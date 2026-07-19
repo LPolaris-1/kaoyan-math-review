@@ -59,11 +59,21 @@ function parseFrontmatter(text) {
   return { fields, body: text.slice(end + 4).trim() };
 }
 
+function localDate(value) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function dateFrom(fields, body, filePath) {
+  const fileModifiedDate = localDate(fs.statSync(filePath).mtime);
+  const today = localDate(new Date());
+  if (fileModifiedDate === today) return fileModifiedDate;
   const frontmatterDate = String(fields.created || fields.date || "").match(/\d{4}-\d{2}-\d{2}/)?.[0];
   const bodyDate = body.match(/(?:\*\*)?(?:日期|创建日期|记录日期)(?:\*\*)?\s*[：:]\s*(\d{4}-\d{2}-\d{2})/)?.[1];
   const fileDate = path.basename(filePath).match(/\d{4}-\d{2}-\d{2}/)?.[0];
-  return frontmatterDate || bodyDate || fileDate || null;
+  return frontmatterDate || bodyDate || fileDate || fileModifiedDate;
 }
 
 function section(body, names) {

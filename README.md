@@ -15,7 +15,7 @@ npm run dev
 
 - 原始输入：`06-Resources/学习/考研/考研数学/错题本/原档案/`
 - 生成数据：`public/data/history.json`
-- 日期识别顺序：Frontmatter `created` → 正文日期 → 文件名日期
+- 日期识别：当天修改的文件优先归入当天；历史文件依次使用 Frontmatter `created` → 正文日期 → 文件名日期 → 文件修改日期
 - 原档案只读，历史数据全量重建且不删除旧日期
 
 ## 校验
