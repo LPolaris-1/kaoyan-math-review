@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const projectDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const vaultDir = path.resolve(projectDir, "..", "..", "..");
+const vaultDir = "C:/Users/HUAWEI/Vault/猥琐凡人的仓库";
 const sourceDir = path.join(vaultDir, "06-Resources", "学习", "考研", "考研数学", "错题本", "原档案");
 const outputDir = path.join(projectDir, "public", "data");
 const outputFile = path.join(outputDir, "history.json");
