@@ -66,10 +66,11 @@ function localDate(value) {
   return `${year}-${month}-${day}`;
 }
 
-function dateFrom(fields, body, filePath) {
+function dateFrom(fields, body, filePath, historicalDate) {
   const fileModifiedDate = localDate(fs.statSync(filePath).mtime);
   const today = localDate(new Date());
   if (fileModifiedDate === today) return fileModifiedDate;
+  if (historicalDate) return historicalDate;
   const frontmatterDate = String(fields.created || fields.date || "").match(/\d{4}-\d{2}-\d{2}/)?.[0];
   const bodyDate = body.match(/(?:\*\*)?(?:日期|创建日期|记录日期)(?:\*\*)?\s*[：:]\s*(\d{4}-\d{2}-\d{2})/)?.[1];
   const fileDate = path.basename(filePath).match(/\d{4}-\d{2}-\d{2}/)?.[0];
@@ -86,12 +87,12 @@ function bullets(body, names) {
   return section(body, names).split(/\s+-\s+|\s+\*\s+/).map(clean).filter(Boolean).slice(0, 5);
 }
 
-function parseNote(filePath) {
+function parseNote(filePath, historicalDates) {
   const raw = fs.readFileSync(filePath, "utf8");
   const { fields, body } = parseFrontmatter(raw);
-  const date = dateFrom(fields, body, filePath);
-  if (!date) return null;
   const relativePath = path.relative(vaultDir, filePath).split(path.sep).join("/");
+  const date = dateFrom(fields, body, filePath, historicalDates.get(relativePath));
+  if (!date) return null;
   const title = clean(body.match(/^#\s+(.+)$/m)?.[1] || path.basename(filePath, ".md"));
   const subject = clean(String(fields.subject || (filePath.includes("\\线代\\") ? "线代" : "高数")));
   const methods = Array.isArray(fields.methods) ? fields.methods.map(clean).filter(Boolean) : parseList(fields.methods);
@@ -118,9 +119,9 @@ function parseNote(filePath) {
   };
 }
 
-function buildHistory() {
+function buildHistory(historicalDates) {
   const notes = walk(sourceDir).filter((filePath) => filePath.toLowerCase().endsWith(".md"));
-  const parsed = notes.map(parseNote).filter(Boolean);
+  const parsed = notes.map((filePath) => parseNote(filePath, historicalDates)).filter(Boolean);
   const byDate = new Map();
   for (const note of parsed) {
     const date = note.date;
@@ -154,8 +155,34 @@ function buildHistory() {
   };
 }
 
+function readExistingHistory() {
+  if (!fs.existsSync(outputFile)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(outputFile, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+const existing = readExistingHistory();
+const historicalDates = new Map(
+  (existing?.days || []).flatMap((day) => (day.items || []).map((item) => [item.id, item.date])),
+);
+const nextHistory = buildHistory(historicalDates);
+const comparable = (history) => {
+  if (!history) return null;
+  const rest = { ...history };
+  delete rest.generatedAt;
+  return rest;
+};
+
+if (JSON.stringify(comparable(existing)) === JSON.stringify(comparable(nextHistory))) {
+  console.log(`Unchanged ${outputFile}`);
+  process.exit(0);
+}
+
 fs.mkdirSync(outputDir, { recursive: true });
-const next = JSON.stringify(buildHistory(), null, 2);
+const next = JSON.stringify({ ...nextHistory, generatedAt: new Date().toISOString() }, null, 2);
 const tempFile = `${outputFile}.tmp`;
 fs.writeFileSync(tempFile, `${next}\n`, "utf8");
 fs.renameSync(tempFile, outputFile);
