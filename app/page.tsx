@@ -50,11 +50,19 @@ function formatGeneratedAt(value: string) {
   return new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 }
 
+function normalizeMathDelimiters(value: string) {
+  return value
+    .replace(/\\\[/g, "$$")
+    .replace(/\\\]/g, "$$")
+    .replace(/\\\(/g, "$")
+    .replace(/\\\)/g, "$");
+}
+
 function MarkdownContent({ value }: { value: string }) {
   return (
     <div className="original-markdown">
       <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-        {value}
+        {normalizeMathDelimiters(value)}
       </ReactMarkdown>
     </div>
   );
