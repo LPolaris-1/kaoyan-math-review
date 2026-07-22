@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
+import "katex/dist/katex.min.css";
 
 type ReviewItem = {
   id: string;
@@ -13,6 +17,7 @@ type ReviewItem = {
   keyPoints: string[];
   pitfalls: string[];
   answer: string;
+  content: string;
   sourcePath: string;
 };
 
@@ -45,12 +50,12 @@ function formatGeneratedAt(value: string) {
   return new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 }
 
-function ListBlock({ title, values }: { title: string; values: string[] }) {
-  if (!values.length) return null;
+function MarkdownContent({ value }: { value: string }) {
   return (
-    <div className="detail-block">
-      <p className="detail-label">{title}</p>
-      <ul>{values.map((value) => <li key={value}>{value}</li>)}</ul>
+    <div className="original-markdown">
+      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+        {value}
+      </ReactMarkdown>
     </div>
   );
 }
@@ -128,7 +133,7 @@ export default function Home() {
             <div className="question-list">
               {filteredItems.map((item, index) => <article className="question-card" key={item.id}>
                 <div className="question-index">{String(index + 1).padStart(2, "0")}</div>
-                <div className="question-main"><div className="question-meta"><span className="subject-pill">{item.subject}</span>{item.chapter && <span>{item.chapter}</span>}</div><h3>{item.title}</h3>{item.topic && <p className="question-topic">{item.topic}</p>}<div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div><details><summary>展开复盘卡片</summary><div className="detail-content">{item.question && <div className="detail-block"><p className="detail-label">题目摘要</p><p>{item.question}</p></div>}<ListBlock title="考点与关键路径" values={item.keyPoints} /><ListBlock title="易错提醒" values={item.pitfalls} />{item.answer && <div className="detail-block"><p className="detail-label">答案 / 结论</p><p>{item.answer}</p></div>}<p className="source-note">来源：{item.sourcePath}</p></div></details></div>
+                <div className="question-main"><div className="question-meta"><span className="subject-pill">{item.subject}</span>{item.chapter && <span>{item.chapter}</span>}</div><h3>{item.title}</h3>{item.topic && <p className="question-topic">{item.topic}</p>}<div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div><details><summary>查看原档案题目与完整推导</summary><div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div></details></div>
               </article>)}
               {!filteredItems.length && <div className="empty-card">没有匹配的错题。换个筛选条件试试。</div>}
             </div>

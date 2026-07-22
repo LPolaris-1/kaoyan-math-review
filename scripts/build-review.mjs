@@ -114,6 +114,7 @@ function parseNote(filePath, historicalDates) {
     keyPoints,
     pitfalls,
     answer,
+    content: body,
     tags: Array.isArray(fields.tags) ? fields.tags.map(clean).filter(Boolean) : parseList(fields.tags),
     sourcePath: relativePath,
   };
