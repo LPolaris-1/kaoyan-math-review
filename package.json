@@ -9,10 +9,11 @@
     "dev": "vinext dev",
     "build": "node node_modules/vite/bin/vite.js build --configLoader native",
     "start": "vinext start",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs",
+    "test": "node --test tests/data-integrity.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "data:build": "node scripts/build-review.mjs"
+    "data:build": "node scripts/build-review.mjs",
+    "data:verify": "node scripts/verify-data.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
@@ -36,6 +37,7 @@
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
+    "gray-matter": "^4.0.3",
     "react-server-dom-webpack": "19.2.6",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
