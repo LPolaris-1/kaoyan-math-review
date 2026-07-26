@@ -53,10 +53,10 @@ function formatGeneratedAt(value: string) {
 
 function normalizeMathDelimiters(value: string) {
   const normalized = value
-    .replace(/\\\[/g, "$$")
-    .replace(/\\\]/g, "$$")
-    .replace(/\\\(/g, "$")
-    .replace(/\\\)/g, "$");
+    .replace(/(?<!\\)\\\[/g, "$$")
+    .replace(/(?<!\\)\\\]/g, "$$")
+    .replace(/(?<!\\)\\\(/g, "$")
+    .replace(/(?<!\\)\\\)/g, "$");
   return normalized
     .split(/(\$\$[\s\S]*?\$\$|\$(?:\\.|[^$\n])*\$)/g)
     .map((segment, index) => {
