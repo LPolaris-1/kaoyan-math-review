@@ -11,6 +11,8 @@ import {
   parseMarkdownFile, extractDate, clean, matchDate, localDate,
   parseList, groupByDate
 } from "../scripts/shared/data-lib.mjs";
+import { normalizeMathDelimiters, collectMathSegments } from "../app/math-content.mjs";
+import katex from "katex";
 
 const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "review-test-"));
 
@@ -255,6 +257,65 @@ test("integration: parseMarkdownFile preserves content byte-exact", () => {
 
 // ========== Cleanup ==========
 
+
+// ========== normalizeMathDelimiters regression ==========
+
+test("normalizeMathDelimiters: converts \\\\[...\\\\] to $$...$$", () => {
+  const input = "\n\\[ x^2 + y^2 \\]\n";
+  const result = normalizeMathDelimiters(input);
+  assert.ok(result.includes("$$ x^2 + y^2 $$"));
+  assert.ok(!result.includes("\\["));
+  assert.ok(!result.includes("\\]"));
+});
+
+test("normalizeMathDelimiters: preserves \\\\\\\\[6pt] in array environments", () => {
+  const input = "\n$$\\\\begin{array}{c} a \\\\\\\\ b \\\\\\\\[6pt] c \\\\end{array}$$\n";
+  const result = normalizeMathDelimiters(input);
+  assert.ok(result.includes("\\\\\\\\[6pt]"));
+});
+
+// ========== collectMathSegments regression ==========
+
+test("collectMathSegments: extracts display and inline segments", () => {
+  const input = "text $$ x^2 $$ more $y$ end";
+  const { segments } = collectMathSegments(input);
+  assert.strictEqual(segments.length, 2);
+  assert.strictEqual(segments[0].displayMode, true);
+  assert.strictEqual(segments[0].source, " x^2 ");
+  assert.strictEqual(segments[1].displayMode, false);
+  assert.strictEqual(segments[1].source, "y");
+});
+
+// ========== KaTeX render regression ==========
+
+test("KaTeX: valid formula renders successfully", () => {
+  const result = katex.renderToString("x^2 + y^2", { displayMode: true, throwOnError: true, strict: "ignore" });
+  assert.ok(typeof result === "string");
+  assert.ok(result.length > 0);
+});
+
+test("KaTeX: bad formula throws ParseError", () => {
+  assert.throws(() => {
+    katex.renderToString("\\\\badcommand{x", { displayMode: true, throwOnError: true, strict: "ignore" });
+  }, (err) => {
+    return err instanceof katex.ParseError;
+  });
+});
+
+test("collectMathSegments: unclosed $ stays in textOutsideMath", () => {
+  const input = "price $x unfinished";
+  const { segments, textOutsideMath } = collectMathSegments(input);
+  assert.strictEqual(segments.length, 0);
+  assert.ok(textOutsideMath.includes("$x"));
+});
+
+
+test("strayDollar regex: escaped \$ is NOT detected as stray", () => {
+  const strayDollarPattern = /(?<!\\)\$/;
+  assert.strictEqual(strayDollarPattern.test("price \\$5 normal"), false);
+  // but a bare $ without backslash SHOULD match
+  assert.strictEqual(strayDollarPattern.test("price $x unfinished"), true);
+});
 test.after(() => {
   fs.rmSync(tmpRoot, { recursive: true, force: true });
 });

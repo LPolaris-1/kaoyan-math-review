@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 import {
   VAULT_DIR, SOURCE_DIR, walk, parseMarkdownFile
 } from "./shared/data-lib.mjs";
+import { collectMathSegments } from "../app/math-content.mjs";
+import katex from "katex";
 
 const projectDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputFile = path.join(projectDir, "public", "data", "history.json");
@@ -230,6 +232,40 @@ console.log(`History tables: ${histTables}`);
 console.log(`GFM tables: ${srcTables === histTables ? "PASS" : "MISMATCH"}`);
 if (srcTables !== histTables) errors++;
 
+
+// --- KaTeX Render Gate ---
+console.log("");
+console.log("=== KaTeX Render Gate ===");
+let katexErrors = 0;
+let katexFormulaCount = 0;
+for (const item of allItems) {
+  const { segments, textOutsideMath } = collectMathSegments(item.content);
+  katexFormulaCount += segments.length;
+  const strayDollar = textOutsideMath.match(/(?<!\\)\$/);
+  if (strayDollar) {
+    console.error(`KaTeX stray $: ${item.sourcePath}`);
+    katexErrors++;
+  }
+  const residual = textOutsideMath.match(/\\(?:begin|end)\{[^}]*\}/);
+  if (residual) {
+    console.error(`KaTeX residual env: ${item.sourcePath}: "${residual[0]}"`);
+    katexErrors++;
+  }
+  for (const seg of segments) {
+    try {
+      katex.renderToString(seg.source, { displayMode: seg.displayMode, throwOnError: true, strict: "ignore" });
+    } catch (e) {
+      if (e instanceof katex.ParseError) {
+        console.error(`KaTeX parse error: ${item.sourcePath}: ${e.message.split("\n")[0]}`);
+        katexErrors++;
+      } else {
+        throw e;
+      }
+    }
+  }
+}
+console.log(`KaTeX render: ${katexErrors === 0 ? `PASS (${katexFormulaCount} formulas)` : `${katexErrors} error(s)`}`);
+if (katexErrors > 0) errors += katexErrors;
 // --- Final ---
 console.log("");
 if (errors > 0) {
