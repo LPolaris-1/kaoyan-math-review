@@ -1,9 +1,53 @@
 {
-  "generatedAt": "2026-07-29T15:37:47.423Z",
+  "generatedAt": "2026-08-01T04:02:33.745Z",
   "source": "06-Resources/学习/考研/考研数学/错题本/原档案",
-  "totalNotes": 97,
-  "totalDays": 15,
+  "totalNotes": 99,
+  "totalDays": 16,
   "days": [
+    {
+      "date": "2026-07-31",
+      "count": 2,
+      "subjectCounts": {
+        "高数": 2
+      },
+      "topics": [],
+      "takeaways": [],
+      "summary": "2 道错题 · 高数 2 道",
+      "items": [
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/极限-洛必达后拆分法与换元法对比（tan+ln混合型）.md",
+          "date": "2026-07-31",
+          "title": "极限-洛必达后拆分法与换元法对比（tan+ln混合型）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "## 原题\n\n$$\\lim_{x \\to 1^-} \\frac{\\pi \\int_{0}^{x} \\left[ \\ln(1-t) + \\tan\\left(\\frac{\\pi}{2}t\\right) \\right] dt}{\\ln|\\sin(\\pi x)|}$$\n\n---\n\n## 第一步（两种解法共有）：洛必达法则\n\n分子分母求导，消去 π，得到：\n\n$$\\text{原式} = \\lim_{x \\to 1^-} \\frac{\\ln(1-x) + \\tan(\\frac{\\pi}{2}x)}{\\cot(\\pi x)}$$\n\n---\n\n## 解法一：拆分法（课本经典写法）\n\n利用加法法则拆成两个极限分别算：\n\n$$\\text{原式} = \\underbrace{\\lim_{x \\to 1^-} \\frac{\\ln(1-x)}{\\cot(\\pi x)}}_{I_1} + \\underbrace{\\lim_{x \\to 1^-} \\frac{\\tan(\\frac{\\pi}{2}x)}{\\cot(\\pi x)}}_{I_2}$$\n\n### 计算 I₁\n\n再次洛必达：\n\n$$I_1 = \\lim_{x \\to 1^-} \\frac{\\frac{1}{1-x}}{-\\pi \\csc^2(\\pi x)} = -\\frac{1}{\\pi} \\lim_{x \\to 1^-} \\frac{\\sin^2(\\pi x)}{1-x}$$\n\n等价无穷小：$\\sin(\\pi x) \\sim \\pi(1-x)$，$\\sin^2(\\pi x) \\sim \\pi^2(1-x)^2$\n\n$$I_1 = -\\frac{1}{\\pi} \\lim_{x \\to 1^-} \\frac{\\pi^2(1-x)^2}{1-x} = -\\pi \\lim_{x \\to 1^-} (1-x) = \\mathbf{0}$$\n\n### 计算 I₂\n\n三角恒等式：$\\tan(\\frac{\\pi}{2}x) = \\cot(\\frac{\\pi}{2} - \\frac{\\pi}{2}x) = \\cot(\\frac{\\pi}{2}(1-x))$\n\n$$I_2 = \\lim_{x \\to 1^-} \\frac{\\cot(\\frac{\\pi}{2}(1-x))}{\\cot(\\pi x)}$$\n\n等价无穷小 $\\cot u \\sim \\frac{1}{u}\\ (u \\to 0)$：\n\n- 分子：$\\cot(\\frac{\\pi}{2}(1-x)) \\sim \\frac{2}{\\pi(1-x)}$\n- 分母：$\\cot(\\pi x) = \\cot(\\pi - \\pi(1-x)) = -\\cot(\\pi(1-x)) \\sim -\\frac{1}{\\pi(1-x)}$\n\n$$I_2 = \\lim_{x \\to 1^-} \\frac{\\frac{2}{\\pi(1-x)}}{-\\frac{1}{\\pi(1-x)}} = \\mathbf{-2}$$\n\n### 合并\n\n$$\\text{原式} = I_1 + I_2 = 0 + (-2) = \\mathbf{-2}$$\n\n---\n\n## 解法二：提取负号 + 换元法\n\n### 提取 cot 负号\n\n$\\frac{1}{\\cot(\\pi x)} = \\frac{\\sin(\\pi x)}{\\cos(\\pi x)}$，$x \\to 1^-$ 时 $\\cos(\\pi x) \\to -1$\n\n$$\\text{原式} = - \\lim_{x \\to 1^-} \\left[ \\ln(1-x) + \\tan\\left(\\frac{\\pi}{2}x\\right) \\right] \\sin(\\pi x)$$\n\n### 换元 t = 1 − x\n\n$x \\to 1^-$ 时，$t \\to 0^+$\n\n- $\\ln(1-x) = \\ln(t)$\n- $\\tan(\\frac{\\pi}{2}x) = \\tan(\\frac{\\pi}{2} - \\frac{\\pi}{2}t) = \\cot(\\frac{\\pi}{2}t)$\n- $\\sin(\\pi x) = \\sin(\\pi - \\pi t) = \\sin(\\pi t)$\n\n$$\\text{原式} = - \\lim_{t \\to 0^+} \\left[ \\ln(t) + \\cot\\left(\\frac{\\pi}{2}t\\right) \\right] \\sin(\\pi t)$$\n\n### 等价无穷小\n\n- $\\sin(\\pi t) \\sim \\pi t$\n- $\\cot(\\frac{\\pi}{2}t) \\sim \\frac{2}{\\pi t}$\n\n$$\\text{原式} = - \\lim_{t \\to 0^+} \\left[ \\ln(t) + \\frac{2}{\\pi t} \\right] \\cdot \\pi t$$\n\n### 乘法分配律 + 重要极限\n\n$$\\text{原式} = - \\left[ \\lim_{t \\to 0^+} (\\pi t \\ln t) + \\lim_{t \\to 0^+} \\left( \\frac{2}{\\pi t} \\cdot \\pi t \\right) \\right]$$\n\n利用 $\\lim_{t \\to 0^+} t \\ln t = 0$：\n\n$$\\text{原式} = - [ \\pi \\cdot 0 + 2 ] = \\mathbf{-2}$$\n\n---\n\n## 总结对比\n\n| | 拆分法 | 换元法 |\n|---|---|---|\n| 适用场景 | 考场写过程，条理清晰 | 草稿演算，快速求解 |\n| 关键技巧 | 加法拆分 + 分别洛必达 | 提取负号 + t=1-x + 等价无穷小 |\n| 难点 | I₂ 三角恒等式变形 | 需要想到换元 + 记住 t·ln t → 0 |\n\n> **核心经验**：遇到 $\\ln(1-x)$ 和三角函数混合，第一反应先试换元 $t=1-x$；如果两项混算容易漏负号，立刻改用拆分法，拆成两坨互不干扰地算。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/极限-洛必达后拆分法与换元法对比（tan+ln混合型）.md"
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/极限-指数差求极限（幂指函数+中值定理+泰勒）.md",
+          "date": "2026-07-31",
+          "title": "极限-指数差求极限（幂指函数+中值定理+泰勒）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "## 原题\n\n$$L = \\lim_{x \\to \\infty} x^2 \\left[ e^{(1+\\frac{1}{x})^x} - (1+\\frac{1}{x})^{ex} \\right]$$\n\n**答案：** $\\dfrac{1}{8} e^{e+1}$\n\n---\n\n## 核心特征\n\n幂指函数与指数函数的差，两项都趋近于 $e^e$，属于 $\\infty \\cdot 0$ 型。关键武器：**拉格朗日中值定理 + 泰勒展开**。\n\n---\n\n## 解法一：提取公因子 + 泰勒展开（草稿思路修正版）\n\n### 步骤\n\n令 $A = (1+\\frac{1}{x})^x$，$B = ex\\ln(1+\\frac{1}{x})$。\n\n则 $e^A - e^B = e^\\xi (A-B)$，$\\xi$ 在 $A$ 与 $B$ 之间。\n\n$A \\to e,\\ B \\to e$ → $\\xi \\to e$ → $e^\\xi \\to \\mathbf{e^e}$\n\n> ⚠️ **草稿错误**：写成了 $e^1$，丢失了 $e^e$ 因子！\n\n### 对 A、B 泰勒展开到 $\\frac{1}{x^2}$\n\n$$\\ln(1+\\frac{1}{x}) = \\frac{1}{x} - \\frac{1}{2x^2} + \\frac{1}{3x^3} + o(\\frac{1}{x^3})$$\n\n$$A = e^{x\\ln(1+\\frac{1}{x})} = e^{1 - \\frac{1}{2x} + \\frac{1}{3x^2} + o(\\frac{1}{x^2})} = e \\cdot e^{-\\frac{1}{2x} + \\frac{1}{3x^2} + o(\\frac{1}{x^2})}$$\n\n利用 $e^u = 1+u+\\frac{u^2}{2}+\\cdots$：\n\n$$A = e\\left[1 - \\frac{1}{2x} + \\frac{1}{3x^2} + \\frac{1}{8x^2} + o(\\frac{1}{x^2})\\right] = e - \\frac{e}{2x} + \\frac{11e}{24x^2} + o(\\frac{1}{x^2})$$\n\n$$B = ex\\ln(1+\\frac{1}{x}) = ex\\left(\\frac{1}{x} - \\frac{1}{2x^2} + \\frac{1}{3x^3} + o(\\frac{1}{x^3})\\right) = e - \\frac{e}{2x} + \\frac{e}{3x^2} + o(\\frac{1}{x^2})$$\n\n### 相减\n\n$$A - B = \\left(\\frac{11}{24} - \\frac{8}{24}\\right)\\frac{e}{x^2} + o(\\frac{1}{x^2}) = \\frac{e}{8x^2} + o(\\frac{1}{x^2})$$\n\n### 代入\n\n$$L = e^e \\cdot \\lim_{x \\to \\infty} x^2 \\cdot \\frac{e}{8x^2} = e^e \\cdot \\frac{e}{8} = \\frac{1}{8}e^{e+1}$$\n\n---\n\n## 解法二：换元 + 巧设中间变量（课本标准解法）⭐ 推荐\n\n### 步骤\n\n**1. 换元**：令 $x = \\frac{1}{t}$，$t \\to 0^+$\n\n$$L = \\lim_{t \\to 0} \\frac{e^{(1+t)^{1/t}} - (1+t)^{e/t}}{t^2}$$\n\n**2. 设中间变量**：令 $u = \\dfrac{\\ln(1+t)}{t}$，$t \\to 0$ 时 $u \\to 1$\n\n则：\n- $(1+t)^{1/t} = e^{\\frac{\\ln(1+t)}{t}} = e^u$ → 第一项：$e^{e^u}$\n- $(1+t)^{e/t} = e^{e\\frac{\\ln(1+t)}{t}} = e^{eu}$ → 第二项：$e^{eu}$\n\n**3. 中值定理**：$e^A - e^B = e^\\xi(A-B)$，其中 $A=e^u,\\ B=eu$\n\n$u \\to 1$ 时 $e^u \\to e,\\ eu \\to e$ → $\\xi \\to e$ → $e^\\xi = e^e$\n\n$$L = e^e \\lim_{t \\to 0} \\frac{e^u - eu}{t^2}$$\n\n**4. 统一变量**：$u = \\dfrac{\\ln(1+t)}{t} = 1 - \\dfrac{t}{2} + \\dfrac{t^2}{3} + o(t^2)$\n\n→ $t^2 \\sim 4(u-1)^2$\n\n$$L = e^e \\lim_{u \\to 1} \\frac{e^u - eu}{4(u-1)^2}$$\n\n**5. 分子在 $u=1$ 处泰勒展开**：\n\n$$e^u = e + e(u-1) + \\frac{e}{2}(u-1)^2 + o((u-1)^2)$$\n$$eu = e + e(u-1)$$\n$$e^u - eu = \\frac{e}{2}(u-1)^2 + o((u-1)^2)$$\n\n**6. 代入**：\n\n$$L = e^e \\lim_{u \\to 1} \\frac{\\frac{e}{2}(u-1)^2}{4(u-1)^2} = e^e \\cdot \\frac{e}{8} = \\frac{1}{8}e^{e+1}$$\n\n---\n\n## 错题点睛\n\n| 雷区 | 正解 |\n|---|---|\n| 中值定理 $e^\\xi$，$\\xi \\to e$ 时提取 $e^1$ | $\\xi \\to e$，提取的是 $e^e$，不是 $e^1$ |\n| 解法一中 $e^u$ 展开漏 $\\frac{u^2}{2}$ 项 | $-\\frac{1}{2x}$ 平方产生 $\\frac{1}{8x^2}$，不能漏 |\n\n---\n\n## 方法论总结\n\n> **指数差 $[e^A - e^B]$ 的标准流程：**\n> 1. 拉格朗日中值定理提取 $e^\\xi$（注意 $\\xi$ 的极限！）\n> 2. 对 $A-B$ 做泰勒展开到所需阶数\n> 3. 如果表达式含 $\\frac{\\ln(1+t)}{t}$，直接设 $u$，把问题转化为在 $u=1$ 处展开 $e^u$\n\n**解法二（设 $u$）是考场首选**：避免高阶多项式相乘，只对 $e^u$ 做二阶展开，计算量极小。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/极限-指数差求极限（幂指函数+中值定理+泰勒）.md"
+        }
+      ]
+    },
     {
       "date": "2026-07-29",
       "count": 4,
