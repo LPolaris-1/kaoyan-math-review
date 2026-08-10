@@ -12,6 +12,7 @@ import {
   parseList, groupByDate
 } from "../scripts/shared/data-lib.mjs";
 import { normalizeMathDelimiters, collectMathSegments } from "../app/math-content.mjs";
+import { findPlainMath } from "../scripts/shared/math-gate.mjs";
 import katex from "katex";
 
 const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "review-test-"));
@@ -307,6 +308,27 @@ test("collectMathSegments: unclosed $ stays in textOutsideMath", () => {
   const { segments, textOutsideMath } = collectMathSegments(input);
   assert.strictEqual(segments.length, 0);
   assert.ok(textOutsideMath.includes("$x"));
+});
+
+// ========== strict plain-math import gate ==========
+
+test("LaTeX gate: accepts delimited formula", () => {
+  const issues = findPlainMath("L = $\\lim_{n\\to\\infty} \\sqrt[n]{n}$", "valid.md");
+  assert.deepStrictEqual(issues, []);
+});
+
+test("LaTeX gate: rejects Unicode/plain formula with location and conversion hint", () => {
+  const body = "求极限：\nL = lim[n→∞] (ⁿ√∏[k=1→n] (k²+n²) ) / (1+2+…+n)\n";
+  const issues = findPlainMath(body, "bad.md");
+  assert.strictEqual(issues.length, 1);
+  assert.strictEqual(issues[0].lineNumber, 2);
+  assert.match(issues[0].snippet, /lim\[n→∞\]/u);
+  assert.match(issues[0].message, /LaTeX/);
+});
+
+test("LaTeX gate: accepts multiline bracket-delimited formula", () => {
+  const body = "\\[\n\\sum_{k=1}^{n} k\n\\]\n";
+  assert.deepStrictEqual(findPlainMath(body, "multiline.md"), []);
 });
 
 

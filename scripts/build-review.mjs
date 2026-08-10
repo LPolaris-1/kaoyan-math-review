@@ -8,6 +8,7 @@ import {
   SOURCE_DIR, walk, clean, parseList, section, bullets,
   extractDate, groupByDate, parseMarkdownFile
 } from "./shared/data-lib.mjs";
+import { reportLatexGate, scanLatexGate } from "./shared/math-gate.mjs";
 
 const projectDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputDir = path.join(projectDir, "public", "data");
@@ -90,6 +91,19 @@ const existing = readExisting();
 const historicalDates = new Map(
   (existing?.days || []).flatMap((day) => (day.items || []).map((item) => [item.id, item.date]))
 );
+
+const sourceFiles = walk(SOURCE_DIR).filter((fp) => fp.toLowerCase().endsWith(".md"));
+const historicalContent = new Map(
+  (existing?.days || []).flatMap((day) => (day.items || []).map((item) => [item.sourcePath || item.id, item.content]))
+);
+const changedSources = sourceFiles.map((filePath) => ({
+  filePath,
+  ...parseMarkdownFile(filePath),
+})).filter(({ relativePath, body }) => historicalContent.get(relativePath) !== body);
+const latexIssues = scanLatexGate(changedSources);
+if (!reportLatexGate(latexIssues)) {
+  process.exit(1);
+}
 
 const nextHistory = buildHistory(historicalDates);
 
