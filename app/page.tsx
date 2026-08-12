@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import rehypeKatex from "rehype-katex";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import "katex/dist/katex.min.css";
-import { normalizeMathDelimiters } from "./math-content.mjs";
+import Link from "next/link";
+import { MarkdownContent } from "./components/markdown-content";
 
 type ReviewItem = {
   id: string;
@@ -40,6 +36,18 @@ type HistoryData = {
   days: ReviewDay[];
 };
 
+type ReviewProgress = {
+  itemId: string;
+  masteryLevel: number;
+  examFrequency: "high" | "medium" | "low" | "unknown";
+  reviewStage: number;
+  nextReviewDate: string;
+  mastered: boolean;
+  lastReviewedAt: string | null;
+  lastResult: string | null;
+  updatedAt: string | null;
+};
+
 const subjectOptions = ["全部", "高数", "线代"];
 
 function formatDate(date: string) {
@@ -53,21 +61,14 @@ function formatGeneratedAt(value: string) {
 }
 
 
-function MarkdownContent({ value }: { value: string }) {
-  return (
-    <div className="original-markdown">
-      <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-        {normalizeMathDelimiters(value)}
-      </ReactMarkdown>
-    </div>
-  );
-}
-
 export default function Home() {
   const [data, setData] = useState<HistoryData | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [subject, setSubject] = useState("全部");
   const [query, setQuery] = useState("");
+  const [progressById, setProgressById] = useState<Record<string, ReviewProgress>>({});
+  const [progressError, setProgressError] = useState("");
+  const [savingId, setSavingId] = useState("");
 
   useEffect(() => {
     fetch(`/data/history.json?ts=${Date.now()}`)
@@ -77,14 +78,44 @@ export default function Home() {
         setSelectedDate(history.days[0]?.date || "");
       })
       .catch(() => setData({ generatedAt: "", totalNotes: 0, totalDays: 0, days: [] }));
+    fetch("/api/review-progress")
+      .then(async (response) => {
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || "复习进度暂不可用");
+        return body as { progress: ReviewProgress[] };
+      })
+      .then(({ progress }) => {
+        setProgressById(Object.fromEntries(progress.map((row) => [row.itemId, row])));
+        setProgressError("");
+      })
+      .catch((error: Error) => setProgressError(error.message));
   }, []);
 
   const currentDay = data?.days.find((day) => day.date === selectedDate) || null;
   const filteredItems = useMemo(() => currentDay?.items.filter((item) => {
     const matchesSubject = subject === "全部" || item.subject === subject;
     const text = `${item.title} ${item.topic} ${item.chapter} ${item.methods.join(" ")}`.toLowerCase();
-    return matchesSubject && (!query || text.includes(query.toLowerCase()));
-  }) || [], [currentDay, query, subject]);
+    return !progressById[item.id]?.mastered && matchesSubject && (!query || text.includes(query.toLowerCase()));
+  }) || [], [currentDay, progressById, query, subject]);
+
+  async function setMastered(itemId: string, mastered: boolean) {
+    setSavingId(itemId);
+    try {
+      const response = await fetch("/api/review-progress", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: mastered ? "master" : "unmaster", itemId }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "保存失败");
+      setProgressById((current) => ({ ...current, [itemId]: body.progress }));
+      setProgressError("");
+    } catch (error) {
+      setProgressError(error instanceof Error ? error.message : "保存复习进度失败");
+    } finally {
+      setSavingId("");
+    }
+  }
 
   if (!data) return <main className="loading-shell"><div className="loading-card">正在加载错题复盘…</div></main>;
 
@@ -93,6 +124,7 @@ export default function Home() {
       <header className="topbar">
         <div className="brand-mark">M²</div>
         <div><p className="brand-name">考研数学 · 错题复盘</p><p className="brand-subtitle">把错题，变成会做的题</p></div>
+        <Link className="review-entry" href="/review">滚动复习 <span>→</span></Link>
         <div className="sync-status"><span className="status-dot" /> 每天 22:00 自动更新</div>
       </header>
 
@@ -104,6 +136,8 @@ export default function Home() {
         </div>
         <div className="hero-note"><span>最近扫描</span><strong>{formatGeneratedAt(data.generatedAt)}</strong><small>{data.totalNotes} 道题 · {data.totalDays} 个复盘日</small></div>
       </section>
+
+      {progressError && <div className="progress-alert">{progressError} 历史错题仍可正常浏览。</div>}
 
       <section className="date-strip" aria-label="复盘日期">
         {data.days.slice(0, 14).map((day) => (
@@ -136,7 +170,21 @@ export default function Home() {
             <div className="question-list">
               {filteredItems.map((item, index) => <article className="question-card" key={item.id}>
                 <div className="question-index">{String(index + 1).padStart(2, "0")}</div>
-                <div className="question-main"><div className="question-meta"><span className="subject-pill">{item.subject}</span>{item.chapter && <span>{item.chapter}</span>}</div><h3>{item.title}</h3>{item.topic && <p className="question-topic">{item.topic}</p>}<div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div><details><summary>查看原档案题目与完整推导</summary><div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div></details></div>
+                <div className="question-main">
+                  <div className="question-heading">
+                    <div className="question-meta"><span className="subject-pill">{item.subject}</span>{item.chapter && <span>{item.chapter}</span>}</div>
+                    <label className="master-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(progressById[item.id]?.mastered)}
+                        disabled={savingId === item.id || Boolean(progressError)}
+                        onChange={(event) => setMastered(item.id, event.target.checked)}
+                      />
+                      <span>{savingId === item.id ? "保存中…" : "已掌握"}</span>
+                    </label>
+                  </div>
+                  <h3>{item.title}</h3>{item.topic && <p className="question-topic">{item.topic}</p>}<div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div><details><summary>查看原档案题目与完整推导</summary><div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div></details>
+                </div>
               </article>)}
               {!filteredItems.length && <div className="empty-card">没有匹配的错题。换个筛选条件试试。</div>}
             </div>

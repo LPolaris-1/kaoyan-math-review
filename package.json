@@ -9,11 +9,12 @@
     "dev": "vinext dev",
     "build": "node node_modules/vite/bin/vite.js build --configLoader native",
     "start": "vinext start",
-    "test": "node --test tests/data-integrity.test.mjs",
+    "test": "node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "data:build": "node scripts/build-review.mjs",
-    "data:verify": "node scripts/verify-data.mjs"
+    "data:verify": "node scripts/verify-data.mjs",
+    "data:check": "node scripts/check-data.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
