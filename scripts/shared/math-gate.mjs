@@ -16,6 +16,33 @@ function maskMath(value) {
   return normalized.replace(MATH_BLOCK, (segment) => segment.replace(/[^\r\n]/g, " "));
 }
 
+export function findSlashMath(body, filePath = "") {
+  const source = String(body);
+  const normalized = normalizeMathDelimiters(source);
+  const sourceLines = source.split(/\r?\n/);
+  const issues = [];
+  const seenLines = new Set();
+
+  for (const match of normalized.matchAll(MATH_BLOCK)) {
+    const segment = match[0];
+    for (let index = segment.indexOf("/"); index >= 0; index = segment.indexOf("/", index + 1)) {
+      const absoluteIndex = (match.index || 0) + index;
+      const lineNumber = normalized.slice(0, absoluteIndex).split(/\r?\n/).length;
+      if (seenLines.has(lineNumber)) continue;
+      seenLines.add(lineNumber);
+      issues.push({
+        filePath,
+        lineNumber,
+        snippet: (sourceLines[lineNumber - 1] || "").trim().slice(0, 240),
+        signals: ["斜杠除法"],
+        message: "数学除法禁止使用 /，请改为 LaTeX 分式 \\frac{分子}{分母}。",
+      });
+    }
+  }
+
+  return issues;
+}
+
 export function findPlainMath(body, filePath = "") {
   const masked = maskMath(body);
   const issues = [];
@@ -36,7 +63,7 @@ export function findPlainMath(body, filePath = "") {
     });
   });
 
-  return issues;
+  return issues.concat(findSlashMath(body, filePath));
 }
 
 export function scanLatexGate(entries) {

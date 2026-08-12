@@ -317,6 +317,19 @@ test("LaTeX gate: accepts delimited formula", () => {
   assert.deepStrictEqual(issues, []);
 });
 
+test("LaTeX gate: rejects slash division inside inline and display math", () => {
+  const issues = findPlainMath("inline $a/b$\n$$x/(1+x)$$", "slash.md");
+  assert.strictEqual(issues.length, 2);
+  assert.deepStrictEqual(issues.map((issue) => issue.lineNumber), [1, 2]);
+  assert.ok(issues.every((issue) => issue.signals.includes("斜杠除法")));
+  assert.ok(issues.every((issue) => issue.message.includes("\\frac{分子}{分母}")));
+});
+
+test("LaTeX gate: accepts fraction commands and ordinary prose slashes", () => {
+  const body = "公式 $\\frac{a}{b}$\nhttps://example.com/a/b\n方法 A/B";
+  assert.deepStrictEqual(findPlainMath(body, "fraction.md"), []);
+});
+
 test("LaTeX gate: rejects Unicode/plain formula with location and conversion hint", () => {
   const body = "求极限：\nL = lim[n→∞] (ⁿ√∏[k=1→n] (k²+n²) ) / (1+2+…+n)\n";
   const issues = findPlainMath(body, "bad.md");
