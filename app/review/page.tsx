@@ -279,6 +279,8 @@ function ReviewCard({
   disabled: boolean;
   onAction: (payload: Record<string, string>) => void;
 }) {
+  const [hasOpened, setHasOpened] = useState(false);
+
   return (
     <article className="rolling-card">
       <div className="rolling-number">{String(index + 1).padStart(2, "0")}</div>
@@ -305,9 +307,11 @@ function ReviewCard({
         <h3>{item.title}</h3>
         {item.topic && <p className="question-topic">{item.topic}</p>}
         <div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div>
-        <details>
+        <details onToggle={(event) => {
+          if (event.currentTarget.open) setHasOpened(true);
+        }}>
           <summary>展开题目与完整推导</summary>
-          <div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div>
+          {hasOpened && <div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div>}
         </details>
         <div className="review-actions">
           <button className="result-wrong" disabled={disabled} onClick={() => onAction({ action: "review", result: "wrong" })}>做错了</button>
