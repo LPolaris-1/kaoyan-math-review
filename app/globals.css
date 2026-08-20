@@ -24,6 +24,9 @@ button { cursor: pointer; }
 .original-markdown table { width: 100%; margin: 16px 0; border-collapse: collapse; font-size: 13px; }.original-markdown th, .original-markdown td { padding: 9px 10px; border: 1px solid var(--line); text-align: left; }.original-markdown th { background: #f3f6f2; }
 .original-markdown code { padding: 2px 5px; border-radius: 4px; color: #8b4a2e; background: #fff1eb; }.original-markdown pre { overflow-x: auto; padding: 14px; border-radius: 8px; background: #f1f3f0; }.original-markdown pre code { padding: 0; color: inherit; background: transparent; }
 .original-markdown .katex-display { overflow-x: auto; padding: 8px 0; }.original-markdown .katex { font-size: 1.05em; }.original-markdown img { max-width: 100%; height: auto; }
+.inline-math-markdown { display: inline; }
+.inline-math-markdown > :first-child { display: inline; }
+.inline-math-markdown .katex { font-size: 1em; }
 
 .review-entry { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1px solid var(--line); border-radius: 100px; color: var(--ink); background: var(--white); text-decoration: none; font-size: 12px; font-weight: 700; }
 .review-entry:hover { border-color: var(--blue); color: var(--blue); }

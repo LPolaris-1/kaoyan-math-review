@@ -6,7 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   SOURCE_DIR, walk, clean, parseList, section, bullets,
-  extractDate, groupByDate, parseMarkdownFile
+  extractDate, groupByDate, parseMarkdownFile, titleFields
 } from "./shared/data-lib.mjs";
 import { reportLatexGate, scanLatexGate } from "./shared/math-gate.mjs";
 
@@ -22,7 +22,7 @@ function buildNote(filePath, historicalDates) {
   const date = extractDate(filePath, historicalDates.get(relativePath));
   if (!date) return null;
 
-  const title = clean(body.match(/^#\s+(.+)$/m)?.[1] || path.basename(filePath, ".md"));
+  const { titleMarkdown, title } = titleFields(body, path.basename(filePath, ".md"));
   const subject = clean(String(fields.subject || (filePath.includes("\\线代\\") ? "线代" : "高数")));
   const methods = parseList(fields.methods);
   const inlineTopic = body.match(/(?:\*\*)?(?:知识点|主题)(?:\*\*)?\s*[：:]\s*([^\n]+)/)?.[1] || "";
@@ -35,6 +35,7 @@ function buildNote(filePath, historicalDates) {
   return {
     id: relativePath,
     date,
+    titleMarkdown,
     title,
     subject,
     chapter: clean(String(fields.source_chapter || "")),

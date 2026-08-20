@@ -11,14 +11,27 @@ const DETECTORS = [
   { label: "纯文本幂/下标", pattern: /[A-Za-z0-9)\]}]\s*[\^_]\s*(?:\{[^}\n]+\}|[A-Za-z0-9])/u },
 ];
 
+const FENCED_CODE = /(?:^|\n)[ \t]{0,3}(`{3,}|~{3,})[^\r\n]*\r?\n[\s\S]*?[ \t]{0,3}\1[ \t]*(?=\r?\n|$)/g;
+const INLINE_CODE = /`[^`\r\n]*`/g;
+
+/**
+ * Replace fenced code blocks and inline code spans with spaces,
+ * preserving newlines so line numbers stay aligned with the source.
+ */
+function maskCode(value) {
+  return value
+    .replace(FENCED_CODE, (segment) => segment.replace(/[^\r\n]/g, " "))
+    .replace(INLINE_CODE, (segment) => segment.replace(/[^\r\n]/g, " "));
+}
+
 function maskMath(value) {
-  const normalized = normalizeMathDelimiters(String(value));
+  const normalized = normalizeMathDelimiters(maskCode(String(value)));
   return normalized.replace(MATH_BLOCK, (segment) => segment.replace(/[^\r\n]/g, " "));
 }
 
 export function findSlashMath(body, filePath = "") {
   const source = String(body);
-  const normalized = normalizeMathDelimiters(source);
+  const normalized = normalizeMathDelimiters(maskCode(source));
   const sourceLines = source.split(/\r?\n/);
   const issues = [];
   const seenLines = new Set();

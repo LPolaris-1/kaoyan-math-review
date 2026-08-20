@@ -6,7 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 
-export const VAULT_DIR = "C:/Users/HUAWEI/Vault/猥琐凡人的仓库";
+export const VAULT_DIR = process.env.MATH_VAULT_DIR || "C:/Users/HUAWEI/Vault/猥琐凡人的仓库";
 export const SOURCE_DIR = path.join(VAULT_DIR, "06-Resources", "学习", "考研", "考研数学", "错题本", "原档案");
 
 /**
@@ -41,6 +41,33 @@ export function clean(value) {
     .replace(/[*_`>#]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/**
+ * Plain-text variant of clean() for titles: keeps underscores so math
+ * identifiers like a_{n+1} survive for search/compatibility.
+ */
+export function cleanTitle(value) {
+  return value
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/[*`>#]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Extract the first H1 from a markdown body.
+ * titleMarkdown keeps the raw heading content character-for-character
+ * (including $, \(...\), \[...\], underscores and backslashes);
+ * title is the plain-text/search compatible variant.
+ */
+export function titleFields(body, fallback = "") {
+  const rawTitle = String(body || "").match(/^#\s+(.+)$/m)?.[1] || fallback;
+  return {
+    titleMarkdown: rawTitle.trim(),
+    title: cleanTitle(rawTitle),
+  };
 }
 
 /**

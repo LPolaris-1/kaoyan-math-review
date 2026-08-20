@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { MarkdownContent } from "../components/markdown-content";
+import { InlineMathMarkdown } from "../components/inline-math-markdown";
 import {
   buildDailyQueue,
   normalizeProgress,
@@ -13,6 +14,7 @@ import {
 type ReviewItem = {
   id: string;
   title: string;
+  titleMarkdown?: string;
   subject: string;
   chapter: string;
   topic: string;
@@ -218,7 +220,7 @@ export default function RollingReviewPage() {
                 <strong>{quadrants[key].length}</strong>
                 <h3>{meta.title}</h3>
                 <div className="matrix-items">
-                  {quadrants[key].slice(0, 8).map(({ item }) => <p key={item.id}>{item.title}</p>)}
+                  {quadrants[key].slice(0, 8).map(({ item }) => <p key={item.id}><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></p>)}
                   {!quadrants[key].length && <p className="muted-item">暂无题目</p>}
                 </div>
               </article>
@@ -240,7 +242,7 @@ export default function RollingReviewPage() {
           <div className="mastered-grid">
             {masteredEntries.map(({ item, progress }) => (
               <article className="mastered-card" key={item.id}>
-                <div><span>{item.subject} · {frequencyLabels[progress.examFrequency]}</span><h3>{item.title}</h3><p>{item.topic || item.chapter || "未标注考点"}</p></div>
+                <div><span>{item.subject} · {frequencyLabels[progress.examFrequency]}</span><h3><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></h3><p>{item.topic || item.chapter || "未标注考点"}</p></div>
                 <label className="master-checkbox">
                   <input
                     type="checkbox"
@@ -304,7 +306,7 @@ function ReviewCard({
           </label>
         </div>
         <p className="review-reason">{reason}</p>
-        <h3>{item.title}</h3>
+        <h3><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></h3>
         {item.topic && <p className="question-topic">{item.topic}</p>}
         <div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div>
         <details onToggle={(event) => {

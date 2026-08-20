@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { MarkdownContent } from "./components/markdown-content";
+import { InlineMathMarkdown } from "./components/inline-math-markdown";
 
 type ReviewItem = {
   id: string;
   title: string;
+  titleMarkdown?: string;
   subject: string;
   chapter: string;
   topic: string;
@@ -183,7 +185,7 @@ export default function Home() {
                       <span>{savingId === item.id ? "保存中…" : "已掌握"}</span>
                     </label>
                   </div>
-                  <h3>{item.title}</h3>{item.topic && <p className="question-topic">{item.topic}</p>}<div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div><details><summary>查看原档案题目与完整推导</summary><div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div></details>
+                  <h3><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></h3>{item.topic && <p className="question-topic">{item.topic}</p>}<div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div><details><summary>查看原档案题目与完整推导</summary><div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div></details>
                 </div>
               </article>)}
               {!filteredItems.length && <div className="empty-card">没有匹配的错题。换个筛选条件试试。</div>}

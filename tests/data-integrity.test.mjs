@@ -8,7 +8,7 @@ import path from "node:path";
 import os from "node:os";
 import matter from "gray-matter";
 import {
-  parseMarkdownFile, extractDate, clean, matchDate, localDate,
+  parseMarkdownFile, extractDate, clean, cleanTitle, titleFields, matchDate, localDate,
   parseList, groupByDate
 } from "../scripts/shared/data-lib.mjs";
 import { normalizeMathDelimiters, collectMathSegments } from "../app/math-content.mjs";
@@ -203,6 +203,30 @@ test("clean: removes markdown formatting", () => {
   assert.strictEqual(clean("### heading"), "heading");
 });
 
+test("titleFields: preserves math syntax in titleMarkdown", () => {
+  const body = "# 求极限 $\\lim_{n\\to\\infty} a_{n+1}$\n内容";
+  const { titleMarkdown, title } = titleFields(body, "fallback.md");
+  assert.strictEqual(titleMarkdown, "求极限 $\\lim_{n\\to\\infty} a_{n+1}$");
+  assert.ok(titleMarkdown.includes("a_{n+1}"));
+  assert.ok(titleMarkdown.includes("$\\lim_{n\\to\\infty} a_{n+1}$"));
+  assert.strictEqual(title, titleMarkdown);
+});
+
+test("titleFields: plain text title keeps underscores", () => {
+  const { title } = titleFields("# 数列 a_{n+1} 的收敛性\n正文", "");
+  assert.strictEqual(title, "数列 a_{n+1} 的收敛性");
+});
+
+test("cleanTitle: keeps underscores and strips bold", () => {
+  assert.strictEqual(cleanTitle("**求** a_{n+1}"), "求 a_{n+1}");
+});
+
+test("titleFields: falls back to provided fallback", () => {
+  const { titleMarkdown, title } = titleFields("no heading", "默认标题");
+  assert.strictEqual(titleMarkdown, "默认标题");
+  assert.strictEqual(title, "默认标题");
+});
+
 test("localDate: formats correctly", () => {
   const d = new Date("2026-07-24T12:00:00Z");
   const result = localDate(d);
@@ -342,6 +366,26 @@ test("LaTeX gate: rejects Unicode/plain formula with location and conversion hin
 test("LaTeX gate: accepts multiline bracket-delimited formula", () => {
   const body = "\\[\n\\sum_{k=1}^{n} k\n\\]\n";
   assert.deepStrictEqual(findPlainMath(body, "multiline.md"), []);
+});
+
+test("LaTeX gate: ignores fenced code blocks but detects plain paragraphs", () => {
+  const body = "```js\nconst L = lim[n→∞] (k²+n²)\nconst x = a/b;\n```\n普通段落 lim[n→∞] 未包裹";
+  const issues = findPlainMath(body, "code.md");
+  assert.strictEqual(issues.length, 1);
+  assert.strictEqual(issues[0].lineNumber, 5);
+  assert.match(issues[0].snippet, /lim\[n→∞\]/u);
+});
+
+test("LaTeX gate: ignores inline code but detects plain paragraphs", () => {
+  const body = "用 `lim[n→∞]` 表示；真正公式 lim[n→∞] 未包裹";
+  const issues = findPlainMath(body, "inline.md");
+  assert.strictEqual(issues.length, 1);
+  assert.match(issues[0].snippet, /lim\[n→∞\]/u);
+});
+
+test("LaTeX gate: ignores slash division inside code blocks", () => {
+  const body = "```python\nratio = a/b\n```\n$ok$";
+  assert.deepStrictEqual(findPlainMath(body, "code-slash.md"), []);
 });
 
 
