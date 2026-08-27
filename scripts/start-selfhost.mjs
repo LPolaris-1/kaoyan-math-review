@@ -7,7 +7,18 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { startProdServer } from "vinext/server/prod-server";
+import { normalizeStaticCacheKeys } from "../selfhost/static-assets.mjs";
+
+// vinext 0.0.50 builds its static-file cache keys from path.relative(). On
+// Windows that yields backslashes, but browser requests use URL slashes. Patch
+// only the in-process cache factory; no dependency files are modified.
+const vinextProdServerUrl = import.meta.resolve("vinext/server/prod-server");
+const vinextStaticCache = await import(new URL("./static-file-cache.js", vinextProdServerUrl));
+const originalStaticCacheCreate = vinextStaticCache.StaticFileCache.create;
+vinextStaticCache.StaticFileCache.create = async (...args) =>
+  normalizeStaticCacheKeys(await originalStaticCacheCreate(...args));
+
+const { startProdServer } = await import("vinext/server/prod-server");
 
 const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
