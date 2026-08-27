@@ -7,7 +7,8 @@
   },
   "scripts": {
     "dev": "vinext dev",
-    "build": "node node_modules/vite/bin/vite.js build --configLoader native",
+    "build": "node scripts/build-selfhost.mjs",
+    "build:sites": "node node_modules/vite/bin/vite.js build --configLoader native",
     "build:selfhost": "node scripts/build-selfhost.mjs",
     "start": "vinext start",
     "start:selfhost": "node scripts/start-selfhost.mjs",

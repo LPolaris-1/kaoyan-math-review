@@ -10,7 +10,8 @@ const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
 // Self-hosted production build (npm run build:selfhost): native vinext Node
 // server only — no Sites/Cloudflare plugins, and the `cloudflare:workers`
 // module is aliased to the local node:sqlite shim in
-// selfhost/cloudflare-workers.ts. The default `npm run build` path is unchanged.
+// selfhost/cloudflare-workers.ts. The default `npm run build` path is self-host;
+// the legacy Sites path remains explicit as `npm run build:sites`.
 const isSelfHostedBuild = process.env.SELF_HOSTED_BUILD === "1";
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.

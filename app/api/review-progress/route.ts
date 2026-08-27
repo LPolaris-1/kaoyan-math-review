@@ -1,10 +1,17 @@
 import { and, eq } from "drizzle-orm";
+import type { BatchItem } from "drizzle-orm/batch";
 import { getChatGPTUser } from "../../chatgpt-auth";
 import { getDb } from "../../../db";
-import { reviewProgress } from "../../../db/schema";
-import { FREQUENCIES, scheduleReview, shanghaiToday } from "../../../lib/review-schedule.mjs";
+import { reviewEvents, reviewProgress } from "../../../db/schema";
+import {
+  FREQUENCIES,
+  addDays,
+  getReviewProgressMeta,
+  shanghaiToday,
+} from "../../../lib/review-schedule.mjs";
+import { buildReviewAction } from "../../../lib/review-progress-state.mjs";
 
-type ReviewAction = "review" | "master" | "unmaster" | "setFrequency";
+type ReviewAction = "review" | "master" | "unmaster" | "setFrequency" | "setCycleStart";
 type ReviewResult = "wrong" | "hard" | "correct";
 
 export async function GET() {
@@ -16,7 +23,8 @@ export async function GET() {
       .select()
       .from(reviewProgress)
       .where(eq(reviewProgress.userEmail, user.email));
-    return Response.json({ progress: rows.map(toClientProgress) });
+    const today = shanghaiToday();
+    return Response.json({ progress: rows.map((row) => toClientProgress(row, today)) });
   } catch (error) {
     return databaseError(error);
   }
@@ -31,6 +39,7 @@ export async function POST(request: Request) {
     itemId?: string;
     result?: ReviewResult;
     frequency?: string;
+    cycleStartedAt?: string;
   };
   try {
     payload = await request.json();
@@ -42,7 +51,7 @@ export async function POST(request: Request) {
   if (!itemId || itemId.length > 240) {
     return Response.json({ error: "题目标识无效。" }, { status: 400 });
   }
-  if (!["review", "master", "unmaster", "setFrequency"].includes(payload.action ?? "")) {
+  if (!["review", "master", "unmaster", "setFrequency", "setCycleStart"].includes(payload.action ?? "")) {
     return Response.json({ error: "复习操作无效。" }, { status: 400 });
   }
   if (payload.action === "review" && !["wrong", "hard", "correct"].includes(payload.result ?? "")) {
@@ -50,6 +59,12 @@ export async function POST(request: Request) {
   }
   if (payload.action === "setFrequency" && !FREQUENCIES.includes(payload.frequency ?? "")) {
     return Response.json({ error: "考频选项无效。" }, { status: 400 });
+  }
+  const today = shanghaiToday();
+  if (payload.action === "setCycleStart") {
+    if (!isValidCalendarDate(payload.cycleStartedAt) || (payload.cycleStartedAt ?? "") > today) {
+      return Response.json({ error: "Day 1 日期无效或不能晚于今天。" }, { status: 400 });
+    }
   }
 
   try {
@@ -64,7 +79,6 @@ export async function POST(request: Request) {
         ),
       )
       .limit(1);
-    const today = shanghaiToday();
     const now = new Date().toISOString();
     const base = existing ?? {
       userEmail: user.email,
@@ -73,34 +87,25 @@ export async function POST(request: Request) {
       examFrequency: "unknown",
       reviewStage: 0,
       nextReviewDate: today,
+      cycleStartedAt: null,
       mastered: 0,
       lastReviewedAt: null,
       lastResult: null,
       updatedAt: now,
     };
 
-    let changes: Partial<typeof base>;
-    switch (payload.action) {
-      case "review":
-        changes = {
-          ...scheduleReview(base, payload.result, today),
-          mastered: 0,
-          lastReviewedAt: now,
-          updatedAt: now,
-        };
-        break;
-      case "master":
-        changes = { mastered: 1, masteryLevel: 5, updatedAt: now };
-        break;
-      case "unmaster":
-        changes = { mastered: 0, nextReviewDate: today, updatedAt: now };
-        break;
-      default:
-        changes = { examFrequency: payload.frequency ?? "unknown", updatedAt: now };
-    }
+    const { changes, event } = buildReviewAction({
+      base,
+      action: payload.action as ReviewAction,
+      result: payload.result ?? null,
+      frequency: payload.frequency ?? null,
+      cycleStartedAt: payload.cycleStartedAt ?? null,
+      today,
+      now,
+    });
 
     const values = { ...base, ...changes };
-    const [saved] = await db
+    const progressMutation = db
       .insert(reviewProgress)
       .values(values)
       .onConflictDoUpdate({
@@ -108,24 +113,46 @@ export async function POST(request: Request) {
         set: changes,
       })
       .returning();
-    return Response.json({ progress: toClientProgress(saved) });
+    const statements: BatchItem<"sqlite">[] = [progressMutation];
+    if (event) {
+      statements.push(
+        db.insert(reviewEvents).values({
+          userEmail: user.email,
+          itemId,
+          ...event,
+        }),
+      );
+    }
+    const batchResults = await db.batch(
+      statements as [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]],
+    );
+    const savedRows = batchResults[0] as typeof reviewProgress.$inferSelect[];
+    const saved = savedRows[0];
+    return Response.json({ progress: toClientProgress(saved, today) });
   } catch (error) {
     return databaseError(error);
   }
 }
 
-function toClientProgress(row: typeof reviewProgress.$inferSelect) {
+function toClientProgress(row: typeof reviewProgress.$inferSelect, today = shanghaiToday()) {
   return {
     itemId: row.itemId,
     masteryLevel: row.masteryLevel,
     examFrequency: row.examFrequency,
     reviewStage: row.reviewStage,
     nextReviewDate: row.nextReviewDate,
+    cycleStartedAt: row.cycleStartedAt,
     mastered: Boolean(row.mastered),
     lastReviewedAt: row.lastReviewedAt,
     lastResult: row.lastResult,
     updatedAt: row.updatedAt,
+    reviewMeta: getReviewProgressMeta(row, today),
   };
+}
+
+function isValidCalendarDate(value: unknown): value is string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  return addDays(value, 0) === value;
 }
 
 function databaseError(error: unknown) {

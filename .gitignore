@@ -40,3 +40,11 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# self-host production data and credentials
+/review.db*
+/auth.env
+/logs/
+*.db-wal
+*.db-shm
+*.log

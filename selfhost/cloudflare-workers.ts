@@ -12,7 +12,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 // Idempotent schema bootstrap. Existing databases (e.g. with real review
-// progress) are left untouched; this only fills in missing tables/indexes.
+// progress) are left untouched; this only fills in missing tables/indexes and
+// adds the nullable cycle anchor when upgrading the old schema.
 const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS review_progress (
   user_email text NOT NULL,
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS review_progress (
   exam_frequency text DEFAULT 'unknown' NOT NULL,
   review_stage integer DEFAULT 0 NOT NULL,
   next_review_date text NOT NULL,
+  cycle_started_at text,
   mastered integer DEFAULT 0 NOT NULL,
   last_reviewed_at text,
   last_result text,
@@ -29,6 +31,25 @@ CREATE TABLE IF NOT EXISTS review_progress (
 );
 CREATE INDEX IF NOT EXISTS review_progress_due_idx
   ON review_progress (user_email, mastered, next_review_date);
+CREATE TABLE IF NOT EXISTS review_events (
+  id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+  user_email text NOT NULL,
+  item_id text NOT NULL,
+  event_type text NOT NULL,
+  result text,
+  occurred_at text NOT NULL,
+  occurred_date text NOT NULL,
+  cycle_started_at text,
+  target_day integer,
+  scheduled_date text,
+  review_stage_before integer,
+  review_stage_after integer,
+  created_at text NOT NULL
+);
+CREATE INDEX IF NOT EXISTS review_events_item_time_idx
+  ON review_events (user_email, item_id, occurred_at);
+CREATE INDEX IF NOT EXISTS review_events_user_date_idx
+  ON review_events (user_email, occurred_date);
 `;
 
 type D1Row = Record<string, unknown>;
@@ -82,11 +103,18 @@ class D1Database {
   }
 
   async batch(statements: D1Statement[]): Promise<Array<{ results: D1Row[] }>> {
-    const results = [];
-    for (const statement of statements) {
-      results.push(await statement.all());
+    const results: Array<{ results: D1Row[] }> = [];
+    this.#db.exec("BEGIN");
+    try {
+      for (const statement of statements) {
+        results.push(await statement.all());
+      }
+      this.#db.exec("COMMIT");
+      return results;
+    } catch (error) {
+      this.#db.exec("ROLLBACK");
+      throw error;
     }
-    return results;
   }
 
   close(): void {
@@ -108,7 +136,17 @@ function openDatabase(): D1Database {
   sqlite.exec("PRAGMA busy_timeout = 5000;");
   sqlite.exec("PRAGMA foreign_keys = ON;");
   sqlite.exec(SCHEMA_SQL);
+  ensureReviewProgressColumn(sqlite);
   return new D1Database(sqlite);
+}
+
+function ensureReviewProgressColumn(sqlite: DatabaseSync) {
+  const columns = sqlite
+    .prepare("PRAGMA table_info(review_progress)")
+    .all() as Array<{ name?: string }>;
+  if (!columns.some((column) => column.name === "cycle_started_at")) {
+    sqlite.exec("ALTER TABLE review_progress ADD COLUMN cycle_started_at text");
+  }
 }
 
 let database: D1Database | null = null;

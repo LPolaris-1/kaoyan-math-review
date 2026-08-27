@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { MarkdownContent } from "../components/markdown-content";
 import { InlineMathMarkdown } from "../components/inline-math-markdown";
+import { ProgressOverview } from "../components/review/progress-overview";
 import {
   buildDailyQueue,
   normalizeProgress,
@@ -39,9 +40,10 @@ type Progress = {
   lastReviewedAt: string | null;
   lastResult: string | null;
   updatedAt: string | null;
+  cycleStartedAt: string | null;
 };
 
-type Tab = "today" | "matrix" | "mastered";
+type Tab = "today" | "progress" | "matrix" | "mastered";
 type QueueEntry = {
   item: ReviewItem;
   progress: Progress;
@@ -179,6 +181,7 @@ export default function RollingReviewPage() {
 
       <nav className="review-tabs" aria-label="滚动复习分类">
         <button className={tab === "today" ? "is-active" : ""} onClick={() => setTab("today")}>今日复习 <b>{queue.length}</b></button>
+        <button className={tab === "progress" ? "is-active" : ""} onClick={() => setTab("progress")}>全部进度 <b>{entries.length}</b></button>
         <button className={tab === "matrix" ? "is-active" : ""} onClick={() => setTab("matrix")}>四象限总览</button>
         <button className={tab === "mastered" ? "is-active" : ""} onClick={() => setTab("mastered")}>已掌握题库 <b>{masteredEntries.length}</b></button>
       </nav>
@@ -205,6 +208,15 @@ export default function RollingReviewPage() {
             {!queue.length && <div className="empty-card success-empty">没有到期题目。已完成的题会按下一个记忆节点再次出现。</div>}
           </div>
         </section>
+      )}
+
+      {tab === "progress" && (
+        <ProgressOverview
+          entries={entries}
+          today={today}
+          savingId={savingId}
+          onUpdate={updateProgress}
+        />
       )}
 
       {tab === "matrix" && (

@@ -28,7 +28,7 @@
 
 ## 自建服务器运行模式（可选）
 
-- 默认 `npm run build` 是 ChatGPT Sites/Cloudflare D1 构建，行为不变；自建构建用 `npm run build:selfhost`（设置 `SELF_HOSTED_BUILD=1` 并调用项目内 vinext CLI，`vite.config.ts` 只启用原生 vinext 构建，把 `cloudflare:workers` alias 到 `selfhost/cloudflare-workers.ts`）。
+- canonical 默认 `npm run build` 是 Aliyun self-host 构建；旧 ChatGPT Sites/Cloudflare D1 构建仅通过显式 `npm run build:sites` 保留（设置 `SELF_HOSTED_BUILD=1` 并调用项目内 vinext CLI 的 self-host 路径，把 `cloudflare:workers` alias 到 `selfhost/cloudflare-workers.ts`）。`npm run build:selfhost` 与默认构建等价。
 - 启动：`npm run start:selfhost`，默认只监听 `127.0.0.1:3100`；`HOST`/`PORT` 可覆盖。`REVIEW_DB_PATH` 必填，缺失时拒绝启动；SQLite 路径父目录自动创建，不删除/清空已有库。
 - 数据库：首次启动幂等创建 `review_progress` 表与 `review_progress_due_idx` 索引（`CREATE ... IF NOT EXISTS`），不做破坏性迁移；重复启动不丢数据。既有真实进度数据不得被覆盖。
 - 数据路径：`MATH_VAULT_DIR` 覆盖原档案目录，默认 `C:/Users/HUAWEI/Vault/猥琐凡人的仓库`；原档案只读，自建模式不写 Vault。
