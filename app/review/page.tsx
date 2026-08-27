@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MarkdownContent } from "../components/markdown-content";
 import { InlineMathMarkdown } from "../components/inline-math-markdown";
 import { ProgressOverview } from "../components/review/progress-overview";
+import { ReviewOverview } from "../components/review/review-overview";
 import {
   buildDailyQueue,
   normalizeProgress,
@@ -43,7 +44,7 @@ type Progress = {
   cycleStartedAt: string | null;
 };
 
-type Tab = "today" | "progress" | "matrix" | "mastered";
+type Tab = "today" | "progress" | "overview" | "matrix" | "mastered";
 type QueueEntry = {
   item: ReviewItem;
   progress: Progress;
@@ -72,6 +73,7 @@ export default function RollingReviewPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [savingId, setSavingId] = useState("");
+  const [manualReviewId, setManualReviewId] = useState<string | null>(null);
   const today = shanghaiToday();
 
   useEffect(() => {
@@ -110,6 +112,12 @@ export default function RollingReviewPage() {
     () => buildDailyQueue(allItems, progressById, today) as QueueEntry[],
     [allItems, progressById, today],
   );
+  const manualQueue = useMemo(() => {
+    if (!manualReviewId) return null;
+    const entry = entries.find(({ item, progress }) => item.id === manualReviewId && !progress.mastered && Boolean(progress.cycleStartedAt));
+    return entry ? [{ ...entry, reason: "手动提前复习：现在打开这道题，提交结果后仍由统一调度规则处理。", source: "manual" }] : null;
+  }, [entries, manualReviewId]);
+  const displayQueue = manualQueue ?? queue;
   const masteredEntries = entries.filter(({ progress }) => progress.mastered);
   const quadrants = useMemo(() => {
     const result: Record<string, typeof entries> = {
@@ -136,6 +144,7 @@ export default function RollingReviewPage() {
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || "保存失败");
       setProgressById((current) => ({ ...current, [itemId]: body.progress }));
+      if (manualReviewId === itemId) setManualReviewId(null);
       setError("");
       if (payload.action === "review") {
         setNotice(
@@ -182,6 +191,7 @@ export default function RollingReviewPage() {
       <nav className="review-tabs" aria-label="滚动复习分类">
         <button className={tab === "today" ? "is-active" : ""} onClick={() => setTab("today")}>今日复习 <b>{queue.length}</b></button>
         <button className={tab === "progress" ? "is-active" : ""} onClick={() => setTab("progress")}>全部进度 <b>{entries.length}</b></button>
+        <button className={tab === "overview" ? "is-active" : ""} onClick={() => setTab("overview")}>复习总览</button>
         <button className={tab === "matrix" ? "is-active" : ""} onClick={() => setTab("matrix")}>四象限总览</button>
         <button className={tab === "mastered" ? "is-active" : ""} onClick={() => setTab("mastered")}>已掌握题库 <b>{masteredEntries.length}</b></button>
       </nav>
@@ -193,7 +203,7 @@ export default function RollingReviewPage() {
             <p>“做错”会重启记忆链，“模糊”明天再见，“做对”会逐步延长到 30 天。</p>
           </div>
           <div className="rolling-list">
-            {queue.map(({ item, progress, reason, source }, index) => (
+            {displayQueue.map(({ item, progress, reason, source }, index) => (
               <ReviewCard
                 key={item.id}
                 item={item}
@@ -205,7 +215,7 @@ export default function RollingReviewPage() {
                 onAction={(payload) => updateProgress(item.id, payload)}
               />
             ))}
-            {!queue.length && <div className="empty-card success-empty">没有到期题目。已完成的题会按下一个记忆节点再次出现。</div>}
+            {!displayQueue.length && <div className="empty-card success-empty">没有到期题目。已完成的题会按下一个记忆节点再次出现。</div>}
           </div>
         </section>
       )}
@@ -216,6 +226,15 @@ export default function RollingReviewPage() {
           today={today}
           savingId={savingId}
           onUpdate={updateProgress}
+          onReviewNow={(itemId) => { setManualReviewId(itemId); setTab("today"); }}
+        />
+      )}
+
+      {tab === "overview" && (
+        <ReviewOverview
+          entries={entries}
+          today={today}
+          onReviewNow={(itemId) => { setManualReviewId(itemId); setTab("today"); }}
         />
       )}
 
@@ -296,11 +315,11 @@ function ReviewCard({
   const [hasOpened, setHasOpened] = useState(false);
 
   return (
-    <article className="rolling-card">
+    <article className="rolling-card" id={`review-item-${encodeURIComponent(item.id)}`}>
       <div className="rolling-number">{String(index + 1).padStart(2, "0")}</div>
       <div className="rolling-main">
         <div className="rolling-meta">
-          <span className={"queue-source queue-" + source}>{source === "core" ? "核心盲区" : source === "due" ? "到期复习" : "随机挑战"}</span>
+          <span className={"queue-source queue-" + source}>{source === "core" ? "核心盲区" : source === "due" ? "到期复习" : source === "manual" ? "手动提前" : "随机挑战"}</span>
           <span>{item.subject}</span>
           <span>掌握度 {progress.masteryLevel}/5</span>
           <label className="frequency-select">

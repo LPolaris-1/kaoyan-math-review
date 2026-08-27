@@ -58,11 +58,13 @@ export function ProgressOverview({
   today,
   savingId,
   onUpdate,
+  onReviewNow,
 }: {
   entries: Entry[];
   today: string;
   savingId: string;
   onUpdate: (itemId: string, payload: Record<string, string>) => void;
+  onReviewNow: (itemId: string) => void;
 }) {
   const [filters, setFilters] = useState<FilterState>({
     query: "",
@@ -153,7 +155,7 @@ export function ProgressOverview({
       </div>
       <p className="progress-result-count">显示 {filtered.length} / {decorated.length} 道题</p>
       <div className="progress-card-list">
-        {filtered.map((entry) => <ProgressCard key={entry.item.id} {...entry} today={today} saving={savingId === entry.item.id} onUpdate={onUpdate} />)}
+        {filtered.map((entry) => <ProgressCard key={entry.item.id} {...entry} today={today} saving={savingId === entry.item.id} onUpdate={onUpdate} onReviewNow={onReviewNow} />)}
         {!filtered.length && <div className="empty-card">没有符合当前筛选条件的题目。</div>}
       </div>
     </section>
@@ -172,6 +174,7 @@ function ProgressCard({
   today,
   saving,
   onUpdate,
+  onReviewNow,
 }: {
   item: ReviewItem;
   progress: Progress;
@@ -180,6 +183,7 @@ function ProgressCard({
   today: string;
   saving: boolean;
   onUpdate: (itemId: string, payload: Record<string, string>) => void;
+  onReviewNow: (itemId: string) => void;
 }) {
   const [draftDate, setDraftDate] = useState(progress.cycleStartedAt ?? today);
   const unstarted = meta.phase === "unstarted";
@@ -191,7 +195,7 @@ function ProgressCard({
       <div className={`progress-timeline ${unstarted ? "timeline-unstarted" : ""}`} aria-label={`${item.title} 艾宾浩斯时间轴`}>
         {nodes.map((node) => <div className={`timeline-node timeline-${node.status} ${node.day === meta.currentTargetDay ? "timeline-target" : ""}`} key={node.day}><strong>Day {node.day}</strong><span>{node.plannedDate ? formatShortDate(node.plannedDate) : "—"}</span><small>{node.day === meta.currentTargetDay && meta.isDueToday ? "今天到期" : node.day === meta.currentTargetDay && meta.isOverdue ? `逾期 ${meta.overdueDays} 天` : node.status === "completed" ? "已完成" : node.status === "missed" ? "已逾期" : node.status === "current" ? "当前节点" : "未来"}</small></div>)}
       </div>
-      <div className="progress-card-footer"><span>当前阶段：{meta.phase === "mastered" ? "已掌握" : stageLabels[String(progress.reviewStage)]}</span><span>下一节点：{meta.phase === "mastered" ? "不再安排" : meta.currentTargetDay ? `Day ${meta.currentTargetDay}` : "等待设置 Day 1"}</span><span>下一次：{meta.phase === "mastered" ? "不再安排" : progress.nextReviewDate}{meta.isOverdue ? `（逾期 ${meta.overdueDays} 天）` : meta.isDueToday ? "（今天）" : meta.daysUntilReview ? `（还有 ${meta.daysUntilReview} 天）` : ""}</span><span>最近：{progress.lastResult ?? "暂无"}{progress.lastReviewedAt ? ` · ${formatDateTime(progress.lastReviewedAt)}` : ""}</span></div>
+      <div className="progress-card-footer"><span>当前阶段：{meta.phase === "mastered" ? "已掌握" : stageLabels[String(progress.reviewStage)]}</span><span>下一节点：{meta.phase === "mastered" ? "不再安排" : meta.currentTargetDay ? `Day ${meta.currentTargetDay}` : "等待设置 Day 1"}</span><span>下一次：{meta.phase === "mastered" ? "不再安排" : progress.nextReviewDate}{meta.isOverdue ? `（逾期 ${meta.overdueDays} 天）` : meta.isDueToday ? "（今天）" : meta.daysUntilReview ? `（还有 ${meta.daysUntilReview} 天）` : ""}</span><span>最近：{progress.lastResult ?? "暂无"}{progress.lastReviewedAt ? ` · ${formatDateTime(progress.lastReviewedAt)}` : ""}</span>{meta.phase !== "unstarted" && meta.phase !== "mastered" && <button type="button" className="immediate-review-button" onClick={() => onReviewNow(item.id)} disabled={saving}>立即复习</button>}</div>
     </article>
   );
 }
