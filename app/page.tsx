@@ -73,7 +73,7 @@ export default function Home() {
   const [savingId, setSavingId] = useState("");
 
   useEffect(() => {
-    fetch(`/data/history.json?ts=${Date.now()}`)
+    fetch("/data/history.json")
       .then((response) => response.json())
       .then((history: HistoryData) => {
         setData(history);
@@ -170,24 +170,15 @@ export default function Home() {
           <div className="question-column">
             <div className="toolbar"><div className="filters">{subjectOptions.map((option) => <button key={option} className={subject === option ? "filter-active" : ""} onClick={() => setSubject(option)}>{option}</button>)}</div><label className="search-box"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索题目、主题或方法" /></label></div>
             <div className="question-list">
-              {filteredItems.map((item, index) => <article className="question-card" key={item.id}>
-                <div className="question-index">{String(index + 1).padStart(2, "0")}</div>
-                <div className="question-main">
-                  <div className="question-heading">
-                    <div className="question-meta"><span className="subject-pill">{item.subject}</span>{item.chapter && <span>{item.chapter}</span>}</div>
-                    <label className="master-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(progressById[item.id]?.mastered)}
-                        disabled={savingId === item.id || Boolean(progressError)}
-                        onChange={(event) => setMastered(item.id, event.target.checked)}
-                      />
-                      <span>{savingId === item.id ? "保存中…" : "已掌握"}</span>
-                    </label>
-                  </div>
-                  <h3><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></h3>{item.topic && <p className="question-topic">{item.topic}</p>}<div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div><details><summary>查看原档案题目与完整推导</summary><div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div></details>
-                </div>
-              </article>)}
+              {filteredItems.map((item, index) => <HistoryQuestionCard
+                key={item.id}
+                item={item}
+                index={index}
+                mastered={Boolean(progressById[item.id]?.mastered)}
+                saving={savingId === item.id}
+                disabled={Boolean(progressError)}
+                onSetMastered={setMastered}
+              />)}
               {!filteredItems.length && <div className="empty-card">没有匹配的错题。换个筛选条件试试。</div>}
             </div>
           </div>
@@ -196,5 +187,52 @@ export default function Home() {
 
       <footer><span>复盘不是重复看答案，而是重新走一遍思路。</span><span>数据来自错题本原档案 · {formatGeneratedAt(data.generatedAt)} 更新</span></footer>
     </main>
+  );
+}
+
+function HistoryQuestionCard({
+  item,
+  index,
+  mastered,
+  saving,
+  disabled,
+  onSetMastered,
+}: {
+  item: ReviewItem;
+  index: number;
+  mastered: boolean;
+  saving: boolean;
+  disabled: boolean;
+  onSetMastered: (itemId: string, mastered: boolean) => void;
+}) {
+  const [hasOpened, setHasOpened] = useState(false);
+
+  return (
+    <article className="question-card">
+      <div className="question-index">{String(index + 1).padStart(2, "0")}</div>
+      <div className="question-main">
+        <div className="question-heading">
+          <div className="question-meta"><span className="subject-pill">{item.subject}</span>{item.chapter && <span>{item.chapter}</span>}</div>
+          <label className="master-checkbox">
+            <input
+              type="checkbox"
+              checked={mastered}
+              disabled={saving || disabled}
+              onChange={(event) => onSetMastered(item.id, event.target.checked)}
+            />
+            <span>{saving ? "保存中…" : "已掌握"}</span>
+          </label>
+        </div>
+        <h3><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></h3>
+        {item.topic && <p className="question-topic">{item.topic}</p>}
+        <div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div>
+        <details onToggle={(event) => {
+          if (event.currentTarget.open) setHasOpened(true);
+        }}>
+          <summary>查看原档案题目与完整推导</summary>
+          {hasOpened && <div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div>}
+        </details>
+      </div>
+    </article>
   );
 }

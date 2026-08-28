@@ -77,7 +77,7 @@ export default function RollingReviewPage() {
   const today = shanghaiToday();
 
   useEffect(() => {
-    fetch("/data/history.json?ts=" + Date.now())
+    fetch("/data/history.json")
       .then((response) => response.json())
       .then((data: HistoryData) => setHistory(data))
       .catch(() => setError("错题历史加载失败，请稍后重试。"));
