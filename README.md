@@ -1,6 +1,16 @@
 # 考研数学 · 错题复盘站
 
-本地复盘网站。它读取 Vault 中的考研数学错题原档案，按日期生成历史记录，网页支持日期切换、学科筛选、关键词搜索和逐题展开。
+考研数学错题复盘站。它读取 Vault 中的错题原档案，生成可追溯的历史数据，并通过艾宾浩斯调度帮助你安排、完成和回顾每一道错题。
+
+## 功能
+
+- **历史错题浏览**：按日期浏览生成的历史记录，按学科筛选、关键词搜索，并展开题目、方法和复盘内容。
+- **艾宾浩斯复习**：每道题按 Day 1、Day 2、Day 4、Day 7、Day 15、Day 30 六个节点安排；首次答对从 Day 1 开始，做错会重启记忆链，模糊会安排下一次复习。
+- **今日复习**：只展示今天到期的题目，按考频、掌握度和复习节点排序；提交“做对 / 有点模糊 / 做错了”后才记录复习事件。
+- **全部进度**：查看每道题的当前阶段、掌握度、最近结果、下一次复习日期和完整时间轴；支持按状态、掌握度、关键词筛选和按下一次复习/最近复习/掌握度排序。
+- **复习总览**：提供 KPI、未来 7/30/60 天全局时间轴、逾期题列表和四象限（核心盲区、提分潜力、巩固区、安全区）筛选。
+- **手动立即复习**：从总览或全部进度进入正式复习流程，不重置 Day 1、不直接推进节点；只有提交结果后才产生事件。
+- **掌握状态**：标记“已掌握”后退出自动复习队列，但仍保留在全部进度和历史记录中。
 
 ## 使用
 
@@ -9,7 +19,14 @@ npm run data:build
 npm run dev
 ```
 
-浏览器打开终端输出的本地地址即可。每天 22:00 的 Codex 定时任务会自动运行 `npm run data:build`。
+浏览器打开终端输出的本地地址即可。首次使用建议先运行 `npm run data:build`，之后每天 22:00 的自动任务会刷新历史数据。进入站点后，从“今日复习”开始；需要查看全量状态时打开“全部进度”或“复习总览”。
+
+### 日常复习流程
+
+1. 在“全部进度”中为尚未开始的题目设置 Day 1（可设为今天或一个不晚于今天的历史日期）。
+2. 在“今日复习”中打开题目，完成复盘后选择“做对”“有点模糊”或“做错了”。
+3. 在“复习总览”查看未来时间轴、逾期题和四象限；在“全部进度”检查单题时间轴与下一次复习日期。
+4. 已经稳定掌握的题目可标记“已掌握”，它不会自动出现在今日队列中。
 
 ## 数据约定
 
@@ -90,7 +107,7 @@ npm run build
 
 ## Canonical repository
 
-`LPolaris-1/kaoyan-math-review` 的 `migration/selfhost-canonical` 分支正在重建并验证为 Aliyun self-host 的 canonical source candidate。当前尚未 merge 到 `main`，也未 commit/push；`main` 仍保留旧 Sites 的历史提交。完成 canonical cutover 后，`main` 才成为未来开发和部署的唯一源码来源。
+`LPolaris-1/kaoyan-math-review` 的 `main` 是 Aliyun self-host 的 canonical source。`migration/selfhost-canonical` 和阶段性 feature 分支保留为可追溯历史；后续开发和部署均应从 `main` 派生并构建。
 
 生产边界明确分离：
 
@@ -102,7 +119,7 @@ npm run build
 
 ### Canonical Cutover
 
-在 `migration/selfhost-canonical` 合并 `main` 之前，生产 release `20260826-122638` 继续作为线上基线。合并后，GitHub `main` 成为未来所有开发和部署的唯一源码来源；不得再从 production bundle 或旧 `coding/错题复盘站` 目录反向开发或部署，也不得在服务器直接编辑业务源码。
+`main` 已是 canonical self-host 源码分支，未来开发和部署均从 GitHub `main` 构建。不得再从 production bundle 或旧 `coding/错题复盘站` 目录反向开发或部署，也不得在服务器直接编辑业务源码。
 
 长期架构、数据库、运维和部署说明见 [`docs/`](docs/)，阶段 1–3 的行为对照见 [`docs/REBUILD_PARITY_REPORT.md`](docs/REBUILD_PARITY_REPORT.md)。
 
