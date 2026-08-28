@@ -12,6 +12,7 @@ import {
   quadrantFor,
   shanghaiToday,
 } from "../../lib/review-schedule.mjs";
+import { parseReviewQuery, serializeReviewQuery } from "../../lib/review-navigation.mjs";
 
 type ReviewItem = {
   id: string;
@@ -45,6 +46,14 @@ type Progress = {
 };
 
 type Tab = "today" | "progress" | "overview" | "matrix" | "mastered";
+type ReviewQuery = {
+  view: Tab;
+  range: 7 | 30 | 60;
+  quadrants: string[];
+  date: string | null;
+  itemId: string | null;
+  focus: "due" | "overdue" | "unstarted" | null;
+};
 type QueueEntry = {
   item: ReviewItem;
   progress: Progress;
@@ -69,11 +78,12 @@ const matrixMeta = {
 export default function RollingReviewPage() {
   const [history, setHistory] = useState<HistoryData | null>(null);
   const [progressById, setProgressById] = useState<Record<string, Progress>>({});
-  const [tab, setTab] = useState<Tab>("today");
+  const [query, setQuery] = useState<ReviewQuery>(() => parseReviewQuery(typeof window === "undefined" ? "" : window.location.search));
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [savingId, setSavingId] = useState("");
-  const [manualReviewId, setManualReviewId] = useState<string | null>(null);
+  const tab = query.view as Tab;
+  const manualReviewId = query.view === "today" ? query.itemId : null;
   const today = shanghaiToday();
 
   useEffect(() => {
@@ -94,6 +104,35 @@ export default function RollingReviewPage() {
       })
       .catch((caught: Error) => setError(caught.message));
   }, []);
+
+  useEffect(() => {
+    const onPopState = () => setQuery(parseReviewQuery(window.location.search));
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  function navigateTo(patch: Partial<ReviewQuery>, replace = false) {
+    const next = { ...query, ...patch };
+    const search = serializeReviewQuery(next);
+    const url = `${window.location.pathname}${search ? `?${search}` : ""}`;
+    if (replace) window.history.replaceState({}, "", url);
+    else window.history.pushState({}, "", url);
+    setQuery(next);
+  }
+
+  function navigateTab(view: Tab) {
+    navigateTo({
+      view,
+      itemId: null,
+      focus: null,
+      date: view === "overview" ? query.date : null,
+      quadrants: view === "overview" ? query.quadrants : [],
+    });
+  }
+
+  function openManualReview(itemId: string) {
+    navigateTo({ view: "today", itemId, focus: null, date: null, quadrants: [] });
+  }
 
   const allItems = useMemo(() => {
     const unique = new Map<string, ReviewItem>();
@@ -144,7 +183,9 @@ export default function RollingReviewPage() {
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || "保存失败");
       setProgressById((current) => ({ ...current, [itemId]: body.progress }));
-      if (manualReviewId === itemId) setManualReviewId(null);
+      if (manualReviewId === itemId) {
+        navigateTo({ itemId: null }, true);
+      }
       setError("");
       if (payload.action === "review") {
         setNotice(
@@ -189,11 +230,11 @@ export default function RollingReviewPage() {
       {notice && <div className="progress-notice">{notice}</div>}
 
       <nav className="review-tabs" aria-label="滚动复习分类">
-        <button className={tab === "today" ? "is-active" : ""} onClick={() => setTab("today")}>今日复习 <b>{queue.length}</b></button>
-        <button className={tab === "progress" ? "is-active" : ""} onClick={() => setTab("progress")}>全部进度 <b>{entries.length}</b></button>
-        <button className={tab === "overview" ? "is-active" : ""} onClick={() => setTab("overview")}>复习总览</button>
-        <button className={tab === "matrix" ? "is-active" : ""} onClick={() => setTab("matrix")}>四象限总览</button>
-        <button className={tab === "mastered" ? "is-active" : ""} onClick={() => setTab("mastered")}>已掌握题库 <b>{masteredEntries.length}</b></button>
+        <button className={tab === "today" ? "is-active" : ""} onClick={() => navigateTab("today")}>今日复习 <b>{queue.length}</b></button>
+        <button className={tab === "progress" ? "is-active" : ""} onClick={() => navigateTab("progress")}>全部进度 <b>{entries.length}</b></button>
+        <button className={tab === "overview" ? "is-active" : ""} onClick={() => navigateTab("overview")}>复习总览</button>
+        <button className={tab === "matrix" ? "is-active" : ""} onClick={() => navigateTab("matrix")}>四象限总览</button>
+        <button className={tab === "mastered" ? "is-active" : ""} onClick={() => navigateTab("mastered")}>已掌握题库 <b>{masteredEntries.length}</b></button>
       </nav>
 
       {tab === "today" && (
@@ -226,7 +267,11 @@ export default function RollingReviewPage() {
           today={today}
           savingId={savingId}
           onUpdate={updateProgress}
-          onReviewNow={(itemId) => { setManualReviewId(itemId); setTab("today"); }}
+          focusItemId={query.itemId}
+          focus={query.focus}
+          onUpdateQuery={navigateTo}
+          onReviewNow={openManualReview}
+          onViewOverview={(itemId) => navigateTo({ view: "overview", itemId, focus: null })}
         />
       )}
 
@@ -234,7 +279,14 @@ export default function RollingReviewPage() {
         <ReviewOverview
           entries={entries}
           today={today}
-          onReviewNow={(itemId) => { setManualReviewId(itemId); setTab("today"); }}
+          range={query.range}
+          selectedDate={query.date}
+          quadrants={query.quadrants}
+          focusItemId={query.itemId}
+          onUpdateQuery={navigateTo}
+          onKpiNavigate={(focus) => navigateTo({ view: "progress", focus, itemId: null, date: null, quadrants: [] })}
+          onViewProgress={(itemId) => navigateTo({ view: "progress", itemId, focus: null, date: null, quadrants: [] })}
+          onReviewNow={openManualReview}
         />
       )}
 

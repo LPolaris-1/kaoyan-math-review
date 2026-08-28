@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   getReviewProgressMeta,
   getTimelineNodes,
@@ -57,18 +57,26 @@ export function ProgressOverview({
   entries,
   today,
   savingId,
+  focusItemId,
+  focus,
   onUpdate,
+  onUpdateQuery,
   onReviewNow,
+  onViewOverview,
 }: {
   entries: Entry[];
   today: string;
   savingId: string;
+  focusItemId: string | null;
+  focus: "due" | "overdue" | "unstarted" | null;
   onUpdate: (itemId: string, payload: Record<string, string>) => void;
+  onUpdateQuery: (patch: { focus?: "due" | "overdue" | "unstarted" | null }) => void;
   onReviewNow: (itemId: string) => void;
+  onViewOverview: (itemId: string) => void;
 }) {
   const [filters, setFilters] = useState<FilterState>({
     query: "",
-    status: "all",
+    status: focus ?? "all",
     subject: "all",
     stage: "all",
     frequency: "all",
@@ -125,8 +133,15 @@ export function ProgressOverview({
   }, [decorated, filters]);
 
   const setFilter = (key: keyof FilterState, value: string) => {
+    onUpdateQuery({ focus: null });
     setFilters((current) => ({ ...current, [key]: value } as FilterState));
   };
+
+  useEffect(() => {
+    if (!focusItemId) return;
+    const target = document.getElementById(`progress-item-${encodeURIComponent(focusItemId)}`);
+    target?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [focusItemId, filtered.length]);
 
   return (
     <section className="rolling-section progress-overview">
@@ -155,7 +170,7 @@ export function ProgressOverview({
       </div>
       <p className="progress-result-count">显示 {filtered.length} / {decorated.length} 道题</p>
       <div className="progress-card-list">
-        {filtered.map((entry) => <ProgressCard key={entry.item.id} {...entry} today={today} saving={savingId === entry.item.id} onUpdate={onUpdate} onReviewNow={onReviewNow} />)}
+        {filtered.map((entry) => <ProgressCard key={entry.item.id} {...entry} today={today} saving={savingId === entry.item.id} focused={focusItemId === entry.item.id} onUpdate={onUpdate} onReviewNow={onReviewNow} onViewOverview={onViewOverview} />)}
         {!filtered.length && <div className="empty-card">没有符合当前筛选条件的题目。</div>}
       </div>
     </section>
@@ -173,8 +188,10 @@ function ProgressCard({
   nodes,
   today,
   saving,
+  focused,
   onUpdate,
   onReviewNow,
+  onViewOverview,
 }: {
   item: ReviewItem;
   progress: Progress;
@@ -182,20 +199,22 @@ function ProgressCard({
   nodes: TimelineNode[];
   today: string;
   saving: boolean;
+  focused: boolean;
   onUpdate: (itemId: string, payload: Record<string, string>) => void;
   onReviewNow: (itemId: string) => void;
+  onViewOverview: (itemId: string) => void;
 }) {
   const [draftDate, setDraftDate] = useState(progress.cycleStartedAt ?? today);
   const unstarted = meta.phase === "unstarted";
   const saveCycleStart = () => onUpdate(item.id, { action: "setCycleStart", cycleStartedAt: draftDate });
   return (
-    <article className="progress-card">
+    <article id={`progress-item-${encodeURIComponent(item.id)}`} className={`progress-card ${focused ? "is-focused" : ""}`}>
       <div className="progress-card-header"><div><div className="progress-card-meta"><span>{item.subject}</span><span>{frequencyLabels[progress.examFrequency as keyof typeof frequencyLabels]}</span><span>掌握度 {progress.masteryLevel}/5</span></div><h3><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></h3><p>{item.topic || item.chapter || "未标注章节/知识点"}</p></div><span className={`progress-status progress-status-${meta.phase}`}>{unstarted ? "尚未设置艾宾浩斯 Day 1" : meta.statusLabel}</span></div>
       <div className="cycle-editor"><label>Day 1 <input type="date" max={today} value={draftDate} onChange={(event) => setDraftDate(event.target.value)} disabled={saving} /></label><button type="button" onClick={saveCycleStart} disabled={saving || !draftDate}>{unstarted ? "保存 Day 1" : "修改 Day 1"}</button>{unstarted && <button type="button" onClick={() => { setDraftDate(today); onUpdate(item.id, { action: "setCycleStart", cycleStartedAt: today }); }} disabled={saving}>今天设为 Day 1</button>}</div>
       <div className={`progress-timeline ${unstarted ? "timeline-unstarted" : ""}`} aria-label={`${item.title} 艾宾浩斯时间轴`}>
         {nodes.map((node) => <div className={`timeline-node timeline-${node.status} ${node.day === meta.currentTargetDay ? "timeline-target" : ""}`} key={node.day}><strong>Day {node.day}</strong><span>{node.plannedDate ? formatShortDate(node.plannedDate) : "—"}</span><small>{node.day === meta.currentTargetDay && meta.isDueToday ? "今天到期" : node.day === meta.currentTargetDay && meta.isOverdue ? `逾期 ${meta.overdueDays} 天` : node.status === "completed" ? "已完成" : node.status === "missed" ? "已逾期" : node.status === "current" ? "当前节点" : "未来"}</small></div>)}
       </div>
-      <div className="progress-card-footer"><span>当前阶段：{meta.phase === "mastered" ? "已掌握" : stageLabels[String(progress.reviewStage)]}</span><span>下一节点：{meta.phase === "mastered" ? "不再安排" : meta.currentTargetDay ? `Day ${meta.currentTargetDay}` : "等待设置 Day 1"}</span><span>下一次：{meta.phase === "mastered" ? "不再安排" : progress.nextReviewDate}{meta.isOverdue ? `（逾期 ${meta.overdueDays} 天）` : meta.isDueToday ? "（今天）" : meta.daysUntilReview ? `（还有 ${meta.daysUntilReview} 天）` : ""}</span><span>最近：{progress.lastResult ?? "暂无"}{progress.lastReviewedAt ? ` · ${formatDateTime(progress.lastReviewedAt)}` : ""}</span>{meta.phase !== "unstarted" && meta.phase !== "mastered" && <button type="button" className="immediate-review-button" onClick={() => onReviewNow(item.id)} disabled={saving}>立即复习</button>}</div>
+      <div className="progress-card-footer"><span>当前阶段：{meta.phase === "mastered" ? "已掌握" : stageLabels[String(progress.reviewStage)]}</span><span>下一节点：{meta.phase === "mastered" ? "不再安排" : meta.currentTargetDay ? `Day ${meta.currentTargetDay}` : "等待设置 Day 1"}</span><span>下一次：{meta.phase === "mastered" ? "不再安排" : progress.nextReviewDate}{meta.isOverdue ? `（逾期 ${meta.overdueDays} 天）` : meta.isDueToday ? "（今天）" : meta.daysUntilReview ? `（还有 ${meta.daysUntilReview} 天）` : ""}</span><span>最近：{progress.lastResult ?? "暂无"}{progress.lastReviewedAt ? ` · ${formatDateTime(progress.lastReviewedAt)}` : ""}</span><button type="button" className="overview-progress-link" onClick={() => onViewOverview(item.id)}>查看总览</button>{meta.phase !== "unstarted" && meta.phase !== "mastered" && <button type="button" className="immediate-review-button" onClick={() => onReviewNow(item.id)} disabled={saving}>立即复习</button>}</div>
     </article>
   );
 }
