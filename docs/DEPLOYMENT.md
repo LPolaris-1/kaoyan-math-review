@@ -15,10 +15,10 @@
 
 正式 canonical production 流程为：
 
-`Git main → build:selfhost → RELEASE.json → release:verify → smoke:selfhost → upload immutable release → DB backup → provenance verify → current atomic switch → PM2 reload → localhost smoke → HTTPS smoke → DB quick_check → logs → rollback if needed`
+`Git main → release:gate → RELEASE.json → upload immutable release → DB backup → provenance verify → current atomic switch → PM2 reload → localhost smoke → HTTPS smoke → DB quick_check → logs → rollback if needed`
 
-1. 在本地 canonical `main` 运行 lint、Node tests、`build:selfhost`、`release:verify`、`smoke:selfhost`、`data:verify` 和 `data:check`。
-   `build:sites` 是兼容性检查；它与 selfhost 共用 `dist/`，若执行过，必须最后再次运行 `build:selfhost`，再执行 `release:verify` 和 `smoke:selfhost`。
+1. 在本地 canonical `main` 运行标准 pre-deploy 入口 `npm run release:gate`。该命令依次执行 lint、`npm test`、`build`、`build:sites`、`build:selfhost`、`release:verify`、`smoke:selfhost`、`data:verify` 和 `data:check`，任一步失败都会立即停止。
+   `build:sites` 会覆盖与 selfhost 共用的 `dist/`，所以 gate 保证其后再次执行 `build:selfhost`，并且在任何 artifact 验证前让 `build:selfhost` 成为最后一次写入 `dist/` 的 build。只有成功的 `release:gate` 结束后，`dist/` 才是允许上传到 selfhost production 的 artifact。
 2. 读取 `dist/RELEASE.json`，确认 `git_commit` 与 `git rev-parse HEAD` 一致，`branch=main`、`mode=selfhost`。
 3. `release:verify` 必须检查 `dist/`、`dist/RELEASE.json`、`dist/client/assets/`、`dist/server/`、package 元数据、`scripts/start-selfhost.mjs` 及其本地 runtime imports（包括 `selfhost/static-assets.mjs`）。`node_modules`、数据库、认证文件、日志和 secrets 不是 artifact 源文件。
 4. 服务器先记录当前 release、PM2、磁盘、SQLite `quick_check`、行数和 schema；使用 SQLite backup 创建可验证的数据库副本。
@@ -27,6 +27,8 @@
 7. 切换后验证本机 `/`、`/review`、`/data/history.json`、实际 JS/CSS assets、HTTPS、PM2、SQLite `quick_check`、数据行数和最近日志；认证保护下的未登录 401/303 需按现有 Caddy 规则解释。
 
 服务器不是 source of truth。源码只来自 GitHub canonical `main`；生产服务器不得直接修改业务源码。部署、重启、数据库备份/写入和 Caddy 变更必须有明确授权。
+
+`build:selfhost`、`build:sites`、`release:verify` 和 `smoke:selfhost` 等底层命令继续保留，便于针对性诊断；它们不能替代正式发布前的 canonical `release:gate`。
 
 ### Deployment lesson
 

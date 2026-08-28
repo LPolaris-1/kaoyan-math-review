@@ -15,6 +15,7 @@
     "release:verify": "node scripts/verify-release.mjs",
     "smoke:selfhost": "node scripts/smoke-selfhost.mjs",
     "release:check": "npm run build:selfhost && npm run release:verify && npm run smoke:selfhost",
+    "release:gate": "node scripts/release-gate.mjs",
     "test": "node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
