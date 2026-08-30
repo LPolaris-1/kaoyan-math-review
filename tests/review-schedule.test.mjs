@@ -214,8 +214,8 @@ test("new-question intake waits until the day after import and persists", () => 
 
   const queue = buildDailyQueue(items, progress, today);
   assert.deepEqual(queue.slice(0, 2).map(({ item, source }) => [item.id, source]), [
-    ["older", "intake"],
     ["yesterday", "intake"],
+    ["older", "intake"],
   ]);
   assert.equal(queue.filter(({ item }) => item.id === "today").length, 0);
   assert.equal(queue.filter(({ item }) => item.id === "mastered").length, 0);
@@ -250,6 +250,21 @@ test("intake keeps history order for questions imported on the same day", () => 
   assert.deepEqual(
     buildDailyQueue(items, {}, "2026-08-30").map(({ item }) => item.id),
     ["history-first", "history-second"],
+  );
+});
+
+test("due questions are ordered from the nearest overdue date to the oldest", () => {
+  const items = [
+    { id: "older-overdue", date: "2026-08-01" },
+    { id: "recent-overdue", date: "2026-08-20" },
+  ];
+  const progress = {
+    "older-overdue": { cycleStartedAt: "2026-08-01", reviewStage: 1, nextReviewDate: "2026-08-20", examFrequency: "medium" },
+    "recent-overdue": { cycleStartedAt: "2026-08-20", reviewStage: 1, nextReviewDate: "2026-08-29", examFrequency: "medium" },
+  };
+  assert.deepEqual(
+    buildDailyQueue(items, progress, "2026-08-30").map(({ item }) => item.id),
+    ["recent-overdue", "older-overdue"],
   );
 });
 
