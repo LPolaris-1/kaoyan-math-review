@@ -94,10 +94,9 @@ export default function RollingReviewPage() {
   const [initialTodayQueueIds, setInitialTodayQueueIds] = useState<string[] | null>(null);
   const tab = query.view as Tab;
   const manualReviewId = query.view === "today" ? query.itemId : null;
-  const today = shanghaiToday();
+  const [today, setToday] = useState(() => shanghaiToday());
 
   useEffect(() => {
-    const reviewDate = shanghaiToday();
     fetch("/data/history.json")
       .then((response) => response.json())
       .then((data: HistoryData) => setHistory(data))
@@ -116,7 +115,10 @@ export default function RollingReviewPage() {
       })
       .catch((caught: Error) => setError(caught.message));
 
-    fetch(`/api/review-events?date=${encodeURIComponent(reviewDate)}`)
+  }, []);
+
+  useEffect(() => {
+    fetch(`/api/review-events?date=${encodeURIComponent(today)}`)
       .then(async (response) => {
         const body = await response.json();
         if (!response.ok) throw new Error(body.error || "复习历史暂不可用");
@@ -124,6 +126,21 @@ export default function RollingReviewPage() {
       })
       .then(({ events }) => setTodayEvents(events))
       .catch((caught: Error) => setError(caught.message));
+  }, [today]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setToday((current) => {
+        const next = shanghaiToday();
+        if (next !== current) {
+          setInitialTodayQueueIds(null);
+          setTodayEvents([]);
+          return next;
+        }
+        return current;
+      });
+    }, 60_000);
+    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
