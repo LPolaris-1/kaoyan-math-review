@@ -371,7 +371,7 @@ function ReviewCard({
       <div className="rolling-number">{String(index + 1).padStart(2, "0")}</div>
       <div className="rolling-main">
         <div className="rolling-meta">
-          <span className={"queue-source queue-" + source}>{source === "core" ? "核心盲区" : source === "due" ? "到期复习" : source === "manual" ? "手动提前" : "随机挑战"}</span>
+          <span className={"queue-source queue-" + source}>{source === "intake" ? "新错题 · 首次复习" : source === "core" ? "核心盲区" : source === "due" ? "到期复习" : source === "manual" ? "手动提前" : "随机挑战"}</span>
           <span>{item.subject}</span>
           <span>掌握度 {progress.masteryLevel}/5</span>
           <label className="frequency-select">

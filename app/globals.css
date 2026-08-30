@@ -62,6 +62,7 @@ button { cursor: pointer; }
 .rolling-main h3 { margin: 13px 0 5px; font-size: 20px; letter-spacing: -.025em; }
 .rolling-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 11px; }
 .queue-source { border-radius: 100px; padding: 5px 8px; font-weight: 800; }
+.queue-intake { color: #7a4a15; background: #fff1d8; }
 .queue-core { color: #943c2a; background: #ffebe5; }
 .queue-due { color: #315b68; background: #e5f0f2; }
 .queue-challenge { color: #6b5a27; background: #f8f0cf; }

@@ -6,6 +6,7 @@ import {
   buildDailyQueue,
   getReviewProgressMeta,
   getTimelineNodes,
+  isIntakePending,
   normalizeProgress,
   plannedDateForDay,
   quadrantFor,
@@ -183,12 +184,78 @@ test("normalizeProgress clamps stage through maintenance and preserves legacy cy
 });
 
 test("mastered questions never enter the daily queue", () => {
-  const items = [{ id: "a" }, { id: "b" }];
+  const items = [{ id: "a", date: "2026-08-01" }, { id: "b", date: "2026-08-01" }];
   const queue = buildDailyQueue(items, {
     a: { mastered: true, examFrequency: "high", nextReviewDate: "2026-08-01" },
     b: { mastered: false, examFrequency: "high", nextReviewDate: "2026-08-12" },
   }, "2026-08-12");
   assert.deepEqual(queue.map(({ item }) => item.id), ["b"]);
+});
+
+test("new-question intake waits until the day after import and persists", () => {
+  const today = "2026-08-30";
+  const items = [
+    { id: "today", date: "2026-08-30" },
+    { id: "yesterday", date: "2026-08-29" },
+    { id: "older", date: "2026-08-27" },
+    { id: "started", date: "2026-08-29" },
+    { id: "mastered", date: "2026-08-29" },
+  ];
+  const progress = {
+    started: { cycleStartedAt: "2026-08-29", reviewStage: 1, nextReviewDate: today },
+    mastered: { mastered: true, nextReviewDate: today },
+  };
+  assert.equal(isIntakePending(items[0], undefined, today), false);
+  assert.equal(isIntakePending(items[1], undefined, today), true);
+  assert.equal(isIntakePending(items[2], undefined, today), true);
+  assert.equal(isIntakePending(items[3], progress.started, today), false);
+  assert.equal(isIntakePending(items[4], progress.mastered, today), false);
+
+  const queue = buildDailyQueue(items, progress, today);
+  assert.deepEqual(queue.slice(0, 2).map(({ item, source }) => [item.id, source]), [
+    ["older", "intake"],
+    ["yesterday", "intake"],
+  ]);
+  assert.equal(queue.filter(({ item }) => item.id === "today").length, 0);
+  assert.equal(queue.filter(({ item }) => item.id === "mastered").length, 0);
+  assert.equal(queue.filter(({ item }) => item.id === "started").length, 1);
+});
+
+test("intake review results keep Day 1 semantics", () => {
+  const base = { itemId: "new", masteryLevel: 0, reviewStage: 0, cycleStartedAt: null, nextReviewDate: "2026-08-30" };
+  const hard = scheduleReview(base, "hard", "2026-08-30");
+  const wrong = scheduleReview(base, "wrong", "2026-08-30");
+  const correct = scheduleReview(base, "correct", "2026-08-30");
+  assert.equal(hard.cycleStartedAt, null);
+  assert.equal(wrong.cycleStartedAt, null);
+  assert.equal(correct.cycleStartedAt, "2026-08-30");
+  assert.equal(correct.reviewStage, 1);
+});
+
+test("intake queue deduplicates overlap with core and due", () => {
+  const item = { id: "overlap", date: "2026-08-29" };
+  const queue = buildDailyQueue([item], {
+    overlap: { examFrequency: "high", nextReviewDate: "2026-08-30" },
+  }, "2026-08-30");
+  assert.equal(queue.filter(({ item: entry }) => entry.id === "overlap").length, 1);
+  assert.equal(queue[0].source, "intake");
+});
+
+test("intake keeps history order for questions imported on the same day", () => {
+  const items = [
+    { id: "history-first", date: "2026-08-29" },
+    { id: "history-second", date: "2026-08-29" },
+  ];
+  assert.deepEqual(
+    buildDailyQueue(items, {}, "2026-08-30").map(({ item }) => item.id),
+    ["history-first", "history-second"],
+  );
+});
+
+test("intake date comparisons cross month and year boundaries", () => {
+  assert.equal(isIntakePending({ id: "month", date: "2026-08-31" }, {}, "2026-09-01"), true);
+  assert.equal(isIntakePending({ id: "year", date: "2026-12-31" }, {}, "2027-01-01"), true);
+  assert.equal(isIntakePending({ id: "same", date: "2027-01-01" }, {}, "2027-01-01"), false);
 });
 
 test("quadrants use explicit mastery and high/low frequency only", () => {

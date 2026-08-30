@@ -26,6 +26,7 @@ test("复习页保留今日、四象限、已掌握并接入全部进度入口",
   assert.match(source, /复习总览/);
   assert.match(source, /manualReviewId/);
   assert.match(source, /source === \"manual\"/);
+  assert.match(source, /新错题 · 首次复习/);
   assert.match(source, /ProgressOverview/);
   assert.match(source, /tab === \"today\"/);
   assert.match(source, /tab === \"matrix\"/);
@@ -55,4 +56,5 @@ test("全部进度样式包含桌面六节点和移动端响应式布局", async
   assert.match(source, /\.progress-timeline \{[^}]*repeat\(6/);
   assert.match(source, /\.progress-timeline \{ grid-template-columns: repeat\(3, 1fr\); \}/);
   assert.match(source, /\.progress-filters input \{ grid-column: span 2; \}/);
+  assert.match(source, /\.queue-intake/);
 });
