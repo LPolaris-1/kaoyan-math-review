@@ -4,6 +4,7 @@ import {
   EBBINGHAUS_DAYS,
   addDays,
   buildDailyQueue,
+  buildTodayProgress,
   getReviewProgressMeta,
   getTimelineNodes,
   isIntakePending,
@@ -256,6 +257,65 @@ test("intake date comparisons cross month and year boundaries", () => {
   assert.equal(isIntakePending({ id: "month", date: "2026-08-31" }, {}, "2026-09-01"), true);
   assert.equal(isIntakePending({ id: "year", date: "2026-12-31" }, {}, "2027-01-01"), true);
   assert.equal(isIntakePending({ id: "same", date: "2027-01-01" }, {}, "2027-01-01"), false);
+});
+
+test("today progress counts unique formal reviews against a stable queue total", () => {
+  const queue = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"].map((id) => ({ item: { id } }));
+  const today = "2026-08-30";
+  assert.deepEqual(buildTodayProgress(queue, [], today), {
+    completed: 0, total: 10, remaining: 10, isComplete: false,
+  });
+  assert.equal(buildTodayProgress(queue, [
+    { itemId: "a", eventType: "review", result: "correct", occurredDate: today },
+    { itemId: "b", eventType: "review", result: "hard", occurredDate: today },
+    { itemId: "c", eventType: "review", result: "wrong", occurredDate: today },
+  ], today).completed, 3);
+});
+
+test("today progress de-duplicates repeated results and excludes other dates", () => {
+  const today = "2026-08-30";
+  const queue = [{ item: { id: "a" } }, { item: { id: "b" } }];
+  const progress = buildTodayProgress(queue, [
+    { itemId: "a", eventType: "review", result: "hard", occurredDate: today },
+    { itemId: "a", eventType: "review", result: "correct", occurredDate: today },
+    { itemId: "b", eventType: "review", result: "wrong", occurredDate: "2026-08-29" },
+  ], today);
+  assert.deepEqual(progress, { completed: 1, total: 2, remaining: 1, isComplete: false });
+});
+
+test("today queue denominator includes intake, excludes same-day imports and mastered items", () => {
+  const today = "2026-08-30";
+  const items = [
+    { id: "intake", date: "2026-08-29" },
+    { id: "same-day", date: today },
+    { id: "mastered", date: "2026-08-29" },
+    { id: "due", date: "2026-08-01" },
+  ];
+  const queue = buildDailyQueue(items, {
+    mastered: { mastered: true, nextReviewDate: today },
+    due: { cycleStartedAt: "2026-08-01", reviewStage: 1, nextReviewDate: today },
+  }, today);
+  const ids = queue.map(({ item }) => item.id);
+  assert.equal(ids.includes("intake"), true);
+  assert.equal(ids.includes("same-day"), false);
+  assert.equal(ids.includes("mastered"), false);
+  assert.equal(buildTodayProgress(queue, [], today).total, 2);
+});
+
+test("today progress handles completion, empty queues and a new day", () => {
+  const queue = [{ item: { id: "a" } }, { item: { id: "b" } }];
+  const today = "2026-08-30";
+  const events = [
+    { itemId: "a", eventType: "review", result: "correct", occurredDate: today },
+    { itemId: "b", eventType: "master", result: null, occurredDate: today },
+  ];
+  assert.deepEqual(buildTodayProgress(queue, events, today), {
+    completed: 2, total: 2, remaining: 0, isComplete: true,
+  });
+  assert.deepEqual(buildTodayProgress([], [], today), {
+    completed: 0, total: 0, remaining: 0, isComplete: false,
+  });
+  assert.equal(buildTodayProgress(queue, events, "2026-08-31").completed, 0);
 });
 
 test("quadrants use explicit mastery and high/low frequency only", () => {

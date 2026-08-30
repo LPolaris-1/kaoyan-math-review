@@ -8,6 +8,7 @@ import { ProgressOverview } from "../components/review/progress-overview";
 import { ReviewOverview } from "../components/review/review-overview";
 import {
   buildDailyQueue,
+  buildTodayProgress,
   normalizeProgress,
   quadrantFor,
   shanghaiToday,
@@ -60,6 +61,12 @@ type QueueEntry = {
   reason: string;
   source: string;
 };
+type ReviewEvent = {
+  itemId: string;
+  eventType: string;
+  result?: string | null;
+  occurredDate: string;
+};
 
 const frequencyLabels = {
   high: "高频",
@@ -82,11 +89,15 @@ export default function RollingReviewPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [savingId, setSavingId] = useState("");
+  const [todayEvents, setTodayEvents] = useState<ReviewEvent[]>([]);
+  const [progressLoaded, setProgressLoaded] = useState(false);
+  const [initialTodayQueueIds, setInitialTodayQueueIds] = useState<string[] | null>(null);
   const tab = query.view as Tab;
   const manualReviewId = query.view === "today" ? query.itemId : null;
   const today = shanghaiToday();
 
   useEffect(() => {
+    const reviewDate = shanghaiToday();
     fetch("/data/history.json")
       .then((response) => response.json())
       .then((data: HistoryData) => setHistory(data))
@@ -100,8 +111,18 @@ export default function RollingReviewPage() {
       })
       .then(({ progress }) => {
         setProgressById(Object.fromEntries(progress.map((row) => [row.itemId, row])));
+        setProgressLoaded(true);
         setError("");
       })
+      .catch((caught: Error) => setError(caught.message));
+
+    fetch(`/api/review-events?date=${encodeURIComponent(reviewDate)}`)
+      .then(async (response) => {
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || "复习历史暂不可用");
+        return body as { events: ReviewEvent[] };
+      })
+      .then(({ events }) => setTodayEvents(events))
       .catch((caught: Error) => setError(caught.message));
   }, []);
 
@@ -151,6 +172,15 @@ export default function RollingReviewPage() {
     () => buildDailyQueue(allItems, progressById, today) as QueueEntry[],
     [allItems, progressById, today],
   );
+  useEffect(() => {
+    if (!history || !progressLoaded || initialTodayQueueIds !== null) return;
+    const timer = window.setTimeout(() => setInitialTodayQueueIds(queue.map(({ item }) => item.id)), 0);
+    return () => window.clearTimeout(timer);
+  }, [history, progressLoaded, queue, initialTodayQueueIds]);
+  const todayProgress = useMemo(
+    () => buildTodayProgress(queue, todayEvents, today, initialTodayQueueIds ?? undefined),
+    [queue, todayEvents, today, initialTodayQueueIds],
+  );
   const manualQueue = useMemo(() => {
     if (!manualReviewId) return null;
     const entry = entries.find(({ item, progress }) => item.id === manualReviewId && !progress.mastered && Boolean(progress.cycleStartedAt));
@@ -183,6 +213,17 @@ export default function RollingReviewPage() {
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || "保存失败");
       setProgressById((current) => ({ ...current, [itemId]: body.progress }));
+      if (payload.action === "review" || payload.action === "master") {
+        setTodayEvents((current) => [
+          ...current,
+          {
+            itemId,
+            eventType: payload.action === "master" ? "master" : "review",
+            result: payload.result ?? null,
+            occurredDate: today,
+          },
+        ]);
+      }
       if (manualReviewId === itemId) {
         navigateTo({ itemId: null }, true);
       }
@@ -219,10 +260,13 @@ export default function RollingReviewPage() {
           <h1>今天只复习<br />最值得复习的题。</h1>
           <p>系统优先安排核心盲区和到期题，再补充少量低频随机挑战。</p>
         </div>
-        <div className="review-score">
-          <span>今日队列</span>
-          <strong>{queue.length}</strong>
-          <small>未复习 {entries.filter(({ progress }) => !progress.mastered).length} · 已掌握 {masteredEntries.length}</small>
+        <div className="review-score-panel">
+          <div className="review-score">
+            <span>今日队列</span>
+            <strong>{queue.length}</strong>
+            <small>未复习 {entries.filter(({ progress }) => !progress.mastered).length} · 已掌握 {masteredEntries.length}</small>
+          </div>
+          {initialTodayQueueIds !== null && <TodayProgress progress={todayProgress} />}
         </div>
       </section>
 
@@ -344,6 +388,22 @@ export default function RollingReviewPage() {
 
       <footer><span>复习顺序由考频、掌握度和记忆节点共同决定。</span><span>勾选“已掌握”的题不会自动再次出现。</span></footer>
     </main>
+  );
+}
+
+function TodayProgress({ progress }: { progress: ReturnType<typeof buildTodayProgress> }) {
+  if (progress.total === 0) {
+    return <div className="today-progress today-progress-empty">今日复习已完成</div>;
+  }
+  const percentage = Math.min(100, (progress.completed / progress.total) * 100);
+  return (
+    <div className="today-progress" aria-label={`今日复习进度 ${progress.completed} / ${progress.total}`}>
+      <div className="today-progress-label"><strong>今日复习进度</strong><span>{progress.completed} / {progress.total}</span></div>
+      <div className="today-progress-track" role="progressbar" aria-valuemin={0} aria-valuemax={progress.total} aria-valuenow={progress.completed}>
+        <span style={{ width: `${percentage}%` }} />
+      </div>
+      <p>{progress.isComplete ? "今日复习已完成" : `今日已复习 ${progress.completed} 道 · 剩余 ${progress.remaining} 道`}</p>
+    </div>
   );
 }
 
