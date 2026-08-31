@@ -313,7 +313,7 @@ export default function RollingReviewPage() {
                 reason={reason}
                 source={source}
                 index={index}
-                disabled={savingId === item.id || Boolean(error)}
+                disabled={savingId === item.id}
                 onAction={(payload) => updateProgress(item.id, payload)}
               />
             ))}

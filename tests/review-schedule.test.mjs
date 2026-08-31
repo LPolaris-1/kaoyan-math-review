@@ -316,6 +316,21 @@ test("today progress de-duplicates repeated results and excludes other dates", (
   assert.deepEqual(progress, { completed: 1, total: 2, remaining: 1, isComplete: false });
 });
 
+test("today progress counts formal reviews that appeared after the initial queue snapshot", () => {
+  const today = "2026-08-30";
+  const progress = buildTodayProgress(
+    [{ item: { id: "initial" } }],
+    [
+      { itemId: "initial", eventType: "review", result: "hard", occurredDate: today },
+      { itemId: "later-1", eventType: "review", result: "wrong", occurredDate: today },
+      { itemId: "later-2", eventType: "review", result: "correct", occurredDate: today },
+    ],
+    today,
+    ["initial"],
+  );
+  assert.deepEqual(progress, { completed: 3, total: 3, remaining: 0, isComplete: true });
+});
+
 test("today queue denominator includes intake, excludes same-day imports and mastered items", () => {
   const today = "2026-08-30";
   const items = [
