@@ -283,7 +283,7 @@ export default function RollingReviewPage() {
             <strong>{queue.length}</strong>
             <small>未复习 {entries.filter(({ progress }) => !progress.mastered).length} · 已掌握 {masteredEntries.length}</small>
           </div>
-          {initialTodayQueueIds !== null && <TodayProgress progress={todayProgress} />}
+          <TodayProgress progress={todayProgress} />
         </div>
       </section>
 

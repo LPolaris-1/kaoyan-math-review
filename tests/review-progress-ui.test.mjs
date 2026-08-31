@@ -37,6 +37,8 @@ test("复习页保留今日、四象限、已掌握并接入全部进度入口",
   assert.match(source, /今日复习进度/);
   assert.match(source, /今日已复习/);
   assert.match(source, /role=\"progressbar\"/);
+  assert.match(source, /<TodayProgress progress=\{todayProgress\} \/>/);
+  assert.doesNotMatch(source, /initialTodayQueueIds !== null && <TodayProgress/);
 });
 
 test("复习总览使用客户端派生时间轴、KPI、逾期和四象限筛选", async () => {

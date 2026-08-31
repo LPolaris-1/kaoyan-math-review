@@ -268,6 +268,24 @@ test("due questions are ordered from the nearest overdue date to the oldest", ()
   );
 });
 
+test("daily queue prioritizes due today, then overdue, then nearest future dates", () => {
+  const today = "2026-08-30";
+  const items = [
+    { id: "future", date: "2026-08-01" },
+    { id: "overdue", date: "2026-08-01" },
+    { id: "today", date: "2026-08-01" },
+  ];
+  const progress = {
+    future: { cycleStartedAt: "2026-08-01", reviewStage: 2, nextReviewDate: "2026-09-01", examFrequency: "high" },
+    overdue: { cycleStartedAt: "2026-08-01", reviewStage: 1, nextReviewDate: "2026-08-29", examFrequency: "medium" },
+    today: { cycleStartedAt: "2026-08-01", reviewStage: 1, nextReviewDate: today, examFrequency: "medium" },
+  };
+  assert.deepEqual(
+    buildDailyQueue(items, progress, today).map(({ item }) => item.id),
+    ["today", "overdue", "future"],
+  );
+});
+
 test("intake date comparisons cross month and year boundaries", () => {
   assert.equal(isIntakePending({ id: "month", date: "2026-08-31" }, {}, "2026-09-01"), true);
   assert.equal(isIntakePending({ id: "year", date: "2026-12-31" }, {}, "2027-01-01"), true);
