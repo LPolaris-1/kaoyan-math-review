@@ -286,6 +286,39 @@ test("daily queue prioritizes due today, then overdue, then nearest future dates
   );
 });
 
+test("daily queue keeps all today work first and orders each later tier by its schedule", () => {
+  const today = "2026-08-30";
+  const items = [
+    { id: "intake-first", date: "2026-08-29" },
+    { id: "intake-second", date: "2026-08-29" },
+    { id: "today-due", date: "2026-08-01" },
+    { id: "overdue-near", date: "2026-08-02" },
+    { id: "overdue-far", date: "2026-08-03" },
+    { id: "future-near", date: "2026-08-04" },
+    { id: "future-far", date: "2026-08-05" },
+  ];
+  const progress = {
+    "today-due": { cycleStartedAt: "2026-08-01", reviewStage: 1, nextReviewDate: today, examFrequency: "medium" },
+    "overdue-near": { cycleStartedAt: "2026-08-01", reviewStage: 1, nextReviewDate: "2026-08-29", examFrequency: "medium" },
+    "overdue-far": { cycleStartedAt: "2026-08-01", reviewStage: 1, nextReviewDate: "2026-08-20", examFrequency: "medium" },
+    "future-near": { cycleStartedAt: "2026-08-01", reviewStage: 2, nextReviewDate: "2026-09-01", examFrequency: "high" },
+    "future-far": { cycleStartedAt: "2026-08-01", reviewStage: 2, nextReviewDate: "2026-09-10", examFrequency: "high" },
+  };
+
+  assert.deepEqual(
+    buildDailyQueue(items, progress, today).map(({ item }) => item.id),
+    [
+      "intake-first",
+      "intake-second",
+      "today-due",
+      "overdue-near",
+      "overdue-far",
+      "future-near",
+      "future-far",
+    ],
+  );
+});
+
 test("intake date comparisons cross month and year boundaries", () => {
   assert.equal(isIntakePending({ id: "month", date: "2026-08-31" }, {}, "2026-09-01"), true);
   assert.equal(isIntakePending({ id: "year", date: "2026-12-31" }, {}, "2027-01-01"), true);
@@ -329,6 +362,24 @@ test("today progress counts formal reviews that appeared after the initial queue
     ["initial"],
   );
   assert.deepEqual(progress, { completed: 3, total: 3, remaining: 0, isComplete: true });
+});
+
+test("today progress includes completed questions after a queue refresh", () => {
+  const today = "2026-08-30";
+  const remainingQueue = ["r1", "r2", "r3", "r4"].map((id) => ({ item: { id } }));
+  const completedEvents = ["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"].map((itemId) => ({
+    itemId,
+    eventType: "review",
+    result: "correct",
+    occurredDate: today,
+  }));
+
+  assert.deepEqual(buildTodayProgress(remainingQueue, completedEvents, today), {
+    completed: 8,
+    total: 12,
+    remaining: 4,
+    isComplete: false,
+  });
 });
 
 test("today queue denominator includes intake, excludes same-day imports and mastered items", () => {
