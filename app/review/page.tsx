@@ -185,9 +185,20 @@ export default function RollingReviewPage() {
     })),
     [allItems, progressById, today],
   );
+  const reviewedTodayIds = useMemo(
+    () => new Set(
+      todayEvents
+        .filter((event) =>
+          (event.eventType === "review" && ["correct", "hard", "wrong"].includes(event.result ?? "")) ||
+          event.eventType === "master"
+        )
+        .map((event) => event.itemId)
+    ),
+    [todayEvents],
+  );
   const queue = useMemo(
-    () => buildDailyQueue(allItems, progressById, today) as QueueEntry[],
-    [allItems, progressById, today],
+    () => buildDailyQueue(allItems, progressById, today, reviewedTodayIds) as QueueEntry[],
+    [allItems, progressById, today, reviewedTodayIds],
   );
   useEffect(() => {
     if (!history || !progressLoaded || initialTodayQueueIds !== null) return;

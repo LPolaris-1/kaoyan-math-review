@@ -9,7 +9,7 @@ import os from "node:os";
 import matter from "gray-matter";
 import {
   parseMarkdownFile, extractDate, clean, cleanTitle, titleFields, matchDate, localDate,
-  parseList, groupByDate, classifyAdmission, summarizeAdmissions,
+  parseList, groupByDate, classifyAdmission, summarizeAdmissions, sourceNeedsRefresh,
   hasQuestionEvidence, hasProcessEvidence
 } from "../scripts/shared/data-lib.mjs";
 import { normalizeMathDelimiters, collectMathSegments } from "../app/math-content.mjs";
@@ -473,6 +473,20 @@ test("admission summary: preserves all classifications", () => {
   assert.deepStrictEqual(Object.fromEntries(Object.entries(summary).map(([k, v]) => [k, v.length])), {
     include: 1, exclude: 1, ambiguous: 1,
   });
+});
+
+test("source refresh: existing item modified today is re-imported", () => {
+  const filePath = path.join(tmpRoot, "refresh-today.md");
+  fs.writeFileSync(filePath, "# Today\nbody\n", "utf8");
+  const now = new Date("2026-09-01T12:00:00+08:00");
+  fs.utimesSync(filePath, now, now);
+  const entry = { filePath, relativePath: "06-Resources/refresh-today.md", body: "# Today\nbody\n" };
+  const history = new Map([[entry.relativePath, entry.body]]);
+  assert.equal(sourceNeedsRefresh(entry, history, now), true);
+  assert.equal(sourceNeedsRefresh(entry, new Map([[entry.relativePath, "# old"]]), now), true);
+  const yesterday = new Date("2026-08-31T12:00:00+08:00");
+  fs.utimesSync(filePath, yesterday, yesterday);
+  assert.equal(sourceNeedsRefresh(entry, history, now), false);
 });
 
 // ========== Grouping tests ==========

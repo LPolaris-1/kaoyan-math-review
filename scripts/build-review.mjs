@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
   clean, parseList, section, bullets,
   extractDate, localDate, groupByDate, parseMarkdownFile, titleFields,
-  collectSourceEntries, summarizeAdmissions
+  collectSourceEntries, summarizeAdmissions, sourceNeedsRefresh
 } from "./shared/data-lib.mjs";
 import { reportLatexGate, scanLatexGate } from "./shared/math-gate.mjs";
 
@@ -131,7 +131,7 @@ const historicalContent = new Map(
 );
 const changedSources = sourceEntries
   .filter((entry) => entry.admission.status === "include")
-  .filter(({ relativePath, body }) => historicalContent.get(relativePath) !== body);
+  .filter((entry) => sourceNeedsRefresh(entry, historicalContent));
 const latexIssues = scanLatexGate(changedSources);
 if (!reportLatexGate(latexIssues)) {
   process.exit(1);

@@ -319,6 +319,22 @@ test("daily queue keeps all today work first and orders each later tier by its s
   );
 });
 
+test("daily queue excludes items already reviewed today, including high-frequency core items", () => {
+  const item = { id: "high-reviewed", date: "2026-08-01" };
+  const progress = {
+    "high-reviewed": {
+      cycleStartedAt: "2026-08-01",
+      reviewStage: 2,
+      nextReviewDate: "2026-09-10",
+      examFrequency: "high",
+    },
+  };
+  assert.deepEqual(
+    buildDailyQueue([item], progress, "2026-09-01", new Set([item.id])),
+    [],
+  );
+});
+
 test("intake date comparisons cross month and year boundaries", () => {
   assert.equal(isIntakePending({ id: "month", date: "2026-08-31" }, {}, "2026-09-01"), true);
   assert.equal(isIntakePending({ id: "year", date: "2026-12-31" }, {}, "2027-01-01"), true);

@@ -6,7 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  VAULT_DIR, parseMarkdownFile, collectSourceEntries, summarizeAdmissions
+  VAULT_DIR, parseMarkdownFile, collectSourceEntries, summarizeAdmissions, sourceNeedsRefresh
 } from "./shared/data-lib.mjs";
 import { collectMathSegments } from "../app/math-content.mjs";
 import katex from "katex";
@@ -106,7 +106,7 @@ if (admissionSummary.ambiguous.length > 0) {
 console.log("");
 console.log("=== LaTeX Import Gate ===");
 const historicalContent = new Map(allItems.map((item) => [item.sourcePath || item.id, item.content]));
-const changedSourceEntries = sourceEntries.filter(({ relativePath, body }) => historicalContent.get(relativePath) !== body);
+const changedSourceEntries = sourceEntries.filter((entry) => sourceNeedsRefresh(entry, historicalContent));
 console.log(`Scanned new/changed source files: ${changedSourceEntries.length}`);
 const sourceLatexIssues = scanLatexGate(changedSourceEntries);
 if (!reportLatexGate(sourceLatexIssues)) errors += sourceLatexIssues.length;

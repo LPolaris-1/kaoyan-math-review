@@ -318,6 +318,20 @@ export function summarizeAdmissions(entries) {
 }
 
 /**
+ * A source is eligible for the current import gate when it is new/changed or
+ * was created/modified on the current local calendar day. The latter keeps
+ * frontmatter and method edits observable even when the stored body is equal.
+ */
+export function sourceNeedsRefresh(entry, historicalContent, now = new Date()) {
+  if (historicalContent.get(entry.relativePath) !== entry.body) return true;
+  try {
+    return localDate(fs.statSync(entry.filePath).mtime) === localDate(now);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Extract a markdown section by heading name.
  */
 export function section(body, names) {
