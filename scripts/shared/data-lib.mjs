@@ -134,6 +134,189 @@ export function parseList(value) {
   return str.split(/\n/).map((item) => clean(item.replace(/^[-*]\s*/, ""))).filter(Boolean);
 }
 
+const QUESTION_HEADING_MARKERS = ["题目", "原题", "题干", "问题", "命题", "原式", "题型", "典型题"];
+const QUESTION_OPERATIVE_MARKERS = ["已知", "设", "若", "求", "计算", "证明", "判断", "选择", "下列"];
+const PROCESS_MARKERS = [
+  "解答", "解析", "解法", "解题", "求解", "推导", "证明", "步骤", "过程", "思路", "答案",
+  "破题", "构造", "方法", "分析", "标准", "Step", "第一步", "第二步", "选项", "判断", "最终",
+];
+const MATH_DELIMITER_RE = /\$\$|\\\(|\\\[|\$/;
+const HEADING_LINE_RE = /^(#{1,6})[ \t]+(.+?)[ \t]*#*[ \t]*$/;
+
+/**
+ * Split a markdown body into heading sections. Each section records the
+ * heading level/title, the 0-based line index of the heading, and the raw
+ * content lines until the next heading of any level (or end of body).
+ */
+function headingSections(body) {
+  const lines = String(body || "").split(/\r?\n/);
+  const sections = [];
+  let current = null;
+  for (let index = 0; index < lines.length; index++) {
+    const match = lines[index].match(HEADING_LINE_RE);
+    if (match) {
+      if (current) sections.push(current);
+      current = { level: match[1].length, title: match[2], index, contentLines: [] };
+    } else if (current) {
+      current.contentLines.push(lines[index]);
+    }
+  }
+  if (current) sections.push(current);
+  return sections;
+}
+
+/**
+ * Group lines from `start` into paragraphs separated by blank lines.
+ */
+function splitParagraphs(lines, start) {
+  const paragraphs = [];
+  let current = [];
+  for (let index = start; index < lines.length; index++) {
+    if (!lines[index].trim()) {
+      if (current.length) {
+        paragraphs.push(current);
+        current = [];
+      }
+    } else {
+      current.push(lines[index]);
+    }
+  }
+  if (current.length) paragraphs.push(current);
+  return paragraphs;
+}
+
+/**
+ * Deterministic structural check for a concrete-question section: a heading
+ * at level 2+ whose title carries a question marker, with non-empty section
+ * content. "题型"/"典型题" additionally require operative wording or an
+ * explicit math expression in the content.
+ */
+function isQuestionSection(section) {
+  if (section.level < 2) return false;
+  const title = cleanTitle(section.title);
+  const markers = QUESTION_HEADING_MARKERS.filter((marker) => title.includes(marker));
+  if (markers.length === 0) return false;
+  const rawContent = section.contentLines.join("\n");
+  if (!clean(rawContent)) return false;
+  if (markers.some((marker) => marker === "题型" || marker === "典型题")) {
+    const hasOperative = QUESTION_OPERATIVE_MARKERS.some((marker) => rawContent.includes(marker));
+    if (!hasOperative && !MATH_DELIMITER_RE.test(rawContent)) return false;
+  }
+  return true;
+}
+
+/**
+ * Content gate (question half): does the body contain a concrete question?
+ * Pure deterministic heading-structure check, no natural-language judgment.
+ */
+export function hasQuestionEvidence(body) {
+  return headingSections(body).some(isQuestionSection);
+}
+
+/**
+ * Content gate (process half): after the concrete question, does the body
+ * contain a solution/derivation/judgment process? A process-marker heading
+ * counts when its whole subtree — from that heading up to the next
+ * same-level or higher-level heading — contains non-empty content; headings
+ * alone are not process evidence. Plain body paragraphs after the question
+ * are also scanned; the question's own first paragraph is not process text.
+ */
+export function hasProcessEvidence(body) {
+  const sections = headingSections(body);
+  const questionIndex = sections.findIndex(isQuestionSection);
+  if (questionIndex === -1) return false;
+
+  for (let index = questionIndex + 1; index < sections.length; index++) {
+    const section = sections[index];
+    const title = cleanTitle(section.title);
+    if (!PROCESS_MARKERS.some((marker) => title.includes(marker))) continue;
+    const subtreeLines = [...section.contentLines];
+    for (let next = index + 1; next < sections.length; next++) {
+      if (sections[next].level <= section.level) break;
+      subtreeLines.push(...sections[next].contentLines);
+    }
+    if (clean(subtreeLines.join("\n"))) return true;
+  }
+
+  const lines = String(body || "").split(/\r?\n/);
+  const paragraphs = splitParagraphs(lines, sections[questionIndex].index + 1);
+  for (let paragraphIndex = 1; paragraphIndex < paragraphs.length; paragraphIndex++) {
+    const text = paragraphs[paragraphIndex].filter((line) => !HEADING_LINE_RE.test(line)).join("\n");
+    for (const marker of PROCESS_MARKERS) {
+      const at = text.indexOf(marker);
+      if (at !== -1 && text.slice(at + marker.length).trim()) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Classify a source Markdown file for history import.
+ *
+ * Explicit frontmatter is authoritative. Full-text content is next: a body
+ * containing both a concrete question and a solution/derivation process is
+ * always included, even when legacy naming (方法 directory, 题型- basename,
+ * pure knowledge-note names) would suggest exclusion. Those legacy hints only
+ * provide an exclude reason for files that lack the full structure; every
+ * remaining file fails closed — a "错题" basename or tag alone admits nothing.
+ */
+export function classifyAdmission({ relativePath, fields = {}, body = "" }) {
+  const entryType = String(fields.entry_type || "").trim().toLowerCase();
+  if (entryType === "wrong_question") {
+    return { status: "include", reason: "entry_type: wrong_question" };
+  }
+  if (entryType === "knowledge") {
+    return { status: "exclude", reason: "entry_type: knowledge" };
+  }
+  if (entryType) {
+    return { status: "ambiguous", reason: `unsupported entry_type: ${entryType}` };
+  }
+
+  if (hasQuestionEvidence(body) && hasProcessEvidence(body)) {
+    return { status: "include", reason: "content has concrete question and solution process" };
+  }
+
+  const normalized = String(relativePath).split("\\").join("/");
+  const segments = normalized.split("/");
+  const basename = segments.at(-1) || "";
+  if (segments.includes("方法")) {
+    return { status: "exclude", reason: "legacy 方法 directory" };
+  }
+  if (basename.startsWith("题型-")) {
+    return { status: "exclude", reason: "legacy 题型- basename" };
+  }
+
+  // Only unambiguous pure knowledge-note naming is excluded automatically.
+  if (/(推导|结论集|运算(?:和)?变换的区别)$/u.test(basename.replace(/\.md$/iu, ""))) {
+    return { status: "exclude", reason: "legacy pure knowledge naming" };
+  }
+
+  return { status: "exclude", reason: "missing concrete question or solution process" };
+}
+
+/**
+ * Parse and classify every Markdown source in one canonical collection.
+ * Build and verify must consume this exact collection.
+ */
+export function collectSourceEntries(sourceDir = SOURCE_DIR) {
+  return walk(sourceDir)
+    .filter((filePath) => filePath.toLowerCase().endsWith(".md"))
+    .map((filePath) => {
+      const parsed = parseMarkdownFile(filePath);
+      return {
+        filePath,
+        ...parsed,
+        admission: classifyAdmission(parsed),
+      };
+    });
+}
+
+export function summarizeAdmissions(entries) {
+  const summary = { include: [], exclude: [], ambiguous: [] };
+  for (const entry of entries) summary[entry.admission.status].push(entry);
+  return summary;
+}
+
 /**
  * Extract a markdown section by heading name.
  */

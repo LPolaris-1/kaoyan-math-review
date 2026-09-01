@@ -6,7 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  VAULT_DIR, SOURCE_DIR, walk, parseMarkdownFile
+  VAULT_DIR, parseMarkdownFile, collectSourceEntries, summarizeAdmissions
 } from "./shared/data-lib.mjs";
 import { collectMathSegments } from "../app/math-content.mjs";
 import katex from "katex";
@@ -76,24 +76,37 @@ function findPlainTranspose(body) {
 const history = JSON.parse(fs.readFileSync(outputFile, "utf8"));
 
 // Build canonical source file set (forward-slash relative paths)
-const srcPaths = walk(SOURCE_DIR).filter((fp) => fp.toLowerCase().endsWith(".md"));
-const sourceEntries = srcPaths.map((filePath) => ({ filePath, body: parseMarkdownFile(filePath).body }));
+const allSourceEntries = collectSourceEntries();
+const admissionSummary = summarizeAdmissions(allSourceEntries);
+const srcPaths = admissionSummary.include.map((entry) => entry.filePath);
+const sourceEntries = admissionSummary.include.map(({ filePath, body, relativePath }) => ({ filePath, body, relativePath }));
 const canonicalSrcIds = new Set(
-  srcPaths.map((fp) => path.relative(VAULT_DIR, fp).split(path.sep).join("/"))
+  admissionSummary.include.map((entry) => entry.relativePath)
 );
 
 const allItems = history.days.flatMap((day) => day.items);
 const historyCanonicalIds = new Set(allItems.map((item) => item.sourcePath));
 let errors = 0;
 
+console.log("");
+console.log("=== Wrong-question Admission Gate ===");
+console.log(`Included: ${admissionSummary.include.length}`);
+console.log(`Excluded: ${admissionSummary.exclude.length}`);
+console.log(`Manual confirmation required: ${admissionSummary.ambiguous.length}`);
+for (const entry of [...admissionSummary.exclude, ...admissionSummary.ambiguous]) {
+  const label = entry.admission.status === "exclude" ? "EXCLUDE" : "AMBIGUOUS";
+  console.log(`${label}\t${entry.relativePath}\t${entry.admission.reason}`);
+}
+if (admissionSummary.ambiguous.length > 0) {
+  console.error("Admission gate blocked: resolve every AMBIGUOUS source explicitly before verification.");
+  process.exit(1);
+}
+
 // --- Strict LaTeX import gate ---
 console.log("");
 console.log("=== LaTeX Import Gate ===");
 const historicalContent = new Map(allItems.map((item) => [item.sourcePath || item.id, item.content]));
-const changedSourceEntries = sourceEntries.filter(({ filePath, body }) => {
-  const relativePath = path.relative(VAULT_DIR, filePath).split(path.sep).join("/");
-  return historicalContent.get(relativePath) !== body;
-});
+const changedSourceEntries = sourceEntries.filter(({ relativePath, body }) => historicalContent.get(relativePath) !== body);
 console.log(`Scanned new/changed source files: ${changedSourceEntries.length}`);
 const sourceLatexIssues = scanLatexGate(changedSourceEntries);
 if (!reportLatexGate(sourceLatexIssues)) errors += sourceLatexIssues.length;

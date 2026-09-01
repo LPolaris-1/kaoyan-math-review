@@ -5,8 +5,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  SOURCE_DIR, walk, clean, parseList, section, bullets,
-  extractDate, groupByDate, parseMarkdownFile, titleFields
+  clean, parseList, section, bullets,
+  extractDate, localDate, groupByDate, parseMarkdownFile, titleFields,
+  collectSourceEntries, summarizeAdmissions
 } from "./shared/data-lib.mjs";
 import { reportLatexGate, scanLatexGate } from "./shared/math-gate.mjs";
 
@@ -54,9 +55,11 @@ function buildNote(filePath, historicalDates) {
 /**
  * Build the full history object.
  */
-function buildHistory(historicalDates) {
-  const mdFiles = walk(SOURCE_DIR).filter((fp) => fp.toLowerCase().endsWith(".md"));
-  const notes = mdFiles.map((fp) => buildNote(fp, historicalDates)).filter(Boolean);
+function buildHistory(historicalDates, sourceEntries) {
+  const notes = sourceEntries
+    .filter((entry) => entry.admission.status === "include")
+    .map(({ filePath }) => buildNote(filePath, historicalDates))
+    .filter(Boolean);
   const days = groupByDate(notes);
   return {
     generatedAt: new Date().toISOString(),
@@ -65,6 +68,31 @@ function buildHistory(historicalDates) {
     totalDays: days.length,
     days,
   };
+}
+
+function reportAdmissions(sourceEntries, historicalDates) {
+  const summary = summarizeAdmissions(sourceEntries);
+  console.log("");
+  console.log("=== Wrong-question Admission Gate ===");
+  console.log(`Included: ${summary.include.length}`);
+  console.log(`Excluded: ${summary.exclude.length}`);
+  console.log(`Manual confirmation required: ${summary.ambiguous.length}`);
+  for (const entry of [...summary.exclude, ...summary.ambiguous]) {
+    const rel = entry.relativePath;
+    const label = entry.admission.status === "exclude" ? "EXCLUDE" : "AMBIGUOUS";
+    console.log(`${label}\t${rel}\t${entry.admission.reason}`);
+  }
+  console.log("2026-08-31 source affiliation:");
+  for (const entry of sourceEntries) {
+    const lockedDate = historicalDates.get(entry.relativePath);
+    let mtimeDate = null;
+    try { mtimeDate = localDate(fs.statSync(entry.filePath).mtime); } catch { /* report-only */ }
+    const effectiveDate = extractDate(entry.filePath, lockedDate);
+    if (effectiveDate === "2026-08-31" || mtimeDate === "2026-08-31") {
+      console.log(`${entry.relativePath}\t${entry.admission.status.toUpperCase()}\teffective=${effectiveDate || "NONE"}\tmtime=${mtimeDate || "NONE"}`);
+    }
+  }
+  return summary;
 }
 
 /**
@@ -89,24 +117,27 @@ function readExisting() {
 // --- Main ---
 
 const existing = readExisting();
+const sourceEntries = collectSourceEntries();
 const historicalDates = new Map(
   (existing?.days || []).flatMap((day) => (day.items || []).map((item) => [item.id, item.date]))
 );
-
-const sourceFiles = walk(SOURCE_DIR).filter((fp) => fp.toLowerCase().endsWith(".md"));
+const admissionSummary = reportAdmissions(sourceEntries, historicalDates);
+if (admissionSummary.ambiguous.length > 0) {
+  console.error("Admission gate blocked: resolve every AMBIGUOUS source explicitly before rebuilding history.json.");
+  process.exit(1);
+}
 const historicalContent = new Map(
   (existing?.days || []).flatMap((day) => (day.items || []).map((item) => [item.sourcePath || item.id, item.content]))
 );
-const changedSources = sourceFiles.map((filePath) => ({
-  filePath,
-  ...parseMarkdownFile(filePath),
-})).filter(({ relativePath, body }) => historicalContent.get(relativePath) !== body);
+const changedSources = sourceEntries
+  .filter((entry) => entry.admission.status === "include")
+  .filter(({ relativePath, body }) => historicalContent.get(relativePath) !== body);
 const latexIssues = scanLatexGate(changedSources);
 if (!reportLatexGate(latexIssues)) {
   process.exit(1);
 }
 
-const nextHistory = buildHistory(historicalDates);
+const nextHistory = buildHistory(historicalDates, sourceEntries);
 
 if (JSON.stringify(comparable(existing)) === JSON.stringify(comparable(nextHistory))) {
   console.log(`Unchanged ${outputFile}`);

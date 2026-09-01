@@ -9,7 +9,8 @@ import os from "node:os";
 import matter from "gray-matter";
 import {
   parseMarkdownFile, extractDate, clean, cleanTitle, titleFields, matchDate, localDate,
-  parseList, groupByDate
+  parseList, groupByDate, classifyAdmission, summarizeAdmissions,
+  hasQuestionEvidence, hasProcessEvidence
 } from "../scripts/shared/data-lib.mjs";
 import { normalizeMathDelimiters, collectMathSegments } from "../app/math-content.mjs";
 import { findPlainMath } from "../scripts/shared/math-gate.mjs";
@@ -244,6 +245,234 @@ test("parseList: handles array", () => {
 
 test("parseList: handles comma-separated string", () => {
   assert.deepStrictEqual(parseList("[a,b,c]"), ["a", "b", "c"]);
+});
+
+// ========== Wrong-question admission contract ==========
+
+test("admission: explicit entry_type is authoritative", () => {
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "高数/题型-知识.md", fields: { entry_type: "wrong_question" } }),
+    { status: "include", reason: "entry_type: wrong_question" }
+  );
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "高数/错题-旧.md", fields: { entry_type: "knowledge" } }),
+    { status: "exclude", reason: "entry_type: knowledge" }
+  );
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "高数/未知.md", fields: { entry_type: "summary" } }),
+    { status: "ambiguous", reason: "unsupported entry_type: summary" }
+  );
+});
+
+test("admission: legacy 方法/题型- naming exclusions stay deterministic", () => {
+  assert.equal(classifyAdmission({ relativePath: "线代/题型-秩1.md", fields: {} }).status, "exclude");
+  assert.equal(classifyAdmission({ relativePath: "线代/方法/特征根法.md", fields: {} }).status, "exclude");
+  assert.equal(classifyAdmission({ relativePath: "线代/伴随矩阵的行列式推导.md", fields: {} }).status, "exclude");
+  // The same paths stay excluded when the body lacks the full structure.
+  const questionOnly = "## 题目\n已知 $f(x)=x^2$，求 $f'(x)$。\n";
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "线代/方法/特征根法.md", fields: {}, body: questionOnly }),
+    { status: "exclude", reason: "legacy 方法 directory" }
+  );
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "线代/题型-秩1.md", fields: {}, body: questionOnly }),
+    { status: "exclude", reason: "legacy 题型- basename" }
+  );
+});
+
+test("admission: full 题目+过程 content wins over legacy naming", () => {
+  const body = [
+    "## 题目",
+    "已知 $f(x)=x^2$，求 $f'(x)$。",
+    "",
+    "## 解答",
+    "第一步：$f'(x)=2x$。",
+  ].join("\n");
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "线代/方法/特征根法.md", fields: {}, body }),
+    { status: "include", reason: "content has concrete question and solution process" }
+  );
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "线代/题型-秩1.md", fields: {}, body }),
+    { status: "include", reason: "content has concrete question and solution process" }
+  );
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "线代/伴随矩阵的行列式推导.md", fields: {}, body }),
+    { status: "include", reason: "content has concrete question and solution process" }
+  );
+});
+
+test("admission: 题目 + 详细步骤 include", () => {
+  const body = [
+    "## 题目",
+    "已知 $f(x)=x^2$，求 $f'(x)$。",
+    "",
+    "## 解答",
+    "第一步：$f'(x)=2x$。",
+    "第二步：代入 $x=1$ 得 $f'(1)=2$。",
+  ].join("\n");
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "高数/导数.md", fields: {}, body }),
+    { status: "include", reason: "content has concrete question and solution process" }
+  );
+});
+
+test("admission: 问题 + 推导 include", () => {
+  const body = [
+    "## 问题",
+    "设 $A$ 为 $n$ 阶方阵，证明 $|A^T|=|A|$。",
+    "",
+    "## 推导",
+    "按行列式定义展开即可。",
+  ].join("\n");
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "线代/转置.md", fields: {}, body }),
+    { status: "include", reason: "content has concrete question and solution process" }
+  );
+});
+
+test("admission: 典型题 + 具体积分 + 过程 include", () => {
+  const body = [
+    "## 典型题",
+    "计算 $\\int_0^1 x\\,dx$。",
+    "",
+    "## 解析",
+    "原式 $=\\left[\\frac{x^2}{2}\\right]_0^1=\\frac{1}{2}$。",
+  ].join("\n");
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "高数/定积分.md", fields: {}, body }),
+    { status: "include", reason: "content has concrete question and solution process" }
+  );
+});
+
+test("admission: only formula derivation or example notes are excluded", () => {
+  const formulaOnly = [
+    "## 推导",
+    "$F'(x)=f(x)$，故 $\\int f(x)\\,dx=F(x)+C$。",
+  ].join("\n");
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "高数/notes-a.md", fields: {}, body: formulaOnly }),
+    { status: "exclude", reason: "missing concrete question or solution process" }
+  );
+  const exampleOnly = [
+    "## 示例",
+    "例如 $\\lim_{x\\to 0}\\frac{\\sin x}{x}=1$，可作反例使用。",
+  ].join("\n");
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "高数/notes-b.md", fields: {}, body: exampleOnly }),
+    { status: "exclude", reason: "missing concrete question or solution process" }
+  );
+});
+
+test("admission: 错题 filename/tag alone no longer admits method-only notes", () => {
+  const methodOnly = [
+    "## 方法",
+    "遇到极限题先判断类型，再选择洛必达或等价无穷小。",
+  ].join("\n");
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "高数/错题-极限.md", fields: {}, body: methodOnly }),
+    { status: "exclude", reason: "missing concrete question or solution process" }
+  );
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "高数/notes.md", fields: { tags: ["考研数学错题"] }, body: methodOnly }),
+    { status: "exclude", reason: "missing concrete question or solution process" }
+  );
+});
+
+test("admission: 错题 filename with complete content still includes", () => {
+  const body = [
+    "## 题目",
+    "已知 $f(x)=x^2$，求 $f'(x)$。",
+    "",
+    "## 解答",
+    "$f'(x)=2x$。",
+  ].join("\n");
+  assert.equal(
+    classifyAdmission({ relativePath: "高数/错题-导数.md", fields: {}, body }).status,
+    "include"
+  );
+});
+
+test("admission: question only or process only is excluded", () => {
+  const questionOnly = [
+    "## 题目",
+    "证明：设 $A$ 可逆，则 $A^T$ 可逆。",
+  ].join("\n");
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "线代/notes-q.md", fields: {}, body: questionOnly }),
+    { status: "exclude", reason: "missing concrete question or solution process" }
+  );
+  const processOnly = [
+    "## 解答",
+    "$f'(x)=2x$。",
+  ].join("\n");
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "线代/notes-p.md", fields: {}, body: processOnly }),
+    { status: "exclude", reason: "missing concrete question or solution process" }
+  );
+});
+
+test("admission: unknown legacy files fail closed via the content gate", () => {
+  assert.equal(
+    classifyAdmission({ relativePath: "高数/中值定理与辅助函数构造.md", fields: {} }).status,
+    "exclude"
+  );
+});
+
+test("admission evidence: question/process detection is structural", () => {
+  assert.equal(hasQuestionEvidence("## 题目\n已知 $f(x)=x^2$，求 $f'(x)$。\n"), true);
+  assert.equal(hasQuestionEvidence("# 题目\n已知 $f(x)=x^2$，求 $f'(x)$。\n"), false);
+  assert.equal(hasQuestionEvidence("## 题型\n常见题型汇总\n"), false);
+  assert.equal(hasQuestionEvidence("## 题型\n已知 $f(x)=x^2$，求 $f'(x)$。\n"), true);
+  assert.equal(hasProcessEvidence("## 题目\n已知 $f(x)=x^2$。\n\n## 解答\n$f'(x)=2x$。\n"), true);
+  assert.equal(hasProcessEvidence("## 题目\n证明：设 $A$ 可逆，则 $A^T$ 可逆。\n"), false);
+  assert.equal(hasProcessEvidence("## 解答\n$f'(x)=2x$。\n"), false);
+});
+
+test("admission evidence: nested 证明 subtree counts as process evidence", () => {
+  const body = [
+    "## 题目",
+    "证明：若 $A$ 可逆，则 $A^T$ 可逆。",
+    "",
+    "## 证明",
+    "### 充分性",
+    "由 $AA^{-1}=E$ 转置得 $(A^T)(A^{-1})^T=E$。",
+    "",
+    "### 必要性",
+    "反向推导同样成立。",
+  ].join("\n");
+  assert.equal(hasProcessEvidence(body), true);
+  assert.deepStrictEqual(
+    classifyAdmission({ relativePath: "线代/题型-可逆.md", fields: {}, body }),
+    { status: "include", reason: "content has concrete question and solution process" }
+  );
+});
+
+test("admission evidence: headings-only subtree is not process evidence", () => {
+  const body = [
+    "## 题目",
+    "已知 $f(x)=x^2$。",
+    "",
+    "## 解答",
+    "### 第一步",
+    "### 第二步",
+  ].join("\n");
+  assert.equal(hasProcessEvidence(body), false);
+  assert.equal(
+    classifyAdmission({ relativePath: "高数/错题-空解答.md", fields: {}, body }).status,
+    "exclude"
+  );
+});
+
+test("admission summary: preserves all classifications", () => {
+  const summary = summarizeAdmissions([
+    { admission: { status: "include" } },
+    { admission: { status: "exclude" } },
+    { admission: { status: "ambiguous" } },
+  ]);
+  assert.deepStrictEqual(Object.fromEntries(Object.entries(summary).map(([k, v]) => [k, v.length])), {
+    include: 1, exclude: 1, ambiguous: 1,
+  });
 });
 
 // ========== Grouping tests ==========
