@@ -213,7 +213,8 @@ test("new-question intake waits until the day after import and persists", () => 
   assert.equal(isIntakePending(items[4], progress.mastered, today), false);
 
   const queue = buildDailyQueue(items, progress, today);
-  assert.deepEqual(queue.slice(0, 2).map(({ item, source }) => [item.id, source]), [
+  assert.deepEqual(queue.slice(0, 3).map(({ item, source }) => [item.id, source]), [
+    ["started", "due"],
     ["yesterday", "intake"],
     ["older", "intake"],
   ]);
@@ -286,7 +287,7 @@ test("daily queue prioritizes due today, then overdue, then nearest future dates
   );
 });
 
-test("daily queue keeps all today work first and orders each later tier by its schedule", () => {
+test("daily queue keeps due today before overdue, intake, and future work", () => {
   const today = "2026-08-30";
   const items = [
     { id: "intake-first", date: "2026-08-29" },
@@ -308,15 +309,36 @@ test("daily queue keeps all today work first and orders each later tier by its s
   assert.deepEqual(
     buildDailyQueue(items, progress, today).map(({ item }) => item.id),
     [
-      "intake-first",
-      "intake-second",
       "today-due",
       "overdue-near",
       "overdue-far",
+      "intake-first",
+      "intake-second",
       "future-near",
       "future-far",
     ],
   );
+});
+
+test("old unstarted intake cannot bury a review due today", () => {
+  const today = "2026-08-30";
+  const items = [
+    ...Array.from({ length: 20 }, (_, index) => ({
+      id: `old-intake-${index}`,
+      date: "2026-07-01",
+    })),
+    { id: "due-today", date: "2026-08-01" },
+  ];
+  const queue = buildDailyQueue(items, {
+    "due-today": {
+      cycleStartedAt: "2026-08-29",
+      reviewStage: 1,
+      nextReviewDate: today,
+      examFrequency: "medium",
+    },
+  }, today);
+  assert.equal(queue[0].item.id, "due-today");
+  assert.equal(queue[0].source, "due");
 });
 
 test("daily queue excludes items already reviewed today, including high-frequency core items", () => {
