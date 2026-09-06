@@ -214,8 +214,8 @@ test("new-question intake waits until the day after import and persists", () => 
 
   const queue = buildDailyQueue(items, progress, today);
   assert.deepEqual(queue.slice(0, 3).map(({ item, source }) => [item.id, source]), [
-    ["started", "due"],
     ["yesterday", "intake"],
+    ["started", "due"],
     ["older", "intake"],
   ]);
   assert.equal(queue.filter(({ item }) => item.id === "today").length, 0);
@@ -287,7 +287,7 @@ test("daily queue prioritizes due today, then overdue, then nearest future dates
   );
 });
 
-test("daily queue keeps due today before overdue, intake, and future work", () => {
+test("daily queue puts yesterday intake before due, overdue, older intake, and future work", () => {
   const today = "2026-08-30";
   const items = [
     { id: "intake-first", date: "2026-08-29" },
@@ -309,15 +309,33 @@ test("daily queue keeps due today before overdue, intake, and future work", () =
   assert.deepEqual(
     buildDailyQueue(items, progress, today).map(({ item }) => item.id),
     [
+      "intake-first",
+      "intake-second",
       "today-due",
       "overdue-near",
       "overdue-far",
-      "intake-first",
-      "intake-second",
       "future-near",
       "future-far",
     ],
   );
+});
+
+test("yesterday intake outranks every other queue category", () => {
+  const today = "2026-08-30";
+  const items = [
+    { id: "yesterday-intake", date: "2026-08-29" },
+    { id: "due-today", date: "2026-08-01" },
+    { id: "overdue", date: "2026-08-01" },
+    { id: "older-intake", date: "2026-08-20" },
+    { id: "future", date: "2026-08-01" },
+  ];
+  const queue = buildDailyQueue(items, {
+    "due-today": { cycleStartedAt: "2026-08-01", reviewStage: 1, nextReviewDate: today },
+    overdue: { cycleStartedAt: "2026-08-01", reviewStage: 1, nextReviewDate: "2026-08-29" },
+    future: { cycleStartedAt: "2026-08-01", reviewStage: 2, nextReviewDate: "2026-09-01" },
+  }, today);
+  assert.equal(queue[0].item.id, "yesterday-intake");
+  assert.equal(queue[0].source, "intake");
 });
 
 test("old unstarted intake cannot bury a review due today", () => {
