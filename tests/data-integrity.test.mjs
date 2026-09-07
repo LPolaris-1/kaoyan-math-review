@@ -13,7 +13,7 @@ import {
   hasQuestionEvidence, hasProcessEvidence
 } from "../scripts/shared/data-lib.mjs";
 import { normalizeMathDelimiters, collectMathSegments } from "../app/math-content.mjs";
-import { findPlainMath } from "../scripts/shared/math-gate.mjs";
+import { findPlainMath, findPseudoMatrices } from "../scripts/shared/math-gate.mjs";
 import katex from "katex";
 
 const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "review-test-"));
@@ -582,6 +582,19 @@ test("collectMathSegments: unclosed $ stays in textOutsideMath", () => {
 test("LaTeX gate: accepts delimited formula", () => {
   const issues = findPlainMath("L = $\\lim_{n\\to\\infty} \\sqrt[n]{n}$", "valid.md");
   assert.deepStrictEqual(issues, []);
+});
+
+test("LaTeX gate: rejects pseudo-matrix notation", () => {
+  const issues = findPseudoMatrices("反例：A=[[1,0],[0,0]]。", "matrix.md");
+  assert.strictEqual(issues.length, 1);
+  assert.strictEqual(issues[0].lineNumber, 1);
+  assert.ok(issues[0].signals.includes("伪矩阵 [[...]]"));
+  assert.match(issues[0].message, /begin\{pmatrix\}/);
+});
+
+test("LaTeX gate: ignores pseudo-matrix-looking text in math and code", () => {
+  const body = "$[[1,0],[0,0]]$\n`[[1,0],[0,0]]`\n普通 wikilink [[06-Resources/笔记]]";
+  assert.deepStrictEqual(findPseudoMatrices(body, "matrix-safe.md"), []);
 });
 
 test("LaTeX gate: rejects slash division inside inline and display math", () => {

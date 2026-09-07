@@ -14,6 +14,11 @@ const DETECTORS = [
 const FENCED_CODE = /(?:^|\n)[ \t]{0,3}(`{3,}|~{3,})[^\r\n]*\r?\n[\s\S]*?[ \t]{0,3}\1[ \t]*(?=\r?\n|$)/g;
 const INLINE_CODE = /`[^`\r\n]*`/g;
 
+// Obsidian-style [[...]] is a wikilink, but a bracketed numeric row such as
+// [[1,0],[0,0]] is a pseudo-matrix that Markdown/KaTeX cannot render as math.
+// Keep the detector narrow enough to avoid normal wikilinks.
+const PSEUDO_MATRIX = /\[\[[^\r\n]*?\](?:\s*,\s*\[[^\r\n]*?\])+\s*\]/g;
+
 /**
  * Replace fenced code blocks and inline code spans with spaces,
  * preserving newlines so line numbers stay aligned with the source.
@@ -27,6 +32,27 @@ function maskCode(value) {
 function maskMath(value) {
   const normalized = normalizeMathDelimiters(maskCode(String(value)));
   return normalized.replace(MATH_BLOCK, (segment) => segment.replace(/[^\r\n]/g, " "));
+}
+
+export function findPseudoMatrices(body, filePath = "") {
+  const source = String(body);
+  const masked = maskMath(source);
+  const sourceLines = source.split(/\r?\n/);
+  const issues = [];
+
+  masked.split(/\r?\n/).forEach((line, index) => {
+    if (!PSEUDO_MATRIX.test(line)) return;
+    PSEUDO_MATRIX.lastIndex = 0;
+    issues.push({
+      filePath,
+      lineNumber: index + 1,
+      snippet: sourceLines[index].trim().slice(0, 240),
+      signals: ["伪矩阵 [[...]]"],
+      message: "请改用 LaTeX 矩阵，例如 $\\begin{pmatrix}1&0\\\\0&0\\end{pmatrix}$。",
+    });
+  });
+
+  return issues;
 }
 
 export function findSlashMath(body, filePath = "") {
@@ -76,7 +102,7 @@ export function findPlainMath(body, filePath = "") {
     });
   });
 
-  return issues.concat(findSlashMath(body, filePath));
+  return findPseudoMatrices(body, filePath).concat(issues, findSlashMath(body, filePath));
 }
 
 export function scanLatexGate(entries) {
