@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
   clean, parseList, section, bullets,
   extractDate, localDate, groupByDate, parseMarkdownFile, titleFields,
-  collectSourceEntries, summarizeAdmissions, sourceNeedsRefresh
+  collectSourceEntries, summarizeAdmissions, sourceNeedsRefresh, inspectSourceBoundary
 } from "./shared/data-lib.mjs";
 import { reportLatexGate, scanLatexGate } from "./shared/math-gate.mjs";
 
@@ -117,6 +117,11 @@ function readExisting() {
 // --- Main ---
 
 const existing = readExisting();
+const sourceBoundary = inspectSourceBoundary();
+console.log(`Source boundary: ${sourceBoundary.fileCount} Markdown files; modified today ${sourceBoundary.modifiedToday.length}; latest mtime ${sourceBoundary.latestMtime || "none"}`);
+for (const warning of sourceBoundary.warnings) console.warn(`WARN ${warning}`);
+for (const issue of sourceBoundary.issues) console.error(`FAIL ${issue.code}: ${issue.message}`);
+if (sourceBoundary.issues.length > 0) process.exit(1);
 const sourceEntries = collectSourceEntries();
 const historicalDates = new Map(
   (existing?.days || []).flatMap((day) => (day.items || []).map((item) => [item.id, item.date]))

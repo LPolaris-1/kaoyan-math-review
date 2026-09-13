@@ -73,7 +73,7 @@ export default function Home() {
   const [savingId, setSavingId] = useState("");
 
   useEffect(() => {
-    fetch("/data/history.json")
+    fetch("/data/history.json", { cache: "no-store" })
       .then((response) => response.json())
       .then((history: HistoryData) => {
         setData(history);

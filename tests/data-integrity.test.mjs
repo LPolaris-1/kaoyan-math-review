@@ -10,7 +10,7 @@ import matter from "gray-matter";
 import {
   parseMarkdownFile, extractDate, clean, cleanTitle, titleFields, matchDate, localDate,
   parseList, groupByDate, classifyAdmission, summarizeAdmissions, sourceNeedsRefresh,
-  hasQuestionEvidence, hasProcessEvidence
+  hasQuestionEvidence, hasProcessEvidence, inspectSourceBoundary
 } from "../scripts/shared/data-lib.mjs";
 import { normalizeMathDelimiters, collectMathSegments } from "../app/math-content.mjs";
 import { findPlainMath, findPseudoMatrices } from "../scripts/shared/math-gate.mjs";
@@ -487,6 +487,32 @@ test("source refresh: existing item modified today is re-imported", () => {
   const yesterday = new Date("2026-08-31T12:00:00+08:00");
   fs.utimesSync(filePath, yesterday, yesterday);
   assert.equal(sourceNeedsRefresh(entry, history, now), false);
+});
+
+test("source boundary: only 高数 and 线代 Markdown trees are eligible", () => {
+  const source = fs.mkdtempSync(path.join(tmpRoot, "source-boundary-"));
+  fs.mkdirSync(path.join(source, "高数"), { recursive: true });
+  fs.mkdirSync(path.join(source, "线代"), { recursive: true });
+  fs.mkdirSync(path.join(source, "整理档案"), { recursive: true });
+  fs.writeFileSync(path.join(source, "高数", "ok.md"), "# ok\n", "utf8");
+  fs.writeFileSync(path.join(source, "线代", "ok.md"), "# ok\n", "utf8");
+  fs.writeFileSync(path.join(source, "整理档案", "wrong.md"), "# wrong\n", "utf8");
+
+  const report = inspectSourceBoundary(source, { enforceCanonical: false });
+  assert.equal(report.fileCount, 3);
+  assert.ok(report.issues.some((issue) => issue.code === "source-category"));
+});
+
+test("source boundary: canonical temporary fixture passes with two categories", () => {
+  const source = fs.mkdtempSync(path.join(tmpRoot, "source-boundary-valid-"));
+  fs.mkdirSync(path.join(source, "高数"), { recursive: true });
+  fs.mkdirSync(path.join(source, "线代"), { recursive: true });
+  fs.writeFileSync(path.join(source, "高数", "ok.md"), "# ok\n", "utf8");
+  fs.writeFileSync(path.join(source, "线代", "ok.md"), "# ok\n", "utf8");
+
+  const report = inspectSourceBoundary(source, { enforceCanonical: false });
+  assert.deepEqual(report.issues, []);
+  assert.equal(report.modifiedToday.length, 2);
 });
 
 // ========== Grouping tests ==========

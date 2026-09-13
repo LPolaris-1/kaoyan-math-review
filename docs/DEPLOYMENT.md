@@ -17,12 +17,12 @@
 
 `Git main → release:gate → RELEASE.json → upload immutable release → DB backup → provenance verify → current atomic switch → PM2 reload → localhost smoke → HTTPS smoke → DB quick_check → logs → rollback if needed`
 
-1. 在本地 canonical `main` 运行标准 pre-deploy 入口 `npm run release:gate`。该命令依次执行 lint、`npm test`、`build`、`build:sites`、`build:selfhost`、`release:verify`、`smoke:selfhost`、`data:verify` 和 `data:check`，任一步失败都会立即停止。
+1. 在本地 canonical `main` 运行 `npm run source:check`，确认唯一源目录、`高数/线代` 分类、文件总数、当天修改数和最新 mtime；再运行标准 pre-deploy 入口 `npm run release:gate`。该命令依次执行 lint、`npm test`、`build`、`build:sites`、`build:selfhost`、`runtime:verify`、`release:verify`、`smoke:selfhost`、`data:verify` 和 `data:check`，任一步失败都会立即停止。
    `build:sites` 会覆盖与 selfhost 共用的 `dist/`，所以 gate 保证其后再次执行 `build:selfhost`，并且在任何 artifact 验证前让 `build:selfhost` 成为最后一次写入 `dist/` 的 build。只有成功的 `release:gate` 结束后，`dist/` 才是允许上传到 selfhost production 的 artifact。
 2. 读取 `dist/RELEASE.json`，确认 `git_commit` 与 `git rev-parse HEAD` 一致，`branch=main`、`mode=selfhost`。
-3. `release:verify` 必须检查 `dist/`、`dist/RELEASE.json`、`dist/client/assets/`、`dist/server/`、package 元数据、`scripts/start-selfhost.mjs` 及其本地 runtime imports（包括 `selfhost/static-assets.mjs`）。`node_modules`、数据库、认证文件、日志和 secrets 不是 artifact 源文件。
+3. `release:verify` 必须检查 `dist/`、`dist/RELEASE.json`、`dist/client/assets/`、`dist/server/`、package 元数据、`scripts/start-selfhost.mjs` 及其本地 runtime imports（包括 `selfhost/static-assets.mjs`）。`node_modules`、数据库、认证文件、日志和 secrets 不是 artifact 源文件；`runtime:verify` 另行确认服务器 release 已绑定可用且版本匹配的 `vinext` 依赖。
 4. 服务器先记录当前 release、PM2、磁盘、SQLite `quick_check`、行数和 schema；使用 SQLite backup 创建可验证的数据库副本。
-5. 创建全新带时间戳的 immutable release，上传已通过本地检查的 artifact；不得在服务器编辑源码或执行 `npm install`。
+5. 创建全新带时间戳的 immutable release，上传已通过本地检查的 artifact；绑定既有 immutable `node_modules` 后，必须在该 release 目录执行 `node scripts/verify-runtime.mjs`，确认 `vinext/server/prod-server` 可解析且版本匹配；不得在服务器编辑源码或执行 `npm install`。
 6. 上传后先核对新 release 的必需文件和 `RELEASE.json` provenance，再以临时 symlink + `mv -Tf` 原子切换 `current`，按现有架构 reload PM2。
 7. 切换后验证本机 `/`、`/review`、`/data/history.json`、实际 JS/CSS assets、HTTPS、PM2、SQLite `quick_check`、数据行数和最近日志；认证保护下的未登录 401/303 需按现有 Caddy 规则解释。
 
@@ -32,7 +32,7 @@
 
 ### Deployment lesson
 
-首次 canonical deployment 曾因 release package 遗漏 runtime dependency `selfhost/static-assets.mjs` 在 production switch 后启动失败，随后立即 rollback 并补齐文件。规则：所有 release 必须在上传前通过 runtime dependency completeness check。
+首次 canonical deployment 曾因 release package 遗漏 runtime dependency `selfhost/static-assets.mjs` 在 production switch 后启动失败，随后立即 rollback 并补齐文件；2026-09-08 又因 release 未绑定 `node_modules` 触发 `ERR_MODULE_NOT_FOUND: vinext`。规则：所有 release 必须在上传前通过本地 runtime gate，并在服务器绑定依赖后、切换 `current` 前再次通过 `runtime:verify`。
 
 ## Canonical Cutover
 

@@ -6,7 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  VAULT_DIR, parseMarkdownFile, collectSourceEntries, summarizeAdmissions, sourceNeedsRefresh
+  VAULT_DIR, parseMarkdownFile, collectSourceEntries, summarizeAdmissions, sourceNeedsRefresh, inspectSourceBoundary
 } from "./shared/data-lib.mjs";
 import { collectMathSegments } from "../app/math-content.mjs";
 import katex from "katex";
@@ -76,6 +76,11 @@ function findPlainTranspose(body) {
 const history = JSON.parse(fs.readFileSync(outputFile, "utf8"));
 
 // Build canonical source file set (forward-slash relative paths)
+const sourceBoundary = inspectSourceBoundary();
+console.log(`Source boundary: ${sourceBoundary.fileCount} Markdown files; modified today ${sourceBoundary.modifiedToday.length}; latest mtime ${sourceBoundary.latestMtime || "none"}`);
+for (const warning of sourceBoundary.warnings) console.warn(`WARN ${warning}`);
+for (const issue of sourceBoundary.issues) console.error(`FAIL ${issue.code}: ${issue.message}`);
+if (sourceBoundary.issues.length > 0) process.exit(1);
 const allSourceEntries = collectSourceEntries();
 const admissionSummary = summarizeAdmissions(allSourceEntries);
 const srcPaths = admissionSummary.include.map((entry) => entry.filePath);

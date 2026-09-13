@@ -8,6 +8,7 @@ import matter from "gray-matter";
 
 export const VAULT_DIR = process.env.MATH_VAULT_DIR || "C:/Users/HUAWEI/Vault/猥琐凡人的仓库";
 export const SOURCE_DIR = path.join(VAULT_DIR, "06-Resources", "学习", "考研", "考研数学", "错题本", "原档案");
+export const SOURCE_CATEGORIES = Object.freeze(["高数", "线代"]);
 
 /**
  * Parse a Markdown file using gray-matter as the single canonical
@@ -132,6 +133,114 @@ export function parseList(value) {
   const match = str.match(/^\[(.*)\]$/);
   if (match) return match[1].split(",").map((item) => clean(item.replace(/^['"]|['"]$/g, ""))).filter(Boolean);
   return str.split(/\n/).map((item) => clean(item.replace(/^[-*]\s*/, ""))).filter(Boolean);
+}
+
+/**
+ * Audit the canonical source boundary before parsing any notes.
+ *
+ * The source contract is deliberately narrow: only Markdown below the
+ * `原档案/高数` and `原档案/线代` trees is eligible.  The audit reports the
+ * inventory used by the daily job and fails closed for path drift, unexpected
+ * top-level folders, missing sources, or future-dated mtimes.
+ */
+export function inspectSourceBoundary(
+  sourceDir = SOURCE_DIR,
+  { now = new Date(), enforceCanonical = true, since = null } = {},
+) {
+  const resolvedSourceDir = path.resolve(sourceDir);
+  const issues = [];
+  const warnings = [];
+  const files = [];
+  const expectedSuffix = path.join(
+    "06-Resources", "学习", "考研", "考研数学", "错题本", "原档案",
+  ).split(path.sep).join("/").toLowerCase();
+  const normalizedSource = resolvedSourceDir.replaceAll(path.sep, "/").replace(/\/+$/, "").toLowerCase();
+
+  if (enforceCanonical && !normalizedSource.endsWith(`/${expectedSuffix}`)) {
+    issues.push({
+      code: "source-path",
+      message: `source directory is outside the canonical 原档案 path: ${resolvedSourceDir}`,
+    });
+  }
+
+  if (!fs.existsSync(resolvedSourceDir)) {
+    issues.push({ code: "source-missing", message: `source directory does not exist: ${resolvedSourceDir}` });
+    return summarizeSourceBoundary({ resolvedSourceDir, files, issues, warnings, now, since });
+  }
+
+  if (!fs.statSync(resolvedSourceDir).isDirectory()) {
+    issues.push({ code: "source-not-directory", message: `source path is not a directory: ${resolvedSourceDir}` });
+    return summarizeSourceBoundary({ resolvedSourceDir, files, issues, warnings, now, since });
+  }
+
+  for (const filePath of walk(resolvedSourceDir)) {
+    if (!filePath.toLowerCase().endsWith(".md")) continue;
+    const relativePath = path.relative(resolvedSourceDir, filePath).split(path.sep).join("/");
+    const topLevel = relativePath.split("/")[0] || "";
+    let stat;
+    try {
+      stat = fs.statSync(filePath);
+    } catch (error) {
+      issues.push({ code: "source-stat", message: `cannot stat ${relativePath}: ${error.message}` });
+      continue;
+    }
+
+    const mtimeMs = stat.mtimeMs;
+    files.push({ filePath, relativePath, topLevel, mtimeMs });
+    if (!SOURCE_CATEGORIES.includes(topLevel)) {
+      issues.push({
+        code: "source-category",
+        message: `Markdown must be below 高数 or 线代: ${relativePath}`,
+      });
+    }
+    if (mtimeMs > now.getTime() + 60_000) {
+      issues.push({
+        code: "future-mtime",
+        message: `source mtime is more than one minute in the future: ${relativePath}`,
+      });
+    }
+  }
+
+  if (files.length === 0) {
+    issues.push({ code: "source-empty", message: `no Markdown source files found: ${resolvedSourceDir}` });
+  }
+
+  const siblingRoot = path.dirname(resolvedSourceDir);
+  try {
+    for (const entry of fs.readdirSync(siblingRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name === path.basename(resolvedSourceDir)) continue;
+      const sibling = path.join(siblingRoot, entry.name);
+      if (walk(sibling).some((filePath) => filePath.toLowerCase().endsWith(".md"))) {
+        warnings.push(`non-canonical Markdown directory exists beside 原档案: ${sibling}`);
+      }
+    }
+  } catch {
+    // Sibling discovery is advisory and must never hide the canonical audit.
+  }
+
+  return summarizeSourceBoundary({ resolvedSourceDir, files, issues, warnings, now, since });
+}
+
+function summarizeSourceBoundary({ resolvedSourceDir, files, issues, warnings, now, since }) {
+  const sinceDate = since ? new Date(since) : null;
+  const validSince = sinceDate && !Number.isNaN(sinceDate.getTime()) ? sinceDate : null;
+  const today = localDate(now);
+  const modifiedToday = files.filter((file) => localDate(new Date(file.mtimeMs)) === today);
+  const modifiedSince = validSince ? files.filter((file) => file.mtimeMs > validSince.getTime()) : [];
+  const latest = files.reduce((current, file) => Math.max(current, file.mtimeMs), 0);
+  if (since && !validSince) {
+    issues.push({ code: "invalid-since", message: `invalid --since timestamp: ${since}` });
+  }
+  return {
+    sourceDir: resolvedSourceDir,
+    fileCount: files.length,
+    files,
+    modifiedToday,
+    modifiedSince,
+    latestMtime: latest ? new Date(latest).toISOString() : null,
+    issues,
+    warnings,
+  };
 }
 
 const QUESTION_HEADING_MARKERS = ["题目", "原题", "题干", "问题", "命题", "原式", "题型", "典型题"];

@@ -10,6 +10,7 @@ export const RELEASE_GATE_STEPS = Object.freeze([
   Object.freeze({ name: "build", script: "build", producesDist: true }),
   Object.freeze({ name: "build:sites", script: "build:sites", producesDist: true }),
   Object.freeze({ name: "build:selfhost", script: "build:selfhost", producesDist: true }),
+  Object.freeze({ name: "runtime:verify", script: "runtime:verify", producesDist: false }),
   Object.freeze({ name: "release:verify", script: "release:verify", producesDist: false }),
   Object.freeze({ name: "smoke:selfhost", script: "smoke:selfhost", producesDist: false }),
   Object.freeze({ name: "data:verify", script: "data:verify", producesDist: false }),

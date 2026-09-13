@@ -8,6 +8,19 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizeStaticCacheKeys } from "../selfhost/static-assets.mjs";
+import { assertRuntimeDependencies } from "./verify-runtime.mjs";
+
+const projectRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
+
+try {
+  assertRuntimeDependencies(projectRoot);
+} catch (error) {
+  console.error(`[start:selfhost] Runtime dependency check failed: ${error.message}`);
+  process.exit(1);
+}
 
 // vinext 0.0.50 builds its static-file cache keys from path.relative(). On
 // Windows that yields backslashes, but browser requests use URL slashes. Patch
@@ -19,11 +32,6 @@ vinextStaticCache.StaticFileCache.create = async (...args) =>
   normalizeStaticCacheKeys(await originalStaticCacheCreate(...args));
 
 const { startProdServer } = await import("vinext/server/prod-server");
-
-const projectRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-);
 
 if (!process.env.REVIEW_DB_PATH) {
   console.error(

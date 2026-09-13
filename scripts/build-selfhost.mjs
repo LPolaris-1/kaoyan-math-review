@@ -8,6 +8,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { assertRuntimeDependencies } from "./verify-runtime.mjs";
 
 const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -22,6 +23,13 @@ const cliPath = path.join(
 );
 
 process.env.SELF_HOSTED_BUILD = "1";
+
+try {
+  assertRuntimeDependencies(projectRoot);
+} catch (error) {
+  console.error(`[build:selfhost] Runtime dependency check failed: ${error.message}`);
+  process.exit(1);
+}
 
 const result = spawnSync(process.execPath, [cliPath, "build"], {
   cwd: projectRoot,

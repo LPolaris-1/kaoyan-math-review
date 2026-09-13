@@ -40,6 +40,10 @@ try {
   assertStatus(rootResponse, "/");
   assertStatus(reviewResponse, "/review");
   assertStatus(historyResponse, "/data/history.json");
+  const cacheControl = historyResponse.headers.get("cache-control")?.toLowerCase() ?? "";
+  if (!cacheControl.includes("no-cache")) {
+    throw new Error(`/data/history.json cache policy is ${cacheControl || "missing"}; expected no-cache`);
+  }
 
   const html = await reviewResponse.text();
   const assets = [...new Set(html.match(/\/assets\/[^"'\s]+\.(?:js|css)/g) ?? [])];

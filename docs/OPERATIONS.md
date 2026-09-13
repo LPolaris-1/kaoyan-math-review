@@ -9,6 +9,8 @@ node --test --test-isolation=none tests/*.test.mjs
 npm run build
 npm run build:sites  # 仅用于旧 Sites 兼容构建
 npm run build:selfhost
+npm run runtime:verify
+npm run source:check
 npm run data:verify
 ```
 
@@ -27,6 +29,8 @@ sqlite3 -readonly /opt/kaoyan-math-review/shared/review.db 'PRAGMA quick_check;'
 ```
 
 不要读取或输出 `.env`、`auth.env`、私钥、Token、密码或会话 Cookie。不要用 HTTP 200 单独判定部署成功；必须结合认证行为、数据读回、PM2 和错误日志。
+
+`/data/history.json` 是每日生成文件，应用层会返回 `Cache-Control: no-cache, max-age=0, must-revalidate` 并保留 ETag；若页面统计与服务器文件不一致，先核对该响应头再判断部署失败。
 
 ## Incident boundary
 

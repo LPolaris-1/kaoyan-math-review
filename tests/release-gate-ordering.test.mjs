@@ -13,6 +13,7 @@ const expectedScripts = [
   "build",
   "build:sites",
   "build:selfhost",
+  "runtime:verify",
   "release:verify",
   "smoke:selfhost",
   "data:verify",
