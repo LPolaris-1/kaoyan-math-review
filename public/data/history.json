@@ -1,9 +1,76 @@
 {
-  "generatedAt": "2026-09-21T14:03:26.051Z",
+  "generatedAt": "2026-09-22T14:06:21.770Z",
   "source": "06-Resources/学习/考研/考研数学/错题本/原档案",
-  "totalNotes": 266,
-  "totalDays": 51,
+  "totalNotes": 269,
+  "totalDays": 52,
   "days": [
+    {
+      "date": "2026-09-22",
+      "count": 3,
+      "subjectCounts": {
+        "高数": 3
+      },
+      "topics": [
+        "不定积分等式反求函数、弧长公式、旋转曲面面积公式",
+        "二重积分、极坐标变换、双纽线 r²=cos2θ、积分区域确定、凑微分法",
+        "未定式极限、拆项法、洛必达法则、泰勒展开、等价无穷小替换、变上限积分求导"
+      ],
+      "takeaways": [],
+      "summary": "3 道错题 · 高数 3 道",
+      "items": [
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-复杂极限的拆分观察与洛必达硬算（2021数二真题）.md",
+          "date": "2026-09-22",
+          "titleMarkdown": "高数错题-复杂极限的计算：拆分观察 vs 洛必达硬算",
+          "title": "高数错题-复杂极限的计算：拆分观察 vs 洛必达硬算",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "未定式极限、拆项法、洛必达法则、泰勒展开、等价无穷小替换、变上限积分求导",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 高数错题-复杂极限的计算：拆分观察 vs 洛必达硬算\n\n**日期**：2026-09-22\n**来源**：2021 年数二真题（21 数二真题）\n**知识点**：未定式极限、拆项法、洛必达法则、泰勒展开、等价无穷小替换、变上限积分求导\n**难度**：⭐⭐⭐⭐（方法选择的策略价值大于计算本身）\n\n---\n\n## 📌 题目\n\n求极限\n\n$$\\lim_{x \\to 0} \\left( \\frac{1 + \\int_0^x e^{t^2} dt}{e^x - 1} - \\frac{1}{\\sin x} \\right)$$\n\n**✅ 正确答案**：$\\frac{1}{2}$\n\n---\n\n## 💡 复盘与启发（极具价值的做题心法）\n\n你总结得非常到位：\"第一种解法需要观察，拆分成 $\\frac{0}{0}$ 型和 $\\infty - \\infty$ 型，形式上更加简便更好计算，给我的启发是要在求极限注意观察形式。第二种是硬算，计算要细心不要畏难。\"\n\n这正是考研数学极限大题的终极奥义：先观察结构定策略（巧算），再动手计算（硬算兜底）。\n\n---\n\n## 📝 解法一：拆分法（巧算，强烈推荐，计算量极小）\n\n**第一步：拆项观察**\n\n原式 $= \\lim_{x \\to 0} \\frac{\\int_0^x e^{t^2} dt}{e^x - 1} + \\lim_{x \\to 0} \\left( \\frac{1}{e^x - 1} - \\frac{1}{\\sin x} \\right)$\n\n**第二步：计算第一项（$\\frac{0}{0}$ 型）**\n\n利用等价无穷小 $e^x - 1 \\sim x$：\n\n$$\\lim_{x \\to 0} \\frac{\\int_0^x e^{t^2} dt}{x}$$\n\n此时为 $\\frac{0}{0}$ 型，使用洛必达法则（或泰勒展开求导）：\n\n$$= \\lim_{x \\to 0} \\frac{e^{x^2}}{1} = e^0 = \\mathbf{1}$$\n\n**第三步：计算第二项（$\\infty - \\infty$ 型）**\n\n先通分，再用等价无穷小替换分母 $(e^x - 1)\\sin x \\sim x^2$：\n\n$$\\lim_{x \\to 0} \\frac{\\sin x - (e^x - 1)}{(e^x - 1)\\sin x} = \\lim_{x \\to 0} \\frac{\\sin x - e^x + 1}{x^2}$$\n\n分子采用泰勒展开（展开到 $x^2$ 项）：\n\n$$\\sin x \\sim x - \\frac{x^3}{6} + o(x^3), \\quad e^x \\sim 1 + x + \\frac{x^2}{2} + o(x^2)$$\n\n代入分子：\n\n$$\\sin x - e^x + 1 = \\left( x - \\frac{x^3}{6} \\right) - \\left( 1 + x + \\frac{x^2}{2} \\right) + 1 + o(x^2) = -\\frac{x^2}{2} + o(x^2)$$\n\n极限 $= \\lim_{x \\to 0} \\frac{-\\frac{x^2}{2}}{x^2} = \\mathbf{-\\frac{1}{2}}$\n\n**第四步：合并结果**\n\n总极限 $= 1 + \\left( -\\frac{1}{2} \\right) = \\mathbf{\\frac{1}{2}}$\n\n---\n\n## 📝 解法二：洛必达法则（硬算，考验耐心与细心）\n\n**第一步：通分并等价替换分母**\n\n原式 $= \\lim_{x \\to 0} \\frac{\\sin x + \\sin x \\int_0^x e^{t^2} dt - e^x + 1}{(e^x - 1)\\sin x}$\n\n分母等价替换为 $x^2$：\n\n$$= \\lim_{x \\to 0} \\frac{\\sin x + \\sin x \\int_0^x e^{t^2} dt - e^x + 1}{x^2}$$\n\n**第二步：第一次洛必达法则**\n\n分子求导：$\\cos x + \\cos x \\int_0^x e^{t^2} dt + \\sin x \\cdot e^{x^2} - e^x$\n\n分母求导：$2x$\n\n此时仍为 $\\frac{0}{0}$ 型。\n\n**第三步：第二次洛必达法则（易错点：每一项都要仔细求导）**\n\n分子求导：$-\\sin x - \\sin x \\int_0^x e^{t^2} dt + \\cos x \\cdot e^{x^2} + \\cos x \\cdot e^{x^2} + \\sin x \\cdot \\left( 2x e^{x^2} \\right) - e^x$\n\n分母求导：$2$\n\n**第四步：代入 $x=0$**\n\n分子 $= -0 - 0 + 1 \\cdot 1 + 1 \\cdot 1 + 0 - 1 = 1$\n\n原式极限 $= \\frac{1}{2}$\n\n---\n\n## 🎯 考场实战总结与避坑口诀\n\n1. **口诀**：\"极限先看形，能拆则拆零；等价与泰勒，双管齐下轻；硬算洛必达，求导要细心。\"\n\n2. **方法总结（求极限的优先级策略）**：\n   - 第一优先级：等价无穷小替换（乘除法中无脑用，加减法中慎用）。\n   - 第二优先级：泰勒展开（遇到加减法中的无穷小相消，如本题的 $\\sin x - e^x + 1$，泰勒展开是唯一解药）。\n   - 第三优先级：洛必达法则（遇到 $\\frac{0}{0}$ 或 $\\frac{\\infty}{\\infty}$ 且求导不复杂时使用。如果求导后式子变得更复杂，立刻换方法）。\n\n3. **避坑提醒**：\n   - 解法一中，加减法中的等价替换要小心。比如 $\\lim \\frac{\\sin x - e^x + 1}{x^2}$，如果你把 $\\sin x$ 和 $e^x$ 都只展开到 $x$ 项，得到 $x - (1 + x) + 1 = 0$，就会得出错误结论。加减法中必须展开到最低阶的非零项（本题是 $x^2$ 项）。\n   - 解法二中，第二次洛必达法则求导时，千万不要漏项！尤其是乘积的求导法则 $(uvw)' = u'vw + uv'w + uvw'$，需要极度耐心。遇到计算量爆炸时，回头看看是否可以像解法一那样拆项化简。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-复杂极限的拆分观察与洛必达硬算（2021数二真题）.md"
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-双纽线区域二重积分xy极坐标计算得1_48（2021真题）.md",
+          "date": "2026-09-22",
+          "titleMarkdown": "高数错题-双纽线区域上的二重积分：极坐标计算 xy（2021 真题 · 第21题）",
+          "title": "高数错题-双纽线区域上的二重积分：极坐标计算 xy（2021 真题 · 第21题）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "二重积分、极坐标变换、双纽线 r²=cos2θ、积分区域确定、凑微分法",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 高数错题-双纽线区域上的二重积分：极坐标计算 xy（2021 真题 · 第21题）\n\n**日期**：2026-09-22\n**来源**：2021 年考研数学真题 · 第 21 题（本题满分 12 分）\n**知识点**：二重积分、极坐标变换、双纽线 $r^2=\\cos 2\\theta$、积分区域（角度范围）确定、凑微分法\n**难度**：⭐⭐⭐⭐\n\n---\n\n## 📌 题目\n\n21.（本题满分 12 分）\n\n曲线 $(x^2+y^2)^2 = x^2 - y^2\\ (x \\geqslant 0,\\ y \\geqslant 0)$ 与 $x$ 轴围成的区域为 $D$，求\n\n$$\\iint_D xy\\,\\mathrm{d}x\\,\\mathrm{d}y.$$\n\n**答案**：$\\dfrac{1}{48}$\n\n---\n\n## 📝 解法：极坐标变换法\n\n**第一步：引入极坐标 $x=r\\cos\\theta,\\ y=r\\sin\\theta$，将曲线方程代入化简。**\n\n$$(r^2)^2 = r^2\\cos^2\\theta - r^2\\sin^2\\theta \\;\\Longrightarrow\\; r^2 = \\cos 2\\theta \\quad (\\text{双纽线}).$$\n\n**第二步：确定极角 $\\theta$ 的实际取值范围。**\n\n由条件 $x\\geqslant 0,\\ y\\geqslant 0$ 可知曲线位于第一象限，即 $\\theta\\in\\left[0,\\dfrac{\\pi}{2}\\right]$。结合 $r^2\\geqslant 0$，必有 $\\cos 2\\theta\\geqslant 0$，从而极角的实际取值范围为\n\n$$\\theta \\in \\left[ 0,\\ \\frac{\\pi}{4} \\right].$$\n\n**第三步：写出积分区域并化为累次积分。**\n\n积分区域 $D$ 在极坐标下可表示为 $0\\leqslant\\theta\\leqslant\\dfrac{\\pi}{4},\\ 0\\leqslant r\\leqslant\\sqrt{\\cos 2\\theta}$。将二重积分转化为累次积分，且面积微元 $\\mathrm{d}x\\,\\mathrm{d}y = r\\,\\mathrm{d}r\\,\\mathrm{d}\\theta$：\n\n$$I = \\int_0^{\\frac{\\pi}{4}} \\mathrm{d}\\theta \\int_0^{\\sqrt{\\cos 2\\theta}} (r\\cos\\theta)(r\\sin\\theta)\\, r\\,\\mathrm{d}r = \\int_0^{\\frac{\\pi}{4}} \\sin\\theta\\cos\\theta\\,\\mathrm{d}\\theta \\int_0^{\\sqrt{\\cos 2\\theta}} r^3\\,\\mathrm{d}r$$\n\n**第四步：对内层关于 $r$ 的积分进行计算。**\n\n$$\\int_0^{\\sqrt{\\cos 2\\theta}} r^3\\,\\mathrm{d}r = \\left. \\frac{1}{4}r^4 \\right|_0^{\\sqrt{\\cos 2\\theta}} = \\frac{1}{4}\\cos^2 2\\theta$$\n\n**第五步：代回外层积分，用倍角公式整理被积函数。**\n\n利用 $\\sin\\theta\\cos\\theta = \\dfrac{1}{2}\\sin 2\\theta$：\n\n$$I = \\int_0^{\\frac{\\pi}{4}} \\frac{1}{2}\\sin 2\\theta \\cdot \\frac{1}{4}\\cos^2 2\\theta \\,\\mathrm{d}\\theta = \\frac{1}{8}\\int_0^{\\frac{\\pi}{4}} \\cos^2 2\\theta\\,\\sin 2\\theta\\,\\mathrm{d}\\theta$$\n\n**第六步：利用凑微分法进行定积分计算。**\n\n注意到 $\\mathrm{d}(\\cos 2\\theta) = -2\\sin 2\\theta\\,\\mathrm{d}\\theta$：\n\n$$I = -\\frac{1}{16}\\int_0^{\\frac{\\pi}{4}} \\cos^2 2\\theta\\,\\mathrm{d}(\\cos 2\\theta) = \\left. -\\frac{1}{48}\\cos^3 2\\theta \\right|_0^{\\frac{\\pi}{4}}$$\n\n**第七步：代入上下限求值。**\n\n$$I = -\\frac{1}{48}\\left( \\cos^3 \\frac{\\pi}{2} - \\cos^3 0 \\right) = -\\frac{1}{48}(0-1) = \\frac{1}{48}$$\n\n---\n\n## 💡 关键点与易错提醒\n\n1. **识别曲线**：$(x^2+y^2)^2 = x^2-y^2$ 是**双纽线**（伯努利双纽线），极坐标下即 $r^2=\\cos 2\\theta$，必须一眼认出并用极坐标。\n2. **角度范围是命门**：双纽线 $r^2=\\cos 2\\theta$ 一整条有两个\"叶\"，本题限定第一象限（$x\\geqslant 0, y\\geqslant 0$）只取**第一象限的一叶**，对应 $\\theta \\in \\left[0, \\dfrac{\\pi}{4}\\right]$。若误取到 $\\dfrac{\\pi}{2}$，会因 $\\cos 2\\theta<0$ 出错。\n3. **面积元别丢 $r$**：$\\mathrm{d}x\\,\\mathrm{d}y = r\\,\\mathrm{d}r\\,\\mathrm{d}\\theta$，被积函数 $xy$ 本身也是 $r^2\\cos\\theta\\sin\\theta$，合起来 $r^3$，这是极易漏项的地方。\n4. **凑微分收尾**：$\\cos^2 2\\theta\\,\\sin 2\\theta\\,\\mathrm{d}\\theta$ 直接凑成 $-\\dfrac{1}{2}\\mathrm{d}(\\cos 2\\theta)$，一步到位，注意 $\\cos^3 2\\theta$ 前面的系数 $-\\dfrac{1}{48}$ 与上下限符号。\n5. **区域描述的严谨写法**：$D$ 由双纽线第一象限那一叶与 $x$ 轴围成，\"$r$ 从 $0$ 到 $\\sqrt{\\cos 2\\theta}$\" 是关键——起点是原点而非其他。\n6. **一处易错的代入**：$\\cos^3\\dfrac{\\pi}{2} = 0$（$\\cos\\frac{\\pi}{2}=0$），且 $\\cos^3 0 = 1$，故差值为 $0-1=-1$，再乘 $-\\dfrac{1}{48}$ 得正数。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-双纽线区域二重积分xy极坐标计算得1_48（2021真题）.md"
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-不定积分等式定f(x)再求弧长与旋转曲面面积.md",
+          "date": "2026-09-22",
+          "titleMarkdown": "高数错题-由不定积分等式定 f(x)，再求弧长与旋转曲面面积（2021 真题 · 第19题）",
+          "title": "高数错题-由不定积分等式定 f(x)，再求弧长与旋转曲面面积（2021 真题 · 第19题）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "不定积分等式反求函数、弧长公式、旋转曲面面积公式",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 高数错题-由不定积分等式定 f(x)，再求弧长与旋转曲面面积（2021 真题 · 第19题）\n\n**日期**：2026-09-22\n**来源**：2021 年考研数学真题 · 第 19 题（本题满分 12 分）\n**知识点**：不定积分等式两端求导反求函数、弧长公式、旋转曲面面积公式、根式化简、定积分计算\n**难度**：⭐⭐⭐\n\n---\n\n## 📌 题目\n\n19.（本题满分 12 分）\n\n设函数 $f(x)$ 满足\n\n$$\\int \\frac{f(x)}{\\sqrt{x}}\\,\\mathrm{d}x = \\frac{1}{6}x^2 - x + C,$$\n\n$L$ 为曲线 $y=f(x)\\,(4 \\leqslant x \\leqslant 9)$。$L$ 的弧长为 $s$，$L$ 绕 $x$ 轴旋转一周所形成的曲面面积为 $A$，求 $s$ 和 $A$。\n\n**答案**：$s = \\dfrac{22}{3}$，$\\quad A = \\dfrac{425\\pi}{9}$\n\n---\n\n## 📝 解法\n\n**第一步：对已知不定积分等式两端关于 $x$ 求导，确定 $f(x)$ 的表达式。**\n\n$$\\frac{f(x)}{\\sqrt{x}} = \\frac{\\mathrm{d}}{\\mathrm{d}x}\\left( \\frac{1}{6}x^2 - x + C \\right) = \\frac{1}{3}x - 1$$\n\n由此可得 $f(x)$ 及其导函数 $f'(x)$：\n\n$$f(x) = \\frac{1}{3}x^{\\frac{3}{2}} - x^{\\frac{1}{2}}, \\qquad f'(x) = \\frac{1}{2}x^{\\frac{1}{2}} - \\frac{1}{2}x^{-\\frac{1}{2}} = \\frac{x-1}{2\\sqrt{x}}$$\n\n**第二步：计算弧长元素 $\\mathrm{d}s = \\sqrt{1+[f'(x)]^2}\\,\\mathrm{d}x$ 中的根式部分。**\n\n$$1 + [f'(x)]^2 = 1 + \\frac{(x-1)^2}{4x} = \\frac{4x + x^2 - 2x + 1}{4x} = \\frac{(x+1)^2}{4x}$$\n\n在区间 $[4,9]$ 上，$x+1 > 0$，故有：\n\n$$\\sqrt{1+[f'(x)]^2} = \\frac{x+1}{2\\sqrt{x}} = \\frac{1}{2}x^{\\frac{1}{2}} + \\frac{1}{2}x^{-\\frac{1}{2}}$$\n\n**第三步：利用弧长公式计算 $s$。**\n\n$$s = \\int_4^9 \\left( \\frac{1}{2}x^{\\frac{1}{2}} + \\frac{1}{2}x^{-\\frac{1}{2}} \\right)\\mathrm{d}x = \\left[ \\frac{1}{3}x^{\\frac{3}{2}} + x^{\\frac{1}{2}} \\right]_4^9$$\n\n代入数值并使用竖线表示上下限计算：\n\n$$s = (9 + 3) - \\left( \\frac{8}{3} + 2 \\right) = 12 - \\frac{14}{3} = \\frac{22}{3}$$\n\n**第四步：利用旋转曲面积分公式计算 $A$。注意到在区间 $[4,9]$ 上 $f(x) \\ge 0$：**\n\n$$A = \\int_4^9 2\\pi f(x)\\sqrt{1+[f'(x)]^2}\\,\\mathrm{d}x$$\n\n代入 $f(x)$ 与根式化简结果：\n\n$$A = 2\\pi \\int_4^9 \\left[ x^{\\frac{1}{2}}\\left( \\frac{1}{3}x - 1 \\right) \\cdot \\frac{x+1}{2\\sqrt{x}} \\right]\\mathrm{d}x = \\pi \\int_4^9 \\left( \\frac{1}{3}x^2 - \\frac{2}{3}x - 1 \\right)\\mathrm{d}x$$\n\n**第五步：执行定积分运算。**\n\n$$A = \\pi \\left[ \\frac{1}{9}x^3 - \\frac{1}{3}x^2 - x \\right]_4^9 = \\pi \\left[ (81 - 27 - 9) - \\left( \\frac{64}{9} - \\frac{16}{3} - 4 \\right) \\right]$$\n\n进一步化简数值：\n\n$$A = \\pi \\left[ 45 - \\left( \\frac{64 - 48 - 36}{9} \\right) \\right] = \\pi \\left( 45 + \\frac{20}{9} \\right) = \\frac{425\\pi}{9}$$\n\n综上所述，弧长 $s = \\dfrac{22}{3}$，旋转曲面面积 $A = \\dfrac{425\\pi}{9}$。\n\n---\n\n## 💡 关键点与易错提醒\n\n1. **反求函数**：遇到“已知某个不定积分（或变限积分）等式”，第一步永远是**两端求导**——左端用不定积分与原函数关系 / 变上限积分求导公式，右端直接求导，即可解出 $f(x)$。\n2. **根式化简是弧长题的命门**：$1+[f'(x)]^2$ 必须凑成完全平方，才能开方去掉根号。本题 $1+\\dfrac{(x-1)^2}{4x} = \\dfrac{(x+1)^2}{4x}$，在 $[4,9]$ 上 $x+1>0$，开方**不用加绝对值**。\n3. **旋转曲面面积要判正负**：公式 $A=\\int 2\\pi f(x)\\sqrt{1+[f'(x)]^2}\\,\\mathrm{d}x$ 只在 $f(x)\\ge 0$ 时等于 $\\int 2\\pi |f(x)|\\,\\mathrm{d}s$。本题在 $[4,9]$ 上 $f(x)\\ge 0$（$x=4$ 时 $f=\\frac{8}{3}-2=\\frac{2}{3}>0$），可直接去掉绝对值。\n4. **计算细心**：$A$ 的定积分含分数，代入上下限时注意符号，本题 $\\frac{64-48-36}{9} = -\\frac{20}{9}$，减去负数变加，得 $45+\\frac{20}{9}$。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-不定积分等式定f(x)再求弧长与旋转曲面面积.md"
+        }
+      ]
+    },
     {
       "date": "2026-09-21",
       "count": 3,
