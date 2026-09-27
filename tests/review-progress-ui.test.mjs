@@ -19,6 +19,11 @@ test("全部进度页面使用统一调度输出并提供 Day 1 API 操作", asy
   assert.match(source, /type=\"date\"/);
   assert.match(source, /立即复习/);
   assert.match(source, /meta\.phase !== \"unstarted\" && meta\.phase !== \"mastered\"/);
+  assert.match(source, /\"1\": \"Day 4\"/);
+  assert.match(source, /\"2\": \"Day 7\"/);
+  assert.match(source, /\"3\": \"Day 30\"/);
+  assert.match(source, /\"4\": \"长期巩固\"/);
+  assert.doesNotMatch(source, /Day 2|Day 15/);
 });
 
 test("复习页保留今日、四象限、已掌握并接入全部进度入口", async () => {
@@ -62,7 +67,7 @@ test("复习总览使用客户端派生时间轴、KPI、逾期和四象限筛�
   assert.match(library, /buildQuadrantEntries/);
 });
 
-test("全部进度样式包含桌面六节点和移动端响应式布局", async () => {
+test("全部进度样式包含桌面四节点和移动端响应式布局", async () => {
   const source = await readFile(cssPath, "utf8");
   assert.match(source, /\.progress-timeline \{[^}]*repeat\(6/);
   assert.match(source, /\.progress-timeline \{ grid-template-columns: repeat\(3, 1fr\); \}/);
@@ -77,4 +82,6 @@ test("复习事件 API 支持按日期批量读取并保留单题查询", async 
   assert.match(source, /searchParams\.get\("date"\)/);
   assert.match(source, /eq\(reviewEvents\.occurredDate, occurredDate\)/);
   assert.match(source, /eq\(reviewEvents\.itemId, itemId\)/);
+  assert.match(source, /displayTargetDay/);
+  assert.match(source, /targetDay: row\.targetDay/);
 });

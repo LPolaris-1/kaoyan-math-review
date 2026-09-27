@@ -53,6 +53,8 @@ test("auto-creates both tables, columns and indexes on first access", async () =
   );
   const columns = await db.prepare("PRAGMA table_info(review_progress)").all();
   assert.ok(columns.results.some((row) => row.name === "cycle_started_at"));
+  const version = await db.prepare("PRAGMA user_version").first();
+  assert.equal(version.user_version, 2);
 });
 
 test("inserts a row and maps D1-shaped results back", async () => {
@@ -252,7 +254,7 @@ test("data persists across a fresh connection (reopen)", async () => {
   db.close();
 });
 
-test("upgrades a legacy review_progress table without guessing or losing Day 1", async () => {
+test("refuses to start a non-empty legacy database until schedule migration runs", async () => {
   const legacy = new DatabaseSync(legacyDbPath);
   legacy.exec(`
     CREATE TABLE review_progress (
@@ -279,34 +281,15 @@ test("upgrades a legacy review_progress table without guessing or losing Day 1",
   const savedPath = process.env.REVIEW_DB_PATH;
   process.env.REVIEW_DB_PATH = legacyDbPath;
   try {
-    const { env: legacyEnv } = await loadShim("legacy-upgrade");
-    const db = legacyEnv.DB;
-    const columns = await db.prepare("PRAGMA table_info(review_progress)").all();
-    assert.ok(columns.results.some((row) => row.name === "cycle_started_at"));
-    const rows = await db
-      .prepare(
-        "SELECT mastery_level, exam_frequency, review_stage, next_review_date, mastered, last_reviewed_at, last_result, cycle_started_at FROM review_progress WHERE user_email = ?",
-      )
-      .bind("legacy@local")
-      .all();
-    assert.deepEqual({ ...rows.results[0] }, {
-      mastery_level: 4,
-      exam_frequency: "high",
-      review_stage: 3,
-      next_review_date: "2026-08-21",
-      mastered: 0,
-      last_reviewed_at: "2026-08-20T10:00:00.000Z",
-      last_result: "hard",
-      cycle_started_at: null,
-    });
-    const events = await db
-      .prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'review_events_%' ORDER BY name")
-      .all();
-    assert.deepEqual(events.results.map((row) => row.name), [
-      "review_events_item_time_idx",
-      "review_events_user_date_idx",
-    ]);
-    db.close();
+    const { env: legacyEnv } = await loadShim("legacy-fail-closed");
+    assert.throws(
+      () => legacyEnv.DB,
+      /legacy schedule schema.*contains data.*db:migrate:schedule-v2/s,
+    );
+    const check = new DatabaseSync(legacyDbPath);
+    assert.equal(check.prepare("PRAGMA user_version").get().user_version, 0);
+    assert.equal(check.prepare("SELECT review_stage FROM review_progress WHERE user_email = 'legacy@local'").get().review_stage, 3);
+    check.close();
   } finally {
     process.env.REVIEW_DB_PATH = savedPath;
   }

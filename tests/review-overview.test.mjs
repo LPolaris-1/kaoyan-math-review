@@ -73,7 +73,7 @@ test("date groups expose Ebbinghaus schedule labels and stable item order", () =
   const [group] = groupReviewsByDate(entries, today, 7);
   assert.equal(group.count, 2);
   assert.deepEqual(group.entries.map(({ item }) => item.id), ["a", "z"]);
-  assert.deepEqual(groupByScheduleDay(group.entries).map(({ label, entries: grouped }) => [label, grouped.length]), [["Day 4", 1], ["Day 2", 1]]);
+  assert.deepEqual(groupByScheduleDay(group.entries).map(({ label, entries: grouped }) => [label, grouped.length]), [["Day 7", 1], ["Day 4", 1]]);
 });
 
 test("overdue stays separate and retains original date and current stage", () => {
@@ -85,7 +85,7 @@ test("overdue stays separate and retains original date and current stage", () =>
   assert.equal(overdue.length, 1);
   assert.equal(overdue[0].progress.nextReviewDate, "2026-08-24");
   assert.equal(overdue[0].meta.overdueDays, 3);
-  assert.equal(overdue[0].scheduleDay, "Day 7");
+  assert.equal(overdue[0].scheduleDay, "Day 30");
 });
 
 test("invalid schedule dates are excluded from timeline and overdue views", () => {

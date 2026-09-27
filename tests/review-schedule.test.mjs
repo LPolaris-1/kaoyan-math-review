@@ -5,6 +5,7 @@ import {
   addDays,
   buildDailyQueue,
   buildTodayProgress,
+  displayTargetDay,
   getReviewProgressMeta,
   getTimelineNodes,
   isIntakePending,
@@ -16,57 +17,55 @@ import {
 } from "../lib/review-schedule.mjs";
 
 test("absolute Ebbinghaus days are anchored to one Day 1", () => {
-  assert.deepEqual(EBBINGHAUS_DAYS, [1, 2, 4, 7, 15, 30]);
+  assert.deepEqual(EBBINGHAUS_DAYS, [1, 4, 7, 30]);
   assert.equal(plannedDateForDay("2026-08-20", 1), "2026-08-20");
-  assert.equal(plannedDateForDay("2026-08-20", 2), "2026-08-21");
   assert.equal(plannedDateForDay("2026-08-20", 4), "2026-08-23");
   assert.equal(plannedDateForDay("2026-08-20", 7), "2026-08-26");
-  assert.equal(plannedDateForDay("2026-08-20", 15), "2026-09-03");
   assert.equal(plannedDateForDay("2026-08-20", 30), "2026-09-18");
 });
 
-test("the first correct review establishes Day 1 and targets Day 2", () => {
+test("the first correct review establishes Day 1 and targets absolute Day 4", () => {
   const result = scheduleReview({ masteryLevel: 0, reviewStage: 0 }, "correct", "2026-08-20");
   assert.deepEqual(result, {
     masteryLevel: 1,
     reviewStage: 1,
-    nextReviewDate: "2026-08-21",
+    nextReviewDate: "2026-08-23",
     cycleStartedAt: "2026-08-20",
     lastResult: "correct",
   });
 });
 
-test("scheduled correct reviews advance to absolute Day 4, Day 7 and Day 15", () => {
+test("scheduled correct reviews advance to absolute Day 4, Day 7 and Day 30", () => {
   const day4 = scheduleReview({
     masteryLevel: 1,
     reviewStage: 1,
     cycleStartedAt: "2026-08-20",
-    nextReviewDate: "2026-08-21",
-  }, "correct", "2026-08-21");
+    nextReviewDate: "2026-08-23",
+  }, "correct", "2026-08-23");
   assert.equal(day4.reviewStage, 2);
-  assert.equal(day4.nextReviewDate, "2026-08-23");
+  assert.equal(day4.nextReviewDate, "2026-08-26");
 
-  const day7 = scheduleReview({ ...day4 }, "correct", "2026-08-23");
+  const day7 = scheduleReview({ ...day4 }, "correct", "2026-08-26");
   assert.equal(day7.reviewStage, 3);
-  assert.equal(day7.nextReviewDate, "2026-08-26");
+  assert.equal(day7.nextReviewDate, "2026-09-18");
 
-  const day15 = scheduleReview({ ...day7 }, "correct", "2026-08-26");
-  assert.equal(day15.reviewStage, 4);
-  assert.equal(day15.nextReviewDate, "2026-09-03");
+  const day30 = scheduleReview({ ...day7 }, "correct", "2026-09-18");
+  assert.equal(day30.reviewStage, 4);
+  assert.equal(day30.nextReviewDate, "2026-10-18");
 });
 
 test("Day 30 correct enters maintenance and maintenance repeats every 30 days", () => {
   const maintenance = scheduleReview({
     masteryLevel: 5,
-    reviewStage: 5,
+    reviewStage: 3,
     cycleStartedAt: "2026-08-20",
     nextReviewDate: "2026-09-18",
   }, "correct", "2026-09-18");
-  assert.equal(maintenance.reviewStage, 6);
+  assert.equal(maintenance.reviewStage, 4);
   assert.equal(maintenance.nextReviewDate, "2026-10-18");
 
   const next = scheduleReview({ ...maintenance }, "correct", "2026-10-18");
-  assert.equal(next.reviewStage, 6);
+  assert.equal(next.reviewStage, 4);
   assert.equal(next.nextReviewDate, "2026-11-17");
 });
 
@@ -129,7 +128,7 @@ test("overdue correct keeps absolute node semantics but never schedules in the p
 
 test("progress metadata distinguishes active, reinforcement, maintenance and unstarted states", () => {
   const active = getReviewProgressMeta({
-    reviewStage: 2,
+    reviewStage: 1,
     cycleStartedAt: "2026-08-20",
     nextReviewDate: "2026-08-23",
   }, "2026-08-22");
@@ -139,7 +138,7 @@ test("progress metadata distinguishes active, reinforcement, maintenance and uns
   assert.equal(active.daysUntilReview, 1);
 
   const reinforcement = getReviewProgressMeta({
-    reviewStage: 2,
+    reviewStage: 1,
     cycleStartedAt: "2026-08-20",
     nextReviewDate: "2026-08-25",
   }, "2026-08-24");
@@ -147,7 +146,7 @@ test("progress metadata distinguishes active, reinforcement, maintenance and uns
   assert.equal(reinforcement.statusLabel, "Day 4 · 补强中");
 
   const maintenance = getReviewProgressMeta({
-    reviewStage: 6,
+    reviewStage: 4,
     cycleStartedAt: "2026-08-20",
     nextReviewDate: "2026-10-18",
   }, "2026-09-20");
@@ -161,26 +160,24 @@ test("progress metadata distinguishes active, reinforcement, maintenance and uns
 
 test("timeline nodes expose completed, current, future and missed nodes", () => {
   const nodes = getTimelineNodes({
-    reviewStage: 2,
+    reviewStage: 1,
     cycleStartedAt: "2026-08-20",
     nextReviewDate: "2026-08-25",
   }, "2026-08-24");
   assert.deepEqual(nodes.map(({ day, plannedDate, status }) => ({ day, plannedDate, status })), [
     { day: 1, plannedDate: "2026-08-20", status: "completed" },
-    { day: 2, plannedDate: "2026-08-21", status: "completed" },
     { day: 4, plannedDate: "2026-08-23", status: "missed" },
     { day: 7, plannedDate: "2026-08-26", status: "future" },
-    { day: 15, plannedDate: "2026-09-03", status: "future" },
     { day: 30, plannedDate: "2026-09-18", status: "future" },
   ]);
 
-  assert.deepEqual(getTimelineNodes({ reviewStage: 6, cycleStartedAt: "2026-08-20" }, "2026-09-20")
-    .map(({ status }) => status), ["completed", "completed", "completed", "completed", "completed", "completed"]);
+  assert.deepEqual(getTimelineNodes({ reviewStage: 4, cycleStartedAt: "2026-08-20" }, "2026-09-20")
+    .map(({ status }) => status), ["completed", "completed", "completed", "completed"]);
 });
 
 test("normalizeProgress clamps stage through maintenance and preserves legacy cycle aliases", () => {
   const normalized = normalizeProgress({ reviewStage: 99, cycle_started_at: "2026-08-20" }, "item");
-  assert.equal(normalized.reviewStage, 6);
+  assert.equal(normalized.reviewStage, 4);
   assert.equal(normalized.cycleStartedAt, "2026-08-20");
 });
 
@@ -484,5 +481,12 @@ test("quadrants use explicit mastery and high/low frequency only", () => {
 test("date arithmetic remains calendar based", () => {
   assert.equal(addDays("2026-08-31", 1), "2026-09-01");
   assert.equal(stageTargetDay(0), null);
-  assert.equal(stageTargetDay(6), 30);
+  assert.equal(stageTargetDay(4), 30);
+});
+
+test("historical target days map only for display", () => {
+  assert.equal(displayTargetDay(2), 4);
+  assert.equal(displayTargetDay(15), 30);
+  assert.equal(displayTargetDay(1), 1);
+  assert.equal(displayTargetDay(null), null);
 });

@@ -6,7 +6,7 @@ const baseProgress = {
   itemId: "item-1",
   masteryLevel: 2,
   examFrequency: "high",
-  reviewStage: 2,
+  reviewStage: 1,
   nextReviewDate: "2026-08-23",
   cycleStartedAt: "2026-08-20",
   mastered: 0,
@@ -23,7 +23,7 @@ test("review action uses scheduleReview and records the before/after cycle state
     today: "2026-08-23",
     now: "2026-08-23T01:00:00.000Z",
   });
-  assert.equal(changes.reviewStage, 3);
+  assert.equal(changes.reviewStage, 2);
   assert.equal(changes.nextReviewDate, "2026-08-26");
   assert.equal(changes.cycleStartedAt, "2026-08-20");
   assert.deepEqual(event, {
@@ -34,10 +34,32 @@ test("review action uses scheduleReview and records the before/after cycle state
     cycleStartedAt: "2026-08-20",
     targetDay: 4,
     scheduledDate: "2026-08-23",
-    reviewStageBefore: 2,
-    reviewStageAfter: 3,
+    reviewStageBefore: 1,
+    reviewStageAfter: 2,
     createdAt: "2026-08-23T01:00:00.000Z",
   });
+});
+
+test("first correct event records Day 1 while progress schedules absolute Day 4", () => {
+  const { changes, event } = buildReviewAction({
+    base: {
+      itemId: "new-item",
+      masteryLevel: 0,
+      reviewStage: 0,
+      nextReviewDate: "2026-08-20",
+      cycleStartedAt: null,
+    },
+    action: "review",
+    result: "correct",
+    today: "2026-08-20",
+    now: "2026-08-20T01:00:00.000Z",
+  });
+  assert.equal(changes.nextReviewDate, "2026-08-23");
+  assert.equal(event.cycleStartedAt, "2026-08-20");
+  assert.equal(event.targetDay, 1);
+  assert.equal(event.scheduledDate, "2026-08-20");
+  assert.equal(event.reviewStageBefore, 0);
+  assert.equal(event.reviewStageAfter, 1);
 });
 
 test("wrong clears the active cycle, while the event retains the old anchor", () => {
@@ -74,7 +96,7 @@ test("hard preserves Day 1 and stage while creating a reinforcement event", () =
     now: "2026-08-24T01:00:00.000Z",
   });
   assert.equal(changes.cycleStartedAt, "2026-08-20");
-  assert.equal(changes.reviewStage, 2);
+  assert.equal(changes.reviewStage, 1);
   assert.equal(changes.nextReviewDate, "2026-08-25");
   assert.equal(event.targetDay, 4);
   assert.equal(event.scheduledDate, "2026-08-23");
@@ -89,7 +111,7 @@ test("setCycleStart accepts a historical Day 1 and recalculates the current targ
     now: "2026-08-24T02:00:00.000Z",
   });
   assert.equal(changes.cycleStartedAt, "2026-08-10");
-  assert.equal(changes.reviewStage, 2);
+  assert.equal(changes.reviewStage, 1);
   assert.equal(changes.nextReviewDate, "2026-08-13");
   assert.equal(event.eventType, "set_cycle_start");
   assert.equal(event.cycleStartedAt, "2026-08-10");

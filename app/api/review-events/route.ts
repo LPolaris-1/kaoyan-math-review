@@ -2,6 +2,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { getChatGPTUser } from "../../chatgpt-auth";
 import { getDb } from "../../../db";
 import { reviewEvents } from "../../../db/schema";
+import { displayTargetDay } from "../../../lib/review-schedule.mjs";
 
 export async function GET(request: Request) {
   const user = await getChatGPTUser();
@@ -55,6 +56,7 @@ function toClientEvent(row: typeof reviewEvents.$inferSelect) {
     occurredDate: row.occurredDate,
     cycleStartedAt: row.cycleStartedAt,
     targetDay: row.targetDay,
+    displayTargetDay: displayTargetDay(row.targetDay),
     scheduledDate: row.scheduledDate,
     reviewStageBefore: row.reviewStageBefore,
     reviewStageAfter: row.reviewStageAfter,

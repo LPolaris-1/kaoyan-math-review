@@ -24,6 +24,7 @@
     "data:verify": "node scripts/verify-data.mjs",
     "data:audit-math": "node scripts/audit-math.mjs",
     "data:check": "node scripts/check-data.mjs",
+    "db:migrate:schedule-v2": "node scripts/migrate-schedule-v2.mjs",
     "source:check": "node scripts/source-boundary.mjs"
   },
   "dependencies": {

@@ -35,12 +35,10 @@ type TimelineNode = ReturnType<typeof getTimelineNodes>[number];
 const frequencyLabels = { high: "高频", medium: "中频", low: "低频", unknown: "考频待定" };
 const stageLabels: Record<string, string> = {
   "0": "未开始",
-  "1": "Day 2",
-  "2": "Day 4",
-  "3": "Day 7",
-  "4": "Day 15",
-  "5": "Day 30",
-  "6": "长期巩固",
+  "1": "Day 4",
+  "2": "Day 7",
+  "3": "Day 30",
+  "4": "长期巩固",
 };
 
 type FilterState = {

@@ -137,6 +137,7 @@ function openDatabase(): D1Database {
   sqlite.exec("PRAGMA foreign_keys = ON;");
   sqlite.exec(SCHEMA_SQL);
   ensureReviewProgressColumn(sqlite);
+  ensureScheduleSchemaVersion(sqlite);
   return new D1Database(sqlite);
 }
 
@@ -147,6 +148,33 @@ function ensureReviewProgressColumn(sqlite: DatabaseSync) {
   if (!columns.some((column) => column.name === "cycle_started_at")) {
     sqlite.exec("ALTER TABLE review_progress ADD COLUMN cycle_started_at text");
   }
+}
+
+function ensureScheduleSchemaVersion(sqlite: DatabaseSync) {
+  const versionRow = sqlite.prepare("PRAGMA user_version").get() as {
+    user_version?: number;
+  };
+  const version = Number(versionRow?.user_version ?? 0);
+  if (version === 2) return;
+  if (version !== 0) {
+    throw new Error(
+      `[selfhost] Unsupported review schema user_version=${version}. Expected 2.`,
+    );
+  }
+
+  const countRow = sqlite
+    .prepare("SELECT COUNT(*) AS count FROM review_progress")
+    .get() as { count?: number | bigint };
+  const count = Number(countRow?.count ?? 0);
+  if (count > 0) {
+    throw new Error(
+      "[selfhost] review_progress uses legacy schedule schema (user_version=0) and contains data. Run npm run db:migrate:schedule-v2 -- --dry-run, then --apply before starting.",
+    );
+  }
+
+  // A newly-created or genuinely empty progress table needs no data rewrite;
+  // mark it at the current schedule version so future starts are explicit.
+  sqlite.exec("PRAGMA user_version = 2");
 }
 
 let database: D1Database | null = null;

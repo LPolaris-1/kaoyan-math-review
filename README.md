@@ -5,7 +5,7 @@
 ## 功能
 
 - **历史错题浏览**：按日期浏览生成的历史记录，按学科筛选、关键词搜索，并展开题目、方法和复盘内容。
-- **艾宾浩斯复习**：每道题按 Day 1、Day 2、Day 4、Day 7、Day 15、Day 30 六个节点安排；首次答对从 Day 1 开始，做错会重启记忆链，模糊会安排下一次复习。
+- **艾宾浩斯复习**：每道题按 Day 1、Day 4、Day 7、Day 30 四个节点安排；首次答对从 Day 1 开始，做错会重启记忆链，模糊会安排下一次复习。
 - **今日复习**：只展示今天到期的题目，按考频、掌握度和复习节点排序；提交“做对 / 有点模糊 / 做错了”后才记录复习事件。
 - **全部进度**：查看每道题的当前阶段、掌握度、最近结果、下一次复习日期和完整时间轴；支持按状态、掌握度、关键词筛选和按下一次复习/最近复习/掌握度排序。
 - **复习总览**：提供 KPI、未来 7/30/60 天全局时间轴、逾期题列表和四象限（核心盲区、提分潜力、巩固区、安全区）筛选。
@@ -48,8 +48,19 @@ REVIEW_DB_PATH=D:/path/to/review.db npm run start:selfhost
 ```
 
 - 环境变量：`REVIEW_DB_PATH` 必填（SQLite 文件路径，父目录自动创建，不会删除或清空已有库）；`HOST` 默认 `127.0.0.1`、`PORT` 默认 `3100` 可覆盖；`MATH_VAULT_DIR` 默认 `C:/Users/HUAWEI/Vault/猥琐凡人的仓库`，供 `data:build`/`data:verify` 读取原档案。
-- 首次启动幂等创建 `review_progress` 表与 `review_progress_due_idx` 索引，不做破坏性迁移，重复启动不丢数据。
+- 首次启动幂等创建 `review_progress` 表与 `review_progress_due_idx` 索引；空的进度表自动标记 `PRAGMA user_version=2`。已有 `user_version=0` 且包含进度数据时会 fail closed，必须先完成一次性四阶段迁移；重复启动不丢数据。
 - 原档案（Vault 错题原题）保持只读，自建模式不写 Vault。
+
+### 四阶段调度迁移
+
+旧版六节点数据库只接受显式、可审计的迁移命令。迁移脚本不会修改 `review_events`，也不会创建业务表；默认无参数会失败。
+
+```bash
+REVIEW_DB_PATH=D:/path/to/review.db npm run db:migrate:schedule-v2 -- --dry-run
+REVIEW_DB_PATH=D:/path/to/review.db npm run db:migrate:schedule-v2 -- --apply
+```
+
+先运行 `--dry-run` 查看行数、阶段映射和日期变更，再运行 `--apply`。成功后数据库标记为 `user_version=2`；再次运行会报告 no-op。异常行会使整个 apply 回滚，不做部分更新。
 
 ### 网页登录（可选，替代 Basic Auth）
 

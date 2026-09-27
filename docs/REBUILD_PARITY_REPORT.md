@@ -4,9 +4,9 @@
 
 | 生产能力 | canonical 源码 | 测试/证据 | 状态 |
 |---|---|---|---|
-| Day 1/2/4/7/15/30 绝对节点 | `lib/review-schedule.mjs` | `tests/review-schedule.test.mjs` | 已确认一致 |
+| Day 1/4/7/30 四节点绝对调度 | `lib/review-schedule.mjs` | `tests/review-schedule.test.mjs` | 已确认一致 |
 | correct/hard/wrong/master 状态机 | `lib/review-progress-state.mjs`、`app/api/review-progress/route.ts` | `tests/review-progress-state.test.mjs`、SQLite tests | 已确认一致 |
-| `cycle_started_at` 与 `review_events` | `db/schema.ts`、`drizzle/0001_black_deadpool.sql`、`app/api/review-events/route.ts` | `tests/selfhost-sqlite.test.mjs` | 已确认一致 |
+| `cycle_started_at`、`review_events` 与历史展示映射 | `db/schema.ts`、`app/api/review-events/route.ts` | `tests/selfhost-sqlite.test.mjs`、事件 API 测试 | 已确认一致；历史 raw `targetDay` 不改 |
 | 今日复习 | `app/review/page.tsx` | `tests/review-progress-ui.test.mjs`、线上 3C | 已确认一致 |
 | 全部进度、六项统计 | `app/components/review/progress-overview.tsx` | UI tests、线上 3C | 已确认一致 |
 | 单题时间轴与 Day 1 编辑 | `app/components/review/progress-overview.tsx`、`lib/review-schedule.mjs` | UI/schedule tests、线上 3C | 已确认一致 |
@@ -19,7 +19,7 @@
 
 - 未复制生产 `review.db`、WAL/SHM、`.env`、`auth.env`、日志或密钥。
 - 未修改生产服务器、Caddy、PM2 或数据库。
-- 未实施阶段 4A/4B。
+- 未实施生产部署；四阶段调度迁移仅提供本地显式 `--dry-run/--apply` 脚本。
 - 旧 `coding/错题复盘站` 只作为已验收阶段 1–3 的源码参考，未把它宣布为生产仓库，也未整目录覆盖 canonical repo。
 
 ## Remaining uncertainty
