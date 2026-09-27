@@ -13,6 +13,7 @@ const DETECTORS = [
 
 const FENCED_CODE = /(?:^|\n)[ \t]{0,3}(`{3,}|~{3,})[^\r\n]*\r?\n[\s\S]*?[ \t]{0,3}\1[ \t]*(?=\r?\n|$)/g;
 const INLINE_CODE = /`[^`\r\n]*`/g;
+const WIKILINK = /\[\[[^\r\n]*?\]\]/g;
 
 // Obsidian-style [[...]] is a wikilink, but a bracketed numeric row such as
 // [[1,0],[0,0]] is a pseudo-matrix that Markdown/KaTeX cannot render as math.
@@ -32,6 +33,15 @@ function maskCode(value) {
 function maskMath(value) {
   const normalized = normalizeMathDelimiters(maskCode(String(value)));
   return normalized.replace(MATH_BLOCK, (segment) => segment.replace(/[^\r\n]/g, " "));
+}
+
+/**
+ * Wikilink targets are filenames/labels, not prose math. Mask them only for
+ * plain-math detectors and preserve newlines so reported source lines remain
+ * stable. Pseudo-matrix detection deliberately receives the original source.
+ */
+function maskWikilinks(value) {
+  return value.replace(WIKILINK, (segment) => segment.replace(/[^\r\n]/g, " "));
 }
 
 export function findPseudoMatrices(body, filePath = "") {
@@ -83,7 +93,7 @@ export function findSlashMath(body, filePath = "") {
 }
 
 export function findPlainMath(body, filePath = "") {
-  const masked = maskMath(body);
+  const masked = maskWikilinks(maskMath(body));
   const issues = [];
 
   masked.split(/\r?\n/).forEach((line, index) => {

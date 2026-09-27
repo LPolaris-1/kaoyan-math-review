@@ -9,6 +9,7 @@ import {
   auditExitCode,
   formatAuditReport,
 } from "../scripts/audit-math.mjs";
+import { findPlainMath } from "../scripts/shared/math-gate.mjs";
 
 test("parseAuditArgs: defaults to report-only", () => {
   assert.deepStrictEqual(parseAuditArgs([]), { strict: false, json: false });
@@ -41,4 +42,17 @@ test("formatAuditReport: includes totals, file, line and snippet", () => {
   assert.match(report, /scanned 1 file\(s\), found 1 issue\(s\)/);
   assert.match(report, /a\.md:1/);
   assert.match(report, /lim\[n→∞\]/u);
+});
+
+test("ordinary wikilinks are ignored by plain-math detectors without shifting lines", () => {
+  const issues = findPlainMath("[[target-x^3|1_48]]\nA = y^2", "links.md");
+  assert.equal(issues.length, 1);
+  assert.equal(issues[0].lineNumber, 2);
+  assert.match(issues[0].snippet, /A = y\^2/);
+});
+
+test("pseudo-matrices remain blocked after wikilink masking", () => {
+  const issues = findPlainMath("[[1,0],[0,1]]", "matrix.md");
+  assert.equal(issues.length, 1);
+  assert.deepEqual(issues[0].signals, ["伪矩阵 [[...]]"]);
 });
