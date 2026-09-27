@@ -54,15 +54,26 @@ function addDays(date, days) {
   return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
 }
 
+function reviewedDateFromTimestamp(value) {
+  if (typeof value !== "string" || !value.includes("T")) return null;
+  const datePart = value.slice(0, 10);
+  if (!isValidDate(datePart) || Number.isNaN(Date.parse(value))) return null;
+  return datePart;
+}
+
 function planMigration(db) {
   const columns = tableColumns(db, "review_progress");
   if (!columns.has("user_email") || !columns.has("item_id") || !columns.has("review_stage") || !columns.has("next_review_date")) {
     throw new Error("review_progress is missing required legacy columns.");
   }
   const hasCycleStartedAt = columns.has("cycle_started_at");
+  const hasLastResult = columns.has("last_result");
+  const hasLastReviewedAt = columns.has("last_reviewed_at");
   const rows = db.prepare(`
     SELECT user_email, item_id, review_stage, next_review_date,
-           ${hasCycleStartedAt ? "cycle_started_at" : "NULL AS cycle_started_at"}
+           ${hasCycleStartedAt ? "cycle_started_at" : "NULL AS cycle_started_at"},
+           ${hasLastResult ? "last_result" : "NULL AS last_result"},
+           ${hasLastReviewedAt ? "last_reviewed_at" : "NULL AS last_reviewed_at"}
       FROM review_progress
      ORDER BY user_email, item_id
   `).all();
@@ -73,6 +84,7 @@ function planMigration(db) {
 
   const changes = [];
   const stageCounts = {};
+  const plannedRows = [];
   for (const row of rows) {
     const legacyStage = row.review_stage;
     if (!Number.isInteger(legacyStage) || !STAGE_MAP.has(legacyStage)) {
@@ -80,7 +92,7 @@ function planMigration(db) {
     }
     const cycleStartedAt = row.cycle_started_at;
     const emptyCycle = cycleStartedAt === null || cycleStartedAt === undefined || cycleStartedAt === "";
-    if (emptyCycle && legacyStage !== 0) {
+    if (emptyCycle && legacyStage !== 0 && legacyStage !== 1) {
       throw new Error(`Legacy stage ${legacyStage} has no cycle_started_at for ${row.user_email}/${row.item_id}.`);
     }
     if (!emptyCycle && !isValidDate(cycleStartedAt)) {
@@ -91,50 +103,77 @@ function planMigration(db) {
     }
 
     const reviewStage = STAGE_MAP.get(legacyStage);
+    let migratedCycleStartedAt = emptyCycle ? null : cycleStartedAt;
+    if (emptyCycle && legacyStage === 1) {
+      const reviewedDate = reviewedDateFromTimestamp(row.last_reviewed_at);
+      const canRecover =
+        row.last_result === "correct" &&
+        reviewedDate !== null &&
+        row.next_review_date === addDays(reviewedDate, 1);
+      if (!canRecover) {
+        throw new Error(`Legacy stage 1 has insufficient first-correct evidence for ${row.user_email}/${row.item_id}.`);
+      }
+      migratedCycleStartedAt = addDays(row.next_review_date, -1);
+    }
     let nextReviewDate = row.next_review_date;
     const legacyDay = LEGACY_STAGE_DAYS.get(legacyStage);
-    if (legacyDay !== undefined && !emptyCycle) {
-      const oldStandardDate = addDays(cycleStartedAt, legacyDay - 1);
+    if (legacyDay !== undefined && migratedCycleStartedAt) {
+      const oldStandardDate = addDays(migratedCycleStartedAt, legacyDay - 1);
       if (nextReviewDate === oldStandardDate) {
         const newTargetDay = reviewStage === 1 ? 4 : reviewStage === 2 ? 7 : 30;
-        nextReviewDate = addDays(cycleStartedAt, newTargetDay - 1);
+        nextReviewDate = addDays(migratedCycleStartedAt, newTargetDay - 1);
       }
     }
 
     stageCounts[reviewStage] = (stageCounts[reviewStage] ?? 0) + 1;
-    if (reviewStage !== legacyStage || nextReviewDate !== row.next_review_date) {
+    const changed =
+      reviewStage !== legacyStage ||
+      nextReviewDate !== row.next_review_date ||
+      migratedCycleStartedAt !== (emptyCycle ? null : cycleStartedAt);
+    if (changed) {
       changes.push({
         userEmail: row.user_email,
         itemId: row.item_id,
         reviewStage,
         nextReviewDate,
+        cycleStartedAt: migratedCycleStartedAt,
       });
     }
+
+    plannedRows.push({
+      userEmail: row.user_email,
+      itemId: row.item_id,
+      reviewStage,
+      nextReviewDate,
+      cycleStartedAt: migratedCycleStartedAt,
+    });
   }
 
   return {
     rows: rows.length,
     changes,
     stageCounts,
-    plannedRows: rows.map((row) => ({
-      userEmail: row.user_email,
-      itemId: row.item_id,
-      reviewStage: STAGE_MAP.get(row.review_stage),
-      nextReviewDate: changes.find((change) => change.userEmail === row.user_email && change.itemId === row.item_id)?.nextReviewDate ?? row.next_review_date,
-    })),
+    hasCycleStartedAt,
+    plannedRows,
   };
 }
 
 function applyMigration(db, plan) {
-  const update = db.prepare(`
-    UPDATE review_progress
-       SET review_stage = ?, next_review_date = ?
-     WHERE user_email = ? AND item_id = ?
-  `);
+  if (!plan.hasCycleStartedAt && plan.changes.length > 0) {
+    throw new Error("review_progress is missing cycle_started_at; refusing to write recovered anchors.");
+  }
+  const update = plan.changes.length > 0
+    ? db.prepare(`
+        UPDATE review_progress
+           SET review_stage = ?, next_review_date = ?, cycle_started_at = ?
+         WHERE user_email = ? AND item_id = ?
+      `)
+    : null;
   for (const change of plan.changes) {
     const result = update.run(
       change.reviewStage,
       change.nextReviewDate,
+      change.cycleStartedAt,
       change.userEmail,
       change.itemId,
     );
@@ -145,11 +184,16 @@ function applyMigration(db, plan) {
 
   for (const expected of plan.plannedRows) {
     const actual = db.prepare(`
-      SELECT review_stage, next_review_date
+      SELECT review_stage, next_review_date, cycle_started_at
         FROM review_progress
        WHERE user_email = ? AND item_id = ?
     `).get(expected.userEmail, expected.itemId);
-    if (!actual || actual.review_stage !== expected.reviewStage || actual.next_review_date !== expected.nextReviewDate) {
+    if (
+      !actual ||
+      actual.review_stage !== expected.reviewStage ||
+      actual.next_review_date !== expected.nextReviewDate ||
+      actual.cycle_started_at !== expected.cycleStartedAt
+    ) {
       throw new Error(`Post-update verification failed for ${expected.userEmail}/${expected.itemId}.`);
     }
   }

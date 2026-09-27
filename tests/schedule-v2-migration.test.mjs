@@ -48,10 +48,21 @@ function createLegacyDb(rows, { event = false } = {}) {
   `);
   const insert = db.prepare(`
     INSERT INTO review_progress
-      (user_email, item_id, review_stage, next_review_date, cycle_started_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, '2026-09-27T00:00:00.000Z')
+      (user_email, item_id, review_stage, next_review_date, cycle_started_at,
+       last_result, last_reviewed_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, '2026-09-27T00:00:00.000Z')
   `);
-  for (const row of rows) insert.run("test@local", row.id, row.stage, row.next, row.cycle);
+  for (const row of rows) {
+    insert.run(
+      "test@local",
+      row.id,
+      row.stage,
+      row.next,
+      row.cycle,
+      row.lastResult ?? null,
+      row.lastReviewedAt ?? null,
+    );
+  }
   if (event) {
     db.prepare(`
       INSERT INTO review_events
@@ -96,6 +107,16 @@ function readProgress(dbPath) {
   return { rows, version, events };
 }
 
+function readCycleRows(dbPath) {
+  const db = new DatabaseSync(dbPath);
+  const rows = db
+    .prepare("SELECT item_id, cycle_started_at, review_stage, next_review_date FROM review_progress ORDER BY item_id")
+    .all()
+    .map((row) => ({ ...row }));
+  db.close();
+  return rows;
+}
+
 const standardRows = [
   { id: "stage0", stage: 0, cycle: null, next: "2026-08-20" },
   { id: "stage1", stage: 1, cycle: "2026-08-20", next: "2026-08-21" },
@@ -106,6 +127,20 @@ const standardRows = [
   { id: "stage6", stage: 6, cycle: "2026-08-20", next: "2026-10-01" },
   { id: "hard", stage: 1, cycle: "2026-08-20", next: "2026-08-25" },
 ];
+
+const recoveryRows = Array.from({ length: 9 }, (_, index) => {
+  const day = String(index + 1).padStart(2, "0");
+  const reviewedDate = `2026-01-${day}`;
+  const nextDay = String(index + 2).padStart(2, "0");
+  return {
+    id: `recover-${index + 1}`,
+    stage: 1,
+    cycle: null,
+    next: `2026-01-${nextDay}`,
+    lastResult: "correct",
+    lastReviewedAt: `${reviewedDate}T12:00:00.000Z`,
+  };
+});
 
 test("migration requires an explicit mode", () => {
   assert.throws(() => parseMode([]), /Usage:.*--dry-run\|--apply/);
@@ -123,6 +158,76 @@ test("dry-run reports the full mapping without writing rows or version", () => {
     assert.deepEqual(after, before);
   } finally {
     fs.rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test("dry-run recovers nine deterministic first-correct anchors", () => {
+  const fixture = createLegacyDb(recoveryRows, { event: true });
+  try {
+    const before = readProgress(fixture.dbPath);
+    const result = runMigration(fixture.dbPath, "--dry-run");
+    assert.equal(result.status, "dry-run");
+    assert.equal(result.plan.changes.length, 9);
+    assert.deepEqual(
+      result.plan.changes.map(({ itemId, cycleStartedAt, nextReviewDate }) => ({ itemId, cycleStartedAt, nextReviewDate })),
+      recoveryRows.map((row) => ({
+        itemId: row.id,
+        cycleStartedAt: row.lastReviewedAt.slice(0, 10),
+        nextReviewDate: `2026-01-${String(Number(row.lastReviewedAt.slice(8, 10)) + 3).padStart(2, "0")}`,
+      })),
+    );
+    assert.deepEqual(readProgress(fixture.dbPath), before);
+    assert.equal(readCycleRows(fixture.dbPath).every((row) => row.cycle_started_at === null), true);
+  } finally {
+    fs.rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test("apply writes recovered anchors atomically and leaves review events unchanged", () => {
+  const fixture = createLegacyDb(recoveryRows, { event: true });
+  try {
+    const result = runMigration(fixture.dbPath, "--apply");
+    assert.equal(result.status, "applied");
+    const state = readProgress(fixture.dbPath);
+    assert.equal(state.version, 2);
+    assert.equal(state.events, 1);
+    assert.deepEqual(
+      readCycleRows(fixture.dbPath).map(({ item_id, cycle_started_at, review_stage, next_review_date }) => ({ item_id, cycle_started_at, review_stage, next_review_date })),
+      recoveryRows.map((row) => ({
+        item_id: row.id,
+        cycle_started_at: row.lastReviewedAt.slice(0, 10),
+        review_stage: 1,
+        next_review_date: `2026-01-${String(Number(row.lastReviewedAt.slice(8, 10)) + 3).padStart(2, "0")}`,
+      })),
+    );
+    assert.equal(runMigration(fixture.dbPath, "--apply").status, "no-op");
+    assert.equal(readProgress(fixture.dbPath).events, 1);
+  } finally {
+    fs.rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test("ambiguous missing-anchor records remain fail closed", () => {
+  const ambiguousRows = [
+    { id: "hard", stage: 1, cycle: null, next: "2026-01-02", lastResult: "hard", lastReviewedAt: "2026-01-01T12:00:00.000Z" },
+    { id: "wrong", stage: 1, cycle: null, next: "2026-01-02", lastResult: "wrong", lastReviewedAt: "2026-01-01T12:00:00.000Z" },
+    { id: "missing-time", stage: 1, cycle: null, next: "2026-01-02", lastResult: "correct", lastReviewedAt: null },
+    { id: "invalid-time", stage: 1, cycle: null, next: "2026-01-02", lastResult: "correct", lastReviewedAt: "not-a-date" },
+    { id: "wrong-next-day", stage: 1, cycle: null, next: "2026-01-03", lastResult: "correct", lastReviewedAt: "2026-01-01T12:00:00.000Z" },
+    { id: "other-stage", stage: 2, cycle: null, next: "2026-01-03", lastResult: "correct", lastReviewedAt: "2026-01-02T12:00:00.000Z" },
+  ];
+  for (const row of ambiguousRows) {
+    const fixture = createLegacyDb([row]);
+    try {
+      assert.throws(
+        () => runMigration(fixture.dbPath, "--apply"),
+        /insufficient first-correct evidence|no cycle_started_at/,
+      );
+      assert.equal(readProgress(fixture.dbPath).version, 0);
+      assert.equal(readCycleRows(fixture.dbPath)[0].cycle_started_at, null);
+    } finally {
+      fs.rmSync(fixture.dir, { recursive: true, force: true });
+    }
   }
 });
 
