@@ -1,5 +1,6 @@
 // Comprehensive tests for data:build and data:verify pipeline.
-// Uses temporary directories — never touches real history.json or real source files.
+// Uses temporary directories and reads the generated public/data/history.json
+// read-only for artifact contract checks — never modifies real history.json or source files.
 
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -10,7 +11,7 @@ import matter from "gray-matter";
 import {
   parseMarkdownFile, extractDate, clean, cleanTitle, titleFields, matchDate, localDate,
   parseList, groupByDate, classifyAdmission, summarizeAdmissions, sourceNeedsRefresh,
-  hasQuestionEvidence, hasProcessEvidence, inspectSourceBoundary
+  hasQuestionEvidence, hasProcessEvidence, inspectSourceBoundary, classifyPastExam
 } from "../scripts/shared/data-lib.mjs";
 import { normalizeMathDelimiters, collectMathSegments } from "../app/math-content.mjs";
 import { findPlainMath, findPseudoMatrices } from "../scripts/shared/math-gate.mjs";
@@ -677,6 +678,81 @@ test("strayDollar regex: escaped \$ is NOT detected as stray", () => {
   // but a bare $ without backslash SHOULD match
   assert.strictEqual(strayDollarPattern.test("price $x unfinished"), true);
 });
+// ========== past exam (真题) classification ==========
+
+test("classifyPastExam: frontmatter source 真题 is a past exam", () => {
+  assert.strictEqual(
+    classifyPastExam({ fields: { source: "2019 数二真题 第14题" }, body: "# 标题", relativePath: "线代/a.md" }),
+    true,
+  );
+});
+
+test("classifyPastExam: frontmatter 真题改编 is excluded", () => {
+  assert.strictEqual(
+    classifyPastExam({ fields: { source: "2020 真题改编" }, body: "# 标题", relativePath: "线代/a.md" }),
+    false,
+  );
+});
+
+test("classifyPastExam: leading 来源 field is read when frontmatter is absent", () => {
+  const bold = "# 标题\n\n**日期**：2026-09-21\n**来源**：2021 年数二真题\n**难度**：⭐⭐⭐\n\n---\n\n## 题目\n求极限。";
+  assert.strictEqual(classifyPastExam({ fields: {}, body: bold, relativePath: "高数/x.md" }), true);
+  const plain = "# 标题\n\n来源：2018 考研数学一/二/三真题\n\n## 题目\n求极限。";
+  assert.strictEqual(classifyPastExam({ fields: {}, body: plain, relativePath: "高数/y.md" }), true);
+});
+
+test("classifyPastExam: a present source field wins over a 真题 title (no fall-through)", () => {
+  const body = "# 高数错题-某题（2021真题）\n\n**来源**：刷题\n\n## 题目\n求极限。";
+  assert.strictEqual(
+    classifyPastExam({ fields: {}, body, title: "高数错题-某题（2021真题）", relativePath: "高数/z.md" }),
+    false,
+  );
+  assert.strictEqual(
+    classifyPastExam({ fields: { source: "刷题" }, body: "# （2021真题）", title: "（2021真题）", relativePath: "高数/z.md" }),
+    false,
+  );
+});
+
+test("classifyPastExam: legacy 真题 marker in title or path is used only when both source fields are missing", () => {
+  assert.strictEqual(
+    classifyPastExam({ fields: {}, body: "# 普通标题\n\n## 题目\n1+1=?", title: "某题（2019数二真题第23题）", relativePath: "线代/x.md" }),
+    true,
+  );
+  assert.strictEqual(
+    classifyPastExam({ fields: {}, body: "# 普通标题\n", title: "普通标题", relativePath: "线代/2023数一真题-正交性秒算向量坐标.md" }),
+    true,
+  );
+});
+
+test("classifyPastExam: ordinary drill question is false", () => {
+  const body = "# 标题\n\n**来源**：刷题（例3 训练思维）\n\n## 题目\n求极限。";
+  assert.strictEqual(classifyPastExam({ fields: {}, body, title: "标题", relativePath: "高数/n.md" }), false);
+});
+
+test("classifyPastExam: incidental 真题 inside the solution body is not collected", () => {
+  const body = "# 标题\n\n## 题目\n求极限。\n\n## 解析\n这道题是某年真题的变体，但本题考查等价无穷小。";
+  assert.strictEqual(classifyPastExam({ fields: {}, body, title: "标题", relativePath: "高数/m.md" }), false);
+  const bodyWithSource = "# 标题\n\n**来源**：刷题\n\n## 题目\n求极限。\n\n## 解析\n本题源自真题。";
+  assert.strictEqual(classifyPastExam({ fields: {}, body: bodyWithSource, title: "标题", relativePath: "高数/m2.md" }), false);
+});
+
+test("classifyPastExam: 真题改编 in the body 来源 field is excluded", () => {
+  const body = "# 标题\n\n**来源**：考研真题改编（呼应“左乘看列”思路）\n\n## 题目\n求秩。";
+  assert.strictEqual(classifyPastExam({ fields: {}, body, title: "标题", relativePath: "线代/k.md" }), false);
+});
+
+// ========== generated history.json field completeness ==========
+
+test("generated history.json: every item carries a boolean isPastExam", () => {
+  const history = JSON.parse(fs.readFileSync(new URL("../public/data/history.json", import.meta.url), "utf8"));
+  const items = history.days.flatMap((day) => day.items);
+  assert.ok(items.length > 0, "history.json should contain items");
+  const incomplete = items
+    .filter((item) => !Object.hasOwn(item, "isPastExam") || typeof item.isPastExam !== "boolean")
+    .map((item) => item.sourcePath || item.id);
+  assert.deepStrictEqual(incomplete, []);
+});
+
 test.after(() => {
   fs.rmSync(tmpRoot, { recursive: true, force: true });
 });

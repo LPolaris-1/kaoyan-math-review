@@ -71,6 +71,59 @@ export function titleFields(body, fallback = "") {
   };
 }
 
+const SOURCE_FIELD_RE = /^\s*(?:\*\*)?来源(?:\*\*)?\s*[：:]\s*(.+?)\s*$/u;
+
+/**
+ * Decide whether a candidate text explicitly marks a formal past exam.
+ *
+ * A candidate is a past exam only when it literally contains "真题".
+ * "真题改编" (adapted from a past exam) is never a formal past exam, even
+ * though it contains the marker.
+ */
+function matchesPastExamMarker(value) {
+  const text = String(value ?? "");
+  if (text.includes("真题改编")) return false;
+  return text.includes("真题");
+}
+
+/**
+ * Read the leading, independent "来源" metadata field from a body.
+ *
+ * Only the header region before the first H2+ heading or horizontal rule is
+ * scanned, so an incidental "来源：" inside a solution is never picked up.
+ * Compatible with `**来源**：xxx` and `来源：xxx`.
+ */
+function extractBodySource(body) {
+  for (const line of String(body || "").split(/\r?\n/)) {
+    if (/^#{2,6}\s/u.test(line)) break;
+    if (/^\s*-{3,}\s*$/u.test(line)) break;
+    const match = line.match(SOURCE_FIELD_RE);
+    if (match) return match[1];
+  }
+  return "";
+}
+
+/**
+ * Classify whether a note is a formal past exam ("真题").
+ *
+ * Resolution order (first present source wins; no fall-through):
+ * 1. frontmatter `source`
+ * 2. the leading body "来源" field
+ * 3. only when both source fields are absent, the title or the
+ *    relativePath/filename legacy marker
+ *
+ * The whole solution body is never searched, so an incidental "真题"
+ * mention in the derivation cannot promote a question. "真题改编" is
+ * always false.
+ */
+export function classifyPastExam({ fields = {}, body = "", title = "", relativePath = "" } = {}) {
+  const frontmatterSource = String(fields?.source ?? "").trim();
+  if (frontmatterSource) return matchesPastExamMarker(frontmatterSource);
+  const bodySource = extractBodySource(body);
+  if (bodySource) return matchesPastExamMarker(bodySource);
+  return matchesPastExamMarker(`${title}\n${relativePath}`);
+}
+
 /**
  * Extract the first date from a string, or null.
  */

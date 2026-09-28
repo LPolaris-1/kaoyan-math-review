@@ -7,7 +7,8 @@ import { fileURLToPath } from "node:url";
 import {
   clean, parseList, section, bullets,
   extractDate, localDate, groupByDate, parseMarkdownFile, titleFields,
-  collectSourceEntries, summarizeAdmissions, sourceNeedsRefresh, inspectSourceBoundary
+  collectSourceEntries, summarizeAdmissions, sourceNeedsRefresh, inspectSourceBoundary,
+  classifyPastExam
 } from "./shared/data-lib.mjs";
 import { reportLatexGate, scanLatexGate } from "./shared/math-gate.mjs";
 
@@ -49,6 +50,7 @@ function buildNote(filePath, historicalDates) {
     content: body,
     tags: parseList(fields.tags),
     sourcePath: relativePath,
+    isPastExam: classifyPastExam({ fields, body, title, relativePath }),
   };
 }
 

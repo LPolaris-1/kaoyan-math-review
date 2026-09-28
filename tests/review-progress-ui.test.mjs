@@ -8,6 +8,7 @@ const overviewLibPath = new URL("../lib/review-overview.mjs", import.meta.url);
 const pagePath = new URL("../app/review/page.tsx", import.meta.url);
 const eventsRoutePath = new URL("../app/api/review-events/route.ts", import.meta.url);
 const cssPath = new URL("../app/globals.css", import.meta.url);
+const homePath = new URL("../app/page.tsx", import.meta.url);
 
 test("全部进度页面使用统一调度输出并提供 Day 1 API 操作", async () => {
   const source = await readFile(componentPath, "utf8");
@@ -84,4 +85,31 @@ test("复习事件 API 支持按日期批量读取并保留单题查询", async 
   assert.match(source, /eq\(reviewEvents\.itemId, itemId\)/);
   assert.match(source, /displayTargetDay/);
   assert.match(source, /targetDay: row\.targetDay/);
+});
+
+test("首页提供 每日复盘/真题 双标签并按 isPastExam 派生，且复用已掌握与懒加载卡片", async () => {
+  const source = await readFile(homePath, "utf8");
+  const css = await readFile(cssPath, "utf8");
+  assert.match(source, /mode-tabs/);
+  assert.match(source, /label: "每日复盘"/);
+  assert.match(source, /label: "真题"/);
+  assert.match(source, /className=\{mode === tab\.id \? "is-active" : ""\}/);
+  assert.match(source, /isPastExam/);
+  assert.match(source, /derivePastExamDays/);
+  assert.match(source, /item\.isPastExam/);
+  assert.match(source, /const \[selectedDates, setSelectedDates\] = useState<Record<ReviewMode, string>>/);
+  assert.match(source, /selectedDates\[mode\]/);
+  assert.match(source, /setSelectedDates\(\(current\) => \(\{ \.\.\.current, \[mode\]: date \}\)\)/);
+  assert.match(source, /daily: history\.days\[0\]\?\.date \|\| "", pastExam: derivePastExamDays\(history\.days\)\[0\]\?\.date \|\| ""/);
+  assert.match(source, /modeDays\.slice\(0, 14\)/);
+  // mastered POST + lazy Markdown/KaTeX card are reused, not duplicated
+  assert.match(source, /onSetMastered=\{setMastered\}/);
+  assert.match(source, /progressById\[item\.id\]\?\.mastered/);
+  assert.equal((source.match(/function HistoryQuestionCard/g) || []).length, 1);
+  assert.match(source, /if \(event\.currentTarget\.open\) setHasOpened\(true\)/);
+  assert.equal(source.includes("/api/review-progress"), true);
+  // no NaN in derived counts
+  assert.doesNotMatch(source, /NaN/);
+  assert.match(css, /\.mode-tabs \{/);
+  assert.match(css, /\.mode-tabs button\.is-active/);
 });

@@ -19,6 +19,7 @@ type ReviewItem = {
   answer: string;
   content: string;
   sourcePath: string;
+  isPastExam: boolean;
 };
 
 type ReviewDay = {
@@ -62,10 +63,46 @@ function formatGeneratedAt(value: string) {
   return new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 }
 
+type ReviewMode = "daily" | "pastExam";
+
+const modeTabs: { id: ReviewMode; label: string }[] = [
+  { id: "daily", label: "每日复盘" },
+  { id: "pastExam", label: "真题" },
+];
+
+/**
+ * Re-derive the day groups for the 真题 mode: keep only isPastExam items and
+ * recompute count/subjectCounts/topics/takeaways/summary for that subset, while
+ * preserving the original 录入日期 grouping. 每日复盘 renders `history.days`
+ * unchanged.
+ */
+function derivePastExamDays(days: ReviewDay[]): ReviewDay[] {
+  return days.flatMap((day) => {
+    const items = day.items.filter((item) => item.isPastExam);
+    if (!items.length) return [];
+    const subjectCounts = items.reduce<Record<string, number>>((counts, item) => {
+      counts[item.subject] = (counts[item.subject] || 0) + 1;
+      return counts;
+    }, {});
+    const topics = [...new Set(items.map((item) => item.topic).filter(Boolean))].slice(0, 6);
+    const takeaways = [...new Set(items.flatMap((item) => [...item.keyPoints, ...item.pitfalls]))].slice(0, 6);
+    return [{
+      date: day.date,
+      count: items.length,
+      subjectCounts,
+      topics,
+      takeaways,
+      summary: `${items.length} 道真题 · ${Object.entries(subjectCounts).map(([name, count]) => `${name} ${count} 道`).join("、")}`,
+      items,
+    }];
+  });
+}
+
 
 export default function Home() {
   const [data, setData] = useState<HistoryData | null>(null);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [mode, setMode] = useState<ReviewMode>("daily");
+  const [selectedDates, setSelectedDates] = useState<Record<ReviewMode, string>>({ daily: "", pastExam: "" });
   const [subject, setSubject] = useState("全部");
   const [query, setQuery] = useState("");
   const [progressById, setProgressById] = useState<Record<string, ReviewProgress>>({});
@@ -77,7 +114,7 @@ export default function Home() {
       .then((response) => response.json())
       .then((history: HistoryData) => {
         setData(history);
-        setSelectedDate(history.days[0]?.date || "");
+        setSelectedDates({ daily: history.days[0]?.date || "", pastExam: derivePastExamDays(history.days)[0]?.date || "" });
       })
       .catch(() => setData({ generatedAt: "", totalNotes: 0, totalDays: 0, days: [] }));
     fetch("/api/review-progress")
@@ -93,7 +130,23 @@ export default function Home() {
       .catch((error: Error) => setProgressError(error.message));
   }, []);
 
-  const currentDay = data?.days.find((day) => day.date === selectedDate) || null;
+  const daysByMode = useMemo(() => ({
+    daily: data?.days || [],
+    pastExam: data ? derivePastExamDays(data.days) : [],
+  }), [data]);
+  const modeDays = daysByMode[mode];
+  const selectedDate = selectedDates[mode];
+  const currentDay = modeDays.find((day) => day.date === selectedDate) || null;
+  const isPastExamMode = mode === "pastExam";
+  const totals = useMemo(() => mode === "daily"
+    ? { totalNotes: data?.totalNotes || 0, totalDays: data?.totalDays || 0 }
+    : { totalNotes: modeDays.reduce((sum, day) => sum + day.count, 0), totalDays: modeDays.length },
+  [mode, data, modeDays]);
+
+  function selectDate(date: string) {
+    setSelectedDates((current) => ({ ...current, [mode]: date }));
+  }
+
   const filteredItems = useMemo(() => currentDay?.items.filter((item) => {
     const matchesSubject = subject === "全部" || item.subject === subject;
     const text = `${item.title} ${item.topic} ${item.chapter} ${item.methods.join(" ")}`.toLowerCase();
@@ -130,29 +183,35 @@ export default function Home() {
         <div className="sync-status"><span className="status-dot" /> 每天 22:00 自动更新</div>
       </header>
 
+      <nav className="mode-tabs" aria-label="复盘模式">
+        {modeTabs.map((tab) => (
+          <button key={tab.id} type="button" className={mode === tab.id ? "is-active" : ""} aria-pressed={mode === tab.id} onClick={() => setMode(tab.id)}>{tab.label}</button>
+        ))}
+      </nav>
+
       <section className="hero">
         <div>
-          <p className="eyebrow">DAILY REVIEW / 每日复盘</p>
-          <h1>{currentDay ? `${formatDate(currentDay.date)}，复盘开始。` : "还没有可复盘的错题"}</h1>
+          <p className="eyebrow">{isPastExamMode ? "PAST EXAM / 真题" : "DAILY REVIEW / 每日复盘"}</p>
+          <h1>{currentDay ? `${formatDate(currentDay.date)}，复盘开始。` : isPastExamMode ? "还没有可复盘的真题" : "还没有可复盘的错题"}</h1>
           <p className="hero-copy">按日期留住每一次失分，把“我会了”变成可重复的解题路径。</p>
         </div>
-        <div className="hero-note"><span>最近扫描</span><strong>{formatGeneratedAt(data.generatedAt)}</strong><small>{data.totalNotes} 道题 · {data.totalDays} 个复盘日</small></div>
+        <div className="hero-note"><span>最近扫描</span><strong>{formatGeneratedAt(data.generatedAt)}</strong><small>{totals.totalNotes} 道题 · {totals.totalDays} 个复盘日</small></div>
       </section>
 
       {progressError && <div className="progress-alert">{progressError} 历史错题仍可正常浏览。</div>}
 
       <section className="date-strip" aria-label="复盘日期">
-        {data.days.slice(0, 14).map((day) => (
-          <button key={day.date} className={`date-chip ${day.date === selectedDate ? "is-active" : ""}`} onClick={() => setSelectedDate(day.date)}>
+        {modeDays.slice(0, 14).map((day) => (
+          <button key={day.date} className={`date-chip ${day.date === selectedDate ? "is-active" : ""}`} onClick={() => selectDate(day.date)}>
             <span>{formatDate(day.date)}</span><b>{day.count}</b>
           </button>
         ))}
-        {!data.days.length && <div className="empty-date">扫描完成后，这里会出现每天的错题记录。</div>}
+        {!modeDays.length && <div className="empty-date">{isPastExamMode ? "还没有标记为真题的错题。" : "扫描完成后，这里会出现每天的错题记录。"}</div>}
       </section>
 
       {currentDay && <>
         <section className="stat-grid">
-          <div className="stat-card stat-card-accent"><span>今日错题</span><strong>{currentDay.count}</strong><small>道</small></div>
+          <div className="stat-card stat-card-accent"><span>{isPastExamMode ? "今日真题" : "今日错题"}</span><strong>{currentDay.count}</strong><small>道</small></div>
           <div className="stat-card"><span>覆盖学科</span><strong>{Object.keys(currentDay.subjectCounts).length}</strong><small>个</small></div>
           <div className="stat-card"><span>重点主题</span><strong>{currentDay.topics.length}</strong><small>组</small></div>
           <div className="stat-card stat-card-note"><span>今日提醒</span><strong>{currentDay.takeaways[0] || "先复盘，再刷题"}</strong></div>
@@ -179,7 +238,7 @@ export default function Home() {
                 disabled={Boolean(progressError)}
                 onSetMastered={setMastered}
               />)}
-              {!filteredItems.length && <div className="empty-card">没有匹配的错题。换个筛选条件试试。</div>}
+              {!filteredItems.length && <div className="empty-card">{isPastExamMode ? "没有匹配的真题。换个筛选条件试试。" : "没有匹配的错题。换个筛选条件试试。"}</div>}
             </div>
           </div>
         </section>
