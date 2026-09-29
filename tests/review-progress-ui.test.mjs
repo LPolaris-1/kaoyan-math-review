@@ -87,29 +87,56 @@ test("复习事件 API 支持按日期批量读取并保留单题查询", async 
   assert.match(source, /targetDay: row\.targetDay/);
 });
 
-test("首页提供 每日复盘/真题 双标签并按 isPastExam 派生，且复用已掌握与懒加载卡片", async () => {
+test("首页恢复为单一「每日复盘」，不再提供真题模式标签并保留每日复盘核心功能", async () => {
   const source = await readFile(homePath, "utf8");
-  const css = await readFile(cssPath, "utf8");
-  assert.match(source, /mode-tabs/);
-  assert.match(source, /label: "每日复盘"/);
-  assert.match(source, /label: "真题"/);
-  assert.match(source, /className=\{mode === tab\.id \? "is-active" : ""\}/);
-  assert.match(source, /isPastExam/);
-  assert.match(source, /derivePastExamDays/);
-  assert.match(source, /item\.isPastExam/);
-  assert.match(source, /const \[selectedDates, setSelectedDates\] = useState<Record<ReviewMode, string>>/);
-  assert.match(source, /selectedDates\[mode\]/);
-  assert.match(source, /setSelectedDates\(\(current\) => \(\{ \.\.\.current, \[mode\]: date \}\)\)/);
-  assert.match(source, /daily: history\.days\[0\]\?\.date \|\| "", pastExam: derivePastExamDays\(history\.days\)\[0\]\?\.date \|\| ""/);
-  assert.match(source, /modeDays\.slice\(0, 14\)/);
+  assert.doesNotMatch(source, /mode-tabs/);
+  assert.doesNotMatch(source, /真题/);
+  assert.doesNotMatch(source, /isPastExam/);
+  assert.doesNotMatch(source, /derivePastExamDays/);
+  assert.doesNotMatch(source, /ReviewMode/);
+  assert.match(source, /DAILY REVIEW \/ 每日复盘/);
+  assert.match(source, /const \[selectedDate, setSelectedDate\] = useState\(""\)/);
+  assert.match(source, /data\.days\.slice\(0, 14\)/);
+  assert.match(source, /fetch\("\/data\/history\.json", \{ cache: "no-store" \}\)/);
+  assert.match(source, /搜索题目、主题或方法/);
   // mastered POST + lazy Markdown/KaTeX card are reused, not duplicated
   assert.match(source, /onSetMastered=\{setMastered\}/);
   assert.match(source, /progressById\[item\.id\]\?\.mastered/);
   assert.equal((source.match(/function HistoryQuestionCard/g) || []).length, 1);
   assert.match(source, /if \(event\.currentTarget\.open\) setHasOpened\(true\)/);
   assert.equal(source.includes("/api/review-progress"), true);
-  // no NaN in derived counts
   assert.doesNotMatch(source, /NaN/);
-  assert.match(css, /\.mode-tabs \{/);
-  assert.match(css, /\.mode-tabs button\.is-active/);
+});
+
+test("滚动复习页新增真题标签：按 isPastExam 派生日期分组并保留原真题板块行为", async () => {
+  const source = await readFile(pagePath, "utf8");
+  const navigation = await readFile(new URL("../lib/review-navigation.mjs", import.meta.url), "utf8");
+  assert.match(navigation, /"pastExam"/);
+  assert.match(source, /type Tab = "today" \| "progress" \| "overview" \| "matrix" \| "mastered" \| "pastExam"/);
+  assert.match(source, /navigateTab\("pastExam"\)/);
+  assert.match(source, /真题 <b>\{pastExamTotal\}<\/b>/);
+  // 真实 history.json 字段
+  assert.match(source, /isPastExam: boolean/);
+  assert.match(source, /keyPoints: string\[\]/);
+  assert.match(source, /pitfalls: string\[\]/);
+  // 只保留 isPastExam 题目，并在原录入日期上重算统计
+  assert.match(source, /function derivePastExamDays/);
+  assert.match(source, /const items = day\.items\.filter\(\(item\) => item\.isPastExam\);/);
+  assert.match(source, /if \(!items\.length\) return \[\];/);
+  assert.match(source, /summary: `\$\{items\.length\} 道真题/);
+  // 总数来自 history 中全部 isPastExam=true，且不进入今日队列
+  assert.match(source, /day\.items\.filter\(\(item\) => item\.isPastExam\)\.length/);
+  assert.doesNotMatch(source, /pastExamTotal[^\n]*queue\.length|queue\.length[^\n]*pastExamTotal/);
+  // 日期切换（本地状态，不进 URL）/ 学科筛选 / 搜索
+  assert.match(source, /setExamDate\(day\.date\)/);
+  assert.match(source, /examSubject === option \? "filter-active" : ""/);
+  assert.match(source, /搜索题目、主题或方法/);
+  assert.match(source, /date: view === "overview" \? query\.date : null/);
+  // 已掌握题隐藏 + 复用 master/unmaster 语义
+  assert.match(source, /!progressById\[item\.id\]\?\.mastered && matchesSubject/);
+  assert.match(source, /action: mastered \? "master" : "unmaster"/);
+  // lazy-on-first-open + Markdown/KaTeX
+  assert.match(source, /function PastExamCard/);
+  assert.match(source, /if \(event\.currentTarget\.open\) setHasOpened\(true\)/);
+  assert.match(source, /<MarkdownContent value=\{item\.content\} \/>/);
 });

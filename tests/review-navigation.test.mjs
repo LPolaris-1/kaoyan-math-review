@@ -34,6 +34,21 @@ test("review query rejects invalid dates, views, ranges and focus values", () =>
   });
 });
 
+test("review query round-trips the past exam view for Back/Forward restore", () => {
+  assert.deepEqual(parseReviewQuery("view=pastExam"), {
+    view: "pastExam",
+    range: 30,
+    quadrants: [],
+    date: null,
+    itemId: null,
+    focus: null,
+  });
+  assert.equal(serializeReviewQuery({ view: "pastExam", range: 30, quadrants: [], date: null, itemId: null, focus: null }), "view=pastExam");
+  // 真题日期是组件本地状态，不通过 URL 参数表达，避免与 overview 的 date 冲突
+  assert.equal(parseReviewQuery("view=pastExam&date=2026-08-28").date, "2026-08-28");
+  assert.equal(serializeReviewQuery({ view: "pastExam", range: 30, quadrants: [], date: null, itemId: null, focus: null }).includes("date="), false);
+});
+
 test("quadrant toggles are deterministic and use OR semantics", () => {
   assert.deepEqual(toggleQuadrant([], "blind"), ["blind"]);
   assert.deepEqual(toggleQuadrant(["blind"], "potential"), ["blind", "potential"]);
@@ -60,4 +75,5 @@ test("review UI owns navigation in the URL and exposes deep-link actions", async
   assert.match(overview, /onViewProgress/);
   assert.match(progress, /onViewOverview/);
   assert.match(progress, /progress-item-/);
+  assert.match(page, /navigateTab\("pastExam"\)/);
 });

@@ -23,14 +23,27 @@ type ReviewItem = {
   chapter: string;
   topic: string;
   methods: string[];
+  keyPoints: string[];
+  pitfalls: string[];
   content: string;
   sourcePath: string;
+  isPastExam: boolean;
 };
 
 type HistoryData = {
   generatedAt: string;
   totalNotes: number;
-  days: Array<{ items: ReviewItem[] }>;
+  days: Array<{ date: string; items: ReviewItem[] }>;
+};
+
+type PastExamDay = {
+  date: string;
+  count: number;
+  subjectCounts: Record<string, number>;
+  topics: string[];
+  takeaways: string[];
+  summary: string;
+  items: ReviewItem[];
 };
 
 type Progress = {
@@ -46,7 +59,7 @@ type Progress = {
   cycleStartedAt: string | null;
 };
 
-type Tab = "today" | "progress" | "overview" | "matrix" | "mastered";
+type Tab = "today" | "progress" | "overview" | "matrix" | "mastered" | "pastExam";
 type ReviewQuery = {
   view: Tab;
   range: 7 | 30 | 60;
@@ -82,6 +95,41 @@ const matrixMeta = {
   safe: { title: "第四象限 · 安全区", caption: "已掌握 × 低频", className: "matrix-safe" },
 };
 
+const subjectOptions = ["全部", "高数", "线代"];
+
+function formatDate(date: string) {
+  const [, month, day] = date.split("-");
+  return `${month}月${day}日`;
+}
+
+/**
+ * Re-derive the 真题 day groups from the original 录入日期 grouping: keep only
+ * isPastExam items and recompute count/subjectCounts/topics/takeaways/summary
+ * for that subset. 真题 no longer lives on the home page; /review owns it and
+ * only shows dates that actually contain past exam items.
+ */
+function derivePastExamDays(days: Array<{ date: string; items: ReviewItem[] }>): PastExamDay[] {
+  return days.flatMap((day) => {
+    const items = day.items.filter((item) => item.isPastExam);
+    if (!items.length) return [];
+    const subjectCounts = items.reduce<Record<string, number>>((counts, item) => {
+      counts[item.subject] = (counts[item.subject] || 0) + 1;
+      return counts;
+    }, {});
+    const topics = [...new Set(items.map((item) => item.topic).filter(Boolean))].slice(0, 6);
+    const takeaways = [...new Set(items.flatMap((item) => [...item.keyPoints, ...item.pitfalls]))].slice(0, 6);
+    return [{
+      date: day.date,
+      count: items.length,
+      subjectCounts,
+      topics,
+      takeaways,
+      summary: `${items.length} 道真题 · ${Object.entries(subjectCounts).map(([name, count]) => `${name} ${count} 道`).join("、")}`,
+      items,
+    }];
+  });
+}
+
 export default function RollingReviewPage() {
   const [history, setHistory] = useState<HistoryData | null>(null);
   const [progressById, setProgressById] = useState<Record<string, Progress>>({});
@@ -92,6 +140,9 @@ export default function RollingReviewPage() {
   const [todayEvents, setTodayEvents] = useState<ReviewEvent[]>([]);
   const [progressLoaded, setProgressLoaded] = useState(false);
   const [initialTodayQueueIds, setInitialTodayQueueIds] = useState<string[] | null>(null);
+  const [examDate, setExamDate] = useState("");
+  const [examSubject, setExamSubject] = useState("全部");
+  const [examQuery, setExamQuery] = useState("");
   const tab = query.view as Tab;
   const manualReviewId = query.view === "today" ? query.itemId : null;
   const [today, setToday] = useState(() => shanghaiToday());
@@ -99,7 +150,10 @@ export default function RollingReviewPage() {
   useEffect(() => {
     fetch("/data/history.json", { cache: "no-store" })
       .then((response) => response.json())
-      .then((data: HistoryData) => setHistory(data))
+      .then((data: HistoryData) => {
+        setHistory(data);
+        setExamDate((current) => current || derivePastExamDays(data.days)[0]?.date || "");
+      })
       .catch(() => setError("错题历史加载失败，请稍后重试。"));
 
     fetch("/api/review-progress")
@@ -228,6 +282,17 @@ export default function RollingReviewPage() {
     entries.forEach((entry) => result[quadrantFor(entry.progress)].push(entry));
     return result;
   }, [entries]);
+  const pastExamDays = useMemo(() => (history ? derivePastExamDays(history.days) : []), [history]);
+  const pastExamTotal = useMemo(
+    () => (history ? history.days.reduce((sum, day) => sum + day.items.filter((item) => item.isPastExam).length, 0) : 0),
+    [history],
+  );
+  const pastExamDay = pastExamDays.find((day) => day.date === examDate) || pastExamDays[0] || null;
+  const pastExamItems = useMemo(() => pastExamDay?.items.filter((item) => {
+    const matchesSubject = examSubject === "全部" || item.subject === examSubject;
+    const text = `${item.title} ${item.topic} ${item.chapter} ${item.methods.join(" ")}`.toLowerCase();
+    return !progressById[item.id]?.mastered && matchesSubject && (!examQuery || text.includes(examQuery.toLowerCase()));
+  }) || [], [pastExamDay, progressById, examSubject, examQuery]);
 
   async function updateProgress(itemId: string, payload: Record<string, string>) {
     setSavingId(itemId);
@@ -307,6 +372,7 @@ export default function RollingReviewPage() {
         <button className={tab === "overview" ? "is-active" : ""} onClick={() => navigateTab("overview")}>复习总览</button>
         <button className={tab === "matrix" ? "is-active" : ""} onClick={() => navigateTab("matrix")}>四象限总览</button>
         <button className={tab === "mastered" ? "is-active" : ""} onClick={() => navigateTab("mastered")}>已掌握题库 <b>{masteredEntries.length}</b></button>
+        <button className={tab === "pastExam" ? "is-active" : ""} onClick={() => navigateTab("pastExam")}>真题 <b>{pastExamTotal}</b></button>
       </nav>
 
       {tab === "today" && (
@@ -414,6 +480,59 @@ export default function RollingReviewPage() {
         </section>
       )}
 
+      {tab === "pastExam" && (
+        <section className="rolling-section">
+          <div className="section-heading">
+            <div><p className="section-kicker">PAST EXAM / 真题</p><h2>{pastExamDay ? `${formatDate(pastExamDay.date)}，真题复盘。` : "还没有可复盘的真题"}</h2></div>
+            <p>按原录入日期浏览真题；勾选“已掌握”的题会从真题列表隐藏，不影响今日滚动队列。</p>
+          </div>
+
+          <section className="date-strip" aria-label="真题日期">
+            {pastExamDays.slice(0, 14).map((day) => (
+              <button key={day.date} className={`date-chip ${day.date === pastExamDay?.date ? "is-active" : ""}`} onClick={() => setExamDate(day.date)}>
+                <span>{formatDate(day.date)}</span><b>{day.count}</b>
+              </button>
+            ))}
+            {!pastExamDays.length && <div className="empty-date">还没有标记为真题的错题。</div>}
+          </section>
+
+          {pastExamDay && <>
+            <section className="stat-grid">
+              <div className="stat-card stat-card-accent"><span>当日真题</span><strong>{pastExamDay.count}</strong><small>道</small></div>
+              <div className="stat-card"><span>覆盖学科</span><strong>{Object.keys(pastExamDay.subjectCounts).length}</strong><small>个</small></div>
+              <div className="stat-card"><span>重点主题</span><strong>{pastExamDay.topics.length}</strong><small>组</small></div>
+              <div className="stat-card stat-card-note"><span>今日提醒</span><strong>{pastExamDay.takeaways[0] || "先复盘，再刷题"}</strong></div>
+            </section>
+
+            <section className="review-layout">
+              <aside className="overview-card">
+                <div className="section-kicker">PAST EXAM / 当日概览</div>
+                <h2>{pastExamDay.summary}</h2>
+                <p>先看下面的高频主题，再逐题展开。真题复盘重点回答：我错在概念、方法，还是计算路径？</p>
+                <div className="topic-list">{pastExamDay.topics.map((topic) => <span key={topic}>{topic}</span>)}</div>
+                <div className="subject-breakdown">{Object.entries(pastExamDay.subjectCounts).map(([name, count]) => <div key={name}><span>{name}</span><strong>{count}</strong></div>)}</div>
+              </aside>
+
+              <div className="question-column">
+                <div className="toolbar"><div className="filters">{subjectOptions.map((option) => <button key={option} className={examSubject === option ? "filter-active" : ""} onClick={() => setExamSubject(option)}>{option}</button>)}</div><label className="search-box"><span>⌕</span><input value={examQuery} onChange={(event) => setExamQuery(event.target.value)} placeholder="搜索题目、主题或方法" /></label></div>
+                <div className="question-list">
+                  {pastExamItems.map((item, index) => <PastExamCard
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    mastered={Boolean(progressById[item.id]?.mastered)}
+                    saving={savingId === item.id}
+                    disabled={Boolean(error)}
+                    onSetMastered={(itemId, mastered) => updateProgress(itemId, { action: mastered ? "master" : "unmaster" })}
+                  />)}
+                  {!pastExamItems.length && <div className="empty-card">没有匹配的真题。换个筛选条件试试。</div>}
+                </div>
+              </div>
+            </section>
+          </>}
+        </section>
+      )}
+
       <footer><span>复习顺序由考频、掌握度和记忆节点共同决定。</span><span>勾选“已掌握”的题不会自动再次出现。</span></footer>
     </main>
   );
@@ -495,6 +614,53 @@ function ReviewCard({
             <span>已掌握，不再出现</span>
           </label>
         </div>
+      </div>
+    </article>
+  );
+}
+
+function PastExamCard({
+  item,
+  index,
+  mastered,
+  saving,
+  disabled,
+  onSetMastered,
+}: {
+  item: ReviewItem;
+  index: number;
+  mastered: boolean;
+  saving: boolean;
+  disabled: boolean;
+  onSetMastered: (itemId: string, mastered: boolean) => void;
+}) {
+  const [hasOpened, setHasOpened] = useState(false);
+
+  return (
+    <article className="question-card">
+      <div className="question-index">{String(index + 1).padStart(2, "0")}</div>
+      <div className="question-main">
+        <div className="question-heading">
+          <div className="question-meta"><span className="subject-pill">{item.subject}</span>{item.chapter && <span>{item.chapter}</span>}</div>
+          <label className="master-checkbox">
+            <input
+              type="checkbox"
+              checked={mastered}
+              disabled={saving || disabled}
+              onChange={(event) => onSetMastered(item.id, event.target.checked)}
+            />
+            <span>{saving ? "保存中…" : "已掌握"}</span>
+          </label>
+        </div>
+        <h3><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></h3>
+        {item.topic && <p className="question-topic">{item.topic}</p>}
+        <div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div>
+        <details onToggle={(event) => {
+          if (event.currentTarget.open) setHasOpened(true);
+        }}>
+          <summary>查看原档案题目与完整推导</summary>
+          {hasOpened && <div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div>}
+        </details>
       </div>
     </article>
   );
