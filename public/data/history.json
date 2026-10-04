@@ -1,18 +1,102 @@
 {
-  "generatedAt": "2026-10-03T14:07:50.730Z",
+  "generatedAt": "2026-10-04T16:14:31.650Z",
   "source": "06-Resources/学习/考研/考研数学/错题本/原档案",
-  "totalNotes": 295,
-  "totalDays": 59,
+  "totalNotes": 300,
+  "totalDays": 60,
   "days": [
     {
-      "date": "2026-10-03",
-      "count": 8,
+      "date": "2026-10-04",
+      "count": 4,
       "subjectCounts": {
-        "高数": 8
+        "高数": 4
       },
       "topics": [],
       "takeaways": [],
-      "summary": "8 道错题 · 高数 8 道",
+      "summary": "4 道错题 · 高数 4 道",
+      "items": [
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：积分不等式证明（单调函数构造辅助函数求导）（李林880题第57780题）.md",
+          "date": "2026-10-04",
+          "titleMarkdown": "错题 · 积分不等式证明（单调函数构造辅助函数求导）",
+          "title": "错题 · 积分不等式证明（单调函数构造辅助函数求导）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 错题 · 积分不等式证明（单调函数构造辅助函数求导）\n\n**来源**：李林880题 第57780题\n**日期**：2026-10-04\n**题型**：解答题（证明）\n**考点归类**：积分不等式 / 单调性 / 构造辅助函数求导\n**易错指数**：⭐⭐⭐⭐\n\n---\n\n## 原题\n\n（57780：李林880题）设 $f(x)$ 在 $[0,+\\infty)$ 上连续，且单调增加，证明：当 $0<a<b$ 时，\n\n$$\\int_{a}^{b} x f(x)\\,\\mathrm{d}x \\ge \\frac{1}{2}\\left[ b\\int_{0}^{b} f(x)\\,\\mathrm{d}x - a\\int_{0}^{a} f(x)\\,\\mathrm{d}x \\right].$$\n\n---\n\n## 思路\n\n把不等式两侧同时看成上限 $b$ 的函数，构造辅助函数，证明它单调不减。这是「含参积分不等式」的通用手法：**把可变的积分上限挪进辅助函数，求导后只剩被积函数之间的比较。**\n\n---\n\n## 证明\n\n固定 $a>0$，对任意 $x\\ge a$ 定义\n\n$$\\varphi(x)=\\int_{a}^{x} t f(t)\\,\\mathrm{d}t-\\frac{1}{2}\\left[ x\\int_{0}^{x} f(t)\\,\\mathrm{d}t-a\\int_{0}^{a} f(t)\\,\\mathrm{d}t \\right].$$\n\n**第一步：验证 $\\varphi(a)=0$。**\n\n$$\\varphi(a)=0-\\frac{1}{2}\\left[ a\\int_{0}^{a} f(t)\\,\\mathrm{d}t-a\\int_{0}^{a} f(t)\\,\\mathrm{d}t \\right]=0.$$\n\n**第二步：求 $\\varphi'(x)$。**\n\n$$\\varphi'(x)=x f(x)-\\frac{1}{2}\\left[ \\int_{0}^{x} f(t)\\,\\mathrm{d}t+x f(x) \\right]=\\frac{1}{2}\\left[ x f(x)-\\int_{0}^{x} f(t)\\,\\mathrm{d}t \\right].$$\n\n**第三步：判断 $\\varphi'(x)\\ge 0$。**\n\n$$x f(x)-\\int_{0}^{x} f(t)\\,\\mathrm{d}t=\\int_{0}^{x}\\bigl[ f(x)-f(t) \\bigr]\\,\\mathrm{d}t.$$\n\n因为 $f$ 单调增加，当 $0\\le t\\le x$ 时 $f(t)\\le f(x)$，故被积函数 $\\ge 0$，从而\n\n$$\\varphi'(x)\\ge 0\\quad(x\\ge a).$$\n\n**第四步：得结论。**\n\n$\\varphi$ 在 $[a,+\\infty)$ 上单调不减，故 $\\varphi(b)\\ge\\varphi(a)=0$，即\n\n$$\\int_{a}^{b} x f(x)\\,\\mathrm{d}x-\\frac{1}{2}\\left[ b\\int_{0}^{b} f(x)\\,\\mathrm{d}x-a\\int_{0}^{a} f(x)\\,\\mathrm{d}x \\right]\\ge 0,$$\n\n移项即为所证。\n\n---\n\n## 取等条件\n\n$f$ 为常数时等号成立；更一般地，$\\varphi'(x)=\\displaystyle\\int_{0}^{x}\\bigl[f(x)-f(t)\\bigr]\\mathrm{d}t\\equiv 0$ 要求 $f$ 在 $[0,x]$ 上为常数。\n\n---\n\n## 要点\n\n- **核心技巧**：把要证的积分不等式写成关于上限 $x$ 的辅助函数 $\\varphi(x)$，先看 $\\varphi(a)$（通常为 $0$），再证 $\\varphi'\\ge 0$。\n- **求导后的结构**：$\\varphi'(x)=\\displaystyle\\int_{0}^{x}\\bigl[f(x)-f(t)\\bigr]\\mathrm{d}t$，正是「单调增加」最自然的表达——单调性等价于这个积分 $\\ge 0$。\n- 同类题（含参积分不等式、单调函数）优先试「构造辅助函数求导」，比硬算积分、放缩更稳、更套路化。\n\n---\n\n## 官方解析核对\n\n官方给的思路与上述证明**完全一致**：常量变易化（把 $b$ 设为 $x$）→ 移项构造函数 $F(x)=\\int_{a}^{x} tf(t)\\mathrm{d}t-\\frac{1}{2}\\left[ x\\int_{0}^{x}f(t)\\mathrm{d}t-a\\int_{0}^{a}f(t)\\mathrm{d}t \\right]$ → 证 $F(x)$ 单调增 → $F(b)\\ge F(a)=0$。\n\n唯一多出的关键一小步：官方在判 $F'(x)=\\frac{1}{2}xf(x)-\\frac{1}{2}\\int_{0}^{x}f(t)\\mathrm{d}t$ 的符号时，利用被积变量是 $t$、$f(x)$ 与 $t$ 无关，把 $\\int_{0}^{x}f(x)\\mathrm{d}t$ 当作常数提出来：$\\int_{0}^{x}f(x)\\mathrm{d}t=xf(x)$，从而\n\n$$F'(x)\\ge \\frac{1}{2}xf(x)-\\frac{1}{2}\\int_{0}^{x}f(x)\\mathrm{d}t=\\frac{1}{2}xf(x)-\\frac{1}{2}xf(x)=0.$$\n\n这正是「把 $x$ 提出来当常数」的操作，比我用 $\\int_{0}^{x}[f(x)-f(t)]\\mathrm{d}t$ 的写法更符合官方口径，本质相同。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：积分不等式证明（单调函数构造辅助函数求导）（李林880题第57780题）.md",
+          "isPastExam": false
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：积分不等式证明（构造原函数与分部积分）（张宇1000题第77992题）.md",
+          "date": "2026-10-04",
+          "titleMarkdown": "错题 · 积分不等式证明（构造原函数 + 分部积分）",
+          "title": "错题 · 积分不等式证明（构造原函数 + 分部积分）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 错题 · 积分不等式证明（构造原函数 + 分部积分）\n\n**来源**：张宇1000题 第77992题\n**日期**：2026-10-04\n**题型**：解答题（证明）\n**考点归类**：积分不等式 / 构造原函数 / 分部积分\n**易错指数**：⭐⭐⭐⭐\n\n---\n\n## 原题\n\n设 $f(x),g(x)$ 在 $[a,b]$ 上连续，且满足\n\n$$\\int_{a}^{x} f(t)\\,\\mathrm{d}t \\ge \\int_{a}^{x} g(t)\\,\\mathrm{d}t,\\quad x\\in[a,b],\\qquad \\int_{a}^{b} f(t)\\,\\mathrm{d}t=\\int_{a}^{b} g(t)\\,\\mathrm{d}t.$$\n\n证明：\n\n$$\\int_{a}^{b} x f(x)\\,\\mathrm{d}x \\le \\int_{a}^{b} x g(x)\\,\\mathrm{d}x.$$\n\n---\n\n## 核心破局点\n\n令 $h(x)=f(x)-g(x)$，把条件翻译成关于 $h$ 的积分条件；再构造原函数 $H(x)=\\int_{a}^{x} h(t)\\,\\mathrm{d}t$，用分部积分把待证式子化成 $-\\int_{a}^{b} H(x)\\,\\mathrm{d}x$，由 $H(x)\\ge 0$ 立即得结论。\n\n---\n\n## 证明\n\n**第一步：令差值函数。**\n令 $h(x)=f(x)-g(x),\\ x\\in[a,b]$。由已知条件：\n\n$$\\int_{a}^{x} h(t)\\,\\mathrm{d}t \\ge 0,\\quad x\\in[a,b],\\qquad \\int_{a}^{b} h(t)\\,\\mathrm{d}t = 0.$$\n\n**第二步：构造原函数。**\n令 $H(x)=\\int_{a}^{x} h(t)\\,\\mathrm{d}t,\\ x\\in[a,b]$。则 $H$ 在 $[a,b]$ 上可导，且\n\n$$H'(x)=h(x),\\qquad H(a)=0,\\qquad H(b)=\\int_{a}^{b} h(t)\\,\\mathrm{d}t=0,$$\n\n并且由已知条件 $H(x)\\ge 0,\\ x\\in[a,b]$。\n\n**第三步：对待证积分分部积分。**\n待证不等式等价于 $\\int_{a}^{b} x h(x)\\,\\mathrm{d}x \\le 0$。对左边分部积分：\n\n$$\\int_{a}^{b} x h(x)\\,\\mathrm{d}x=\\int_{a}^{b} x H'(x)\\,\\mathrm{d}x=\\bigl[xH(x)\\bigr]_{a}^{b}-\\int_{a}^{b} H(x)\\,\\mathrm{d}x.$$\n\n代入端点值：\n\n$$\\bigl[xH(x)\\bigr]_{a}^{b}=bH(b)-aH(a)=b\\cdot 0-a\\cdot 0=0.$$\n\n因此\n\n$$\\int_{a}^{b} x h(x)\\,\\mathrm{d}x=-\\int_{a}^{b} H(x)\\,\\mathrm{d}x.$$\n\n**第四步：由非负性得结论。**\n因 $H(x)\\ge 0$ 在 $[a,b]$ 上恒成立，$\\int_{a}^{b} H(x)\\,\\mathrm{d}x\\ge 0$，从而\n\n$$-\\int_{a}^{b} H(x)\\,\\mathrm{d}x\\le 0\\ \\Longrightarrow\\ \\int_{a}^{b} x h(x)\\,\\mathrm{d}x\\le 0.$$\n\n还原 $h(x)=f(x)-g(x)$，得 $\\int_{a}^{b} x\\bigl(f(x)-g(x)\\bigr)\\mathrm{d}x\\le 0$，即\n\n$$\\int_{a}^{b} x f(x)\\,\\mathrm{d}x \\le \\int_{a}^{b} x g(x)\\,\\mathrm{d}x. \\qquad\\blacksquare$$\n\n---\n\n## 易错点与避坑\n\n1. **不要直接对原式硬算。** 看到 $\\int_{a}^{x} f\\ge\\int_{a}^{x} g$ 与 $\\int_{a}^{b} f=\\int_{a}^{b} g$，应立刻想到作差并构造原函数，而非分别计算两个积分。\n2. **分部积分方向要对。** 把 $x$ 看作 $u$，把 $h(x)\\mathrm{d}x$ 凑成 $\\mathrm{d}H(x)$：$\\int_{a}^{b} x h(x)\\mathrm{d}x=\\int_{a}^{b} x\\,\\mathrm{d}H(x)$。写反就无法利用 $H(x)\\ge 0$。\n3. **端点值要代清楚。** $H(a)=0$ 显然；$H(b)=0$ 来自题设 $\\int_{a}^{b} f=\\int_{a}^{b} g$。两个端点缺一不可，否则分部积分后边界项不会消失。\n4. **符号别弄错。** 最后得到 $-\\int_{a}^{b} H(x)\\mathrm{d}x\\le 0$，所以是「$\\le$」，移项时不等号方向别搞反。\n\n---\n\n## 口诀\n\n> 函数作差构原函，端点为零且非负；\n> 待证积分分部积，化为负的原函积；\n> 原函非负积非负，加负号后必非正。\n\n## 通用套路\n\n形如「已知 $\\int_{a}^{x} f\\ge\\int_{a}^{x} g$ 且 $\\int_{a}^{b} f=\\int_{a}^{b} g$，证明 $\\int_{a}^{b} x f\\le\\int_{a}^{b} x g$」的题：\n\n1. 令 $h=f-g$，构造 $H(x)=\\int_{a}^{x} h(t)\\,\\mathrm{d}t$；\n2. 得 $H(x)\\ge 0,\\ H(a)=H(b)=0$；\n3. 对待证积分分部积分，化为 $-\\int_{a}^{b} H(x)\\,\\mathrm{d}x$；\n4. 由 $H(x)\\ge 0$ 得结论。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：积分不等式证明（构造原函数与分部积分）（张宇1000题第77992题）.md",
+          "isPastExam": false
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：极限性质与无穷小无穷大无界函数辨析（李永乐660题第54045题）.md",
+          "date": "2026-10-04",
+          "titleMarkdown": "错题 · 极限性质与无穷小、无穷大、无界函数的辨析",
+          "title": "错题 · 极限性质与无穷小、无穷大、无界函数的辨析",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 错题 · 极限性质与无穷小、无穷大、无界函数的辨析\n\n**来源**：李永乐660题 第54045题\n**日期**：2026-10-04\n**题型**：选择题\n**考点归类**：极限性质 / 无穷小 / 无穷大 / 无界函数\n**易错指数**：⭐⭐⭐⭐\n\n---\n\n## 原题\n\n（54045：李永乐660题）下列命题正确的是（ ）\n\n- **(A)** 设在 $x=x_{0}$ 空心邻域 $\\alpha(x)$ 为有界函数，且 $\\lim\\limits_{x\\to x_{0}}\\alpha(x)\\beta(x)=0$，则 $\\lim\\limits_{x\\to x_{0}}\\beta(x)=0$。\n- **(B)** 设 $x\\to x_{0}$ 时 $\\alpha(x)$ 为无穷小，且 $\\lim\\limits_{x\\to x_{0}}\\dfrac{\\alpha(x)}{\\beta(x)}=a\\ne 0$，则 $\\lim\\limits_{x\\to x_{0}}\\beta(x)=\\infty$。\n- **(C)** 设 $x\\to x_{0}$ 时 $\\alpha(x)$ 为无穷大，且 $\\lim\\limits_{x\\to x_{0}}\\alpha(x)\\beta(x)=a$，则 $\\lim\\limits_{x\\to x_{0}}\\beta(x)=0$。\n- **(D)** 设在 $x=x_{0}$ 空心邻域 $\\alpha(x)$ 为无界函数，且 $\\lim\\limits_{x\\to x_{0}}\\alpha(x)\\beta(x)=0$，则 $\\lim\\limits_{x\\to x_{0}}\\beta(x)=0$。\n\n**正确答案：C**\n\n---\n\n## 逐项解析\n\n### A 选项（错误）\n\n有界函数乘以某函数极限为 $0$，**不能**推出另一个函数极限为 $0$。例如 $\\alpha(x)\\equiv 0$ 有界，但 $\\beta(x)$ 可任意取，乘积恒为 $0$、极限为 $0$，而 $\\beta(x)$ 的极限不一定为 $0$。\n\n### B 选项（错误）\n\n由 $\\lim\\limits_{x\\to x_{0}}\\dfrac{\\alpha(x)}{\\beta(x)}=a\\ne 0$，且 $\\alpha(x)\\to 0$，可推出\n\n$$\\beta(x)=\\frac{\\alpha(x)}{\\dfrac{\\alpha(x)}{\\beta(x)}}$$\n\n分母趋于 $a\\ne 0$，分子趋于 $0$，所以 $\\beta(x)\\to 0$，而**不是** $\\infty$。\n\n### C 选项（正确）\n\n因为 $\\alpha(x)\\to\\infty$，且 $\\lim\\limits_{x\\to x_{0}}\\alpha(x)\\beta(x)=a$，所以\n\n$$\\beta(x)=\\frac{\\alpha(x)\\beta(x)}{\\alpha(x)}$$\n\n分子趋于 $a$，分母趋于 $\\infty$，故 $\\beta(x)\\to 0$。\n\n### D 选项（错误）\n\n无界函数乘以某函数极限为 $0$，**不能**推出后者极限为 $0$。可构造 $\\alpha(x)$ 在 $x_{n}$ 处取 $n$（无界），而 $\\beta(x)$ 在对应点取 $\\dfrac{1}{n^{2}}$，乘积趋于 $0$；但在其他点 $\\beta(x)$ 可取 $1$，使整体 $\\beta(x)$ 不趋于 $0$。因此结论不成立。\n\n---\n\n## 核心总结\n\n1. 有界 × 极限为 $0$ $\\nRightarrow$ 另一因子极限为 $0$（因子可能本身极限不存在或为无穷大）。\n2. 无穷小 / 某函数 = 非零常数 $\\Longrightarrow$ 某函数为同阶无穷小（趋于 $0$，而不是无穷大）。\n3. 无穷大 × 某函数 = 有限常数 $\\Longrightarrow$ 某函数必为无穷小（因为除以无穷大趋于 $0$）。\n4. 无界 × 某函数 = $0$ $\\nRightarrow$ 某函数为 $0$（无界函数可以局部取很大值，乘积仍可趋于 $0$）。\n\n---\n\n## 考场口诀\n\n> 有界无界乘为零，推不出另一因子零；\n> 无穷大乘得常数，另一因子必零行。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：极限性质与无穷小无穷大无界函数辨析（李永乐660题第54045题）.md",
+          "isPastExam": false
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：数列极限（三角函数周期性约化与有理化）（李永乐660题第53977题）.md",
+          "date": "2026-10-04",
+          "titleMarkdown": "错题 · 数列极限（三角函数周期性约化与有理化）",
+          "title": "错题 · 数列极限（三角函数周期性约化与有理化）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 错题 · 数列极限（三角函数周期性约化与有理化）\n\n**来源**：李永乐660题 第53977题\n**日期**：2026-10-04\n**题型**：填空题\n**考点归类**：数列极限 / 三角函数周期性 / 等价无穷小替换 / 根式有理化\n**易错指数**：⭐⭐⭐\n\n---\n\n## 原题\n\n求数列极限 $I=\\lim\\limits_{n\\to\\infty} n\\tan\\left(\\pi\\sqrt{n^{2}+1}\\right)=$ ______。\n\n**正确答案：$I=\\dfrac{\\pi}{2}$**\n\n---\n\n## 破题思路\n\n关键：$\\tan$ 的周期是 $\\pi$，把 $\\pi\\sqrt{n^{2}+1}$ 里整数的部分（$\\pi n$）用周期性消掉，剩下的才是有效无穷小。\n\n**第一步：用周期性去掉整数部分**\n\n因为 $\\tan$ 以 $\\pi$ 为周期，\n\n$$\\tan\\left(\\pi\\sqrt{n^{2}+1}\\right)=\\tan\\left(\\pi\\sqrt{n^{2}+1}-\\pi n\\right)=\\tan\\left[\\pi\\left(\\sqrt{n^{2}+1}-n\\right)\\right]$$\n\n**第二步：有理化，把根号差化成 $\\dfrac{1}{n}$ 量级**\n\n$$\\sqrt{n^{2}+1}-n=\\frac{1}{\\sqrt{n^{2}+1}+n}\\sim\\frac{1}{2n}\\quad(n\\to\\infty)$$\n\n所以\n\n$$\\pi\\left(\\sqrt{n^{2}+1}-n\\right)\\sim\\frac{\\pi}{2n}\\to0$$\n\n**第三步：等价无穷小 $\\tan u\\sim u$**\n\n$$\\tan\\left[\\pi\\left(\\sqrt{n^{2}+1}-n\\right)\\right]\\sim\\pi\\left(\\sqrt{n^{2}+1}-n\\right)$$\n\n**第四步：回代求极限**\n\n$$I=\\lim_{n\\to\\infty} n\\cdot\\pi\\left(\\sqrt{n^{2}+1}-n\\right)=\\lim_{n\\to\\infty}\\frac{\\pi n}{\\sqrt{n^{2}+1}+n}=\\frac{\\pi}{2}$$\n\n（最后一步分子分母同除 $n$：$\\dfrac{\\pi}{\\sqrt{1+\\frac{1}{n^{2}}}+1}\\to\\dfrac{\\pi}{2}$。）\n\n---\n\n## 避坑要点\n\n- **先想到周期**：看到 $\\tan(\\pi\\times\\text{根号})$ 这种，先减掉 $\\pi n$（整数倍周期），否则直接对 $\\tan\\left(\\pi\\sqrt{n^{2}+1}\\right)$ 无法用等价无穷小替换。\n- **不能直接等价**：$\\pi\\sqrt{n^{2}+1}\\to\\infty$，本身不是无穷小量，必须先约化成 $\\to0$ 的量。\n- **有理化别漏系数**：$\\sqrt{n^{2}+1}-n$ 要化成 $\\dfrac{1}{\\sqrt{n^{2}+1}+n}$，其阶数是 $\\dfrac{1}{2n}$，不是 $\\dfrac{1}{n}$；那个系数 $\\dfrac{1}{2}$ 正是答案里 $\\dfrac{\\pi}{2}$ 的来源。\n- 与「$n\\sin\\left(2\\pi\\sqrt{n^{2}+1}\\right)$」这类题同源：都是「周期函数减整数倍 → 有理化 → 等价无穷小」的标准三步。\n\n---\n\n## 识别信号（怎么想到用周期性？）\n\n不是灵光一现，而是从「函数长相」按一条判断链反推出来的。\n\n**第 1 步：先看第一反应为什么卡住。**\n要算 $\\lim n\\tan\\left(\\pi\\sqrt{n^{2}+1}\\right)$，一看 $\\tan$ 里是 $\\pi\\sqrt{n^{2}+1}\\to+\\infty$。$\\tan$ 在无穷远处震荡、不收敛，于是等价无穷小、泰勒、洛必达**全体失效**——它们都要求自变量趋于 $0$（或某个确定点）。\n⇒ 第一个念头：**必须把 $\\tan$ 的「里子」从 $\\infty$ 拉回 $0$ 附近。**\n\n**第 2 步：谁有本事把 $\\infty$ 拉回 $0$？——周期性。**\n此时脑子里要有「工具箱清单」：\n\n- $\\arctan$ / 有界函数 → 用有界性；\n- 有理式 → 有理化 / 提最高次；\n- **$\\sin,\\cos,\\tan$ 里塞了个趋于 $\\infty$ 的东西 → 周期性！**（专治三角）\n\n因为 $\\sin,\\cos$ 周期 $2\\pi$、$\\tan$ 周期 $\\pi$，本身对「整数倍周期」完全无感：$\\tan(x+k\\pi)=\\tan x$。**给它减掉整数倍周期，函数值一动不动，但自变量被砍小了。**\n⇒ 看到三角里是 $\\infty$，第一反应就是：**能不能减掉一个「整数倍的周期」，把它压回小量？**\n\n**第 3 步：这里的整数倍周期藏在哪？——是 $n\\pi$。**\n关键观察：$\\sqrt{n^{2}+1}$ 长得很像 $n$，而且是「比 $n$ 大一点点」：\n\n$$\\sqrt{n^{2}+1}=n+(\\text{很小的量})\\quad\\Longrightarrow\\quad \\pi\\sqrt{n^{2}+1}=\\underbrace{n\\pi}_{\\text{整数倍周期}}+(\\text{很小的量})$$\n\n于是\n\n$$\\tan\\left(\\pi\\sqrt{n^{2}+1}\\right)=\\tan\\left(\\pi\\sqrt{n^{2}+1}-n\\pi\\right)=\\tan\\left[\\pi\\left(\\sqrt{n^{2}+1}-n\\right)\\right]$$\n\n这一步之后里子是 $\\pi\\left(\\sqrt{n^{2}+1}-n\\right)\\to0$，**终于回到 $0$ 附近**，可以上等价无穷小 $\\tan u\\sim u$ 了。\n\n**第 4 步：可复用的触发器（同类题一眼反应）。**\n看到 **$\\pi\\times(\\text{一个「几乎正好等于整数」的量})$** 这种结构——如 $\\sqrt{n^{2}+1}$、$\\sqrt{n^{2}+n}$、$n\\sqrt{1+\\frac{1}{n^{2}}}$——就警觉：\n\n1. 里子是 $\\infty$ → 常规工具失效；\n2. 里子是三角 → 想起周期性；\n3. 里子「长得像整数倍 $\\pi$」→ 减掉那个整数倍；\n4. 减完的残差是小的 → 有理化 / 等价无穷小收尾。\n\n**第 5 步：体会出题人的用心。**\n$\\sqrt{n^{2}+1}$ 故意比 $n$「多一丁点」，于是 $\\pi\\sqrt{n^{2}+1}$ 比 $n\\pi$ 也多一丁点。这一丁点就是题眼：减掉 $n\\pi$ 后剩 $\\pi\\left(\\sqrt{n^{2}+1}-n\\right)\\sim\\dfrac{\\pi}{2n}$，再乘外面的 $n$，正好凑出 $\\dfrac{\\pi}{2}$。**题目结构本身就在喊「减 $n\\pi$」。**\n\n**一句话心法**：三角里套着一个趋于无穷、又「几乎正好扛着整数倍周期」的东西 → **先减整数倍周期把它拉回 $0$ 附近 → 再上等价无穷小**。同类兄弟题 $n\\sin\\left(2\\pi\\sqrt{n^{2}+1}\\right)$、$n\\tan\\left(\\pi\\sqrt{n^{2}+n}\\right)$ 都是这个套路。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：数列极限（三角函数周期性约化与有理化）（李永乐660题第53977题）.md",
+          "isPastExam": false
+        }
+      ]
+    },
+    {
+      "date": "2026-10-03",
+      "count": 9,
+      "subjectCounts": {
+        "高数": 9
+      },
+      "topics": [],
+      "takeaways": [],
+      "summary": "9 道错题 · 高数 9 道",
       "items": [
         {
           "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：0^0型幂指函数极限（嵌套对数）.md",
@@ -84,6 +168,24 @@
           "content": "# 错题 · 高阶无穷小关系判定\n\n**来源**：2025 年考研数学（二）第 4 题\n**日期**：2026-10-03\n**考点归类**：高阶无穷小定义 / 等价无穷小替换 / 选择题特值排除法\n**易错指数**：⭐⭐⭐（易受\"高阶\"直觉误导，尤其 B、D）\n\n---\n\n## 原题重现\n\n设函数 $f(x),g(x)$ 在 $x=0$ 的某去心邻域内有定义且恒不为零。若当 $x\\to0$ 时，$f(x)$ 是 $g(x)$ 的高阶无穷小，则当 $x\\to0$ 时（　）\n\nA. $f(x)+g(x)=o(g(x))$\nB. $f(x)g(x)=o\\!\\big(f^2(x)\\big)$\nC. $f(x)=o\\!\\big(e^{g(x)}-1\\big)$\nD. $f(x)=o\\!\\big(g^2(x)\\big)$\n\n**正确答案：C**\n\n---\n\n## 条件翻译\n\n\"$f$ 是 $g$ 的高阶无穷小\"即 $f=o(g)$，按定义：\n\n$$\\lim_{x\\to0}\\frac{f(x)}{g(x)}=0.$$\n\n结合\"恒不为零\"与无穷小语境，知 $\\lim f=\\lim g=0$（$g\\to0$ 是本题的隐含前提）。\n\n## 解法一：极限定义验证法（通法）\n\n- **A**：$\\displaystyle\\lim_{x\\to0}\\frac{f+g}{g}=\\lim\\left(\\frac fg+1\\right)=0+1=1\\ne0$，说明 $f+g\\sim g$（同阶），不是 $o(g)$。**错。**\n- **B**：$\\displaystyle\\frac{f^2}{f\\cdot g}=\\frac fg\\to0$，正确结论是 $f^2=o(fg)$；选项写成 $fg=o(f^2)$，**关系恰好颠倒**。错。\n- **C**：$g\\to0$ 时 $e^{g}-1\\sim g$，故 $\\displaystyle\\lim_{x\\to0}\\frac{f}{e^{g}-1}=\\lim_{x\\to0}\\frac fg=0$，按定义 $f=o(e^{g}-1)$。**对。**\n- **D**：$f=o(g)$ 只说明 $f$ 比 $g$ 衰减快，**推不出与 $g^2$ 的阶**。取 $f=x^2,\\ g=x$，满足 $f=o(g)$，但 $f$ 与 $g^2=x^2$ 等价，不是高阶。**错。**\n\n## 解法二：特值法秒杀（选择题技巧）\n\n取 $f(x)=x^2,\\ g(x)=x$，满足 $x^2=o(x)$。逐项代入：\n\n- **A**：左边 $x^2+x\\sim x$（一阶），右边要求 $o(x)$（高于一阶），排除。\n- **B**：左边 $fg=x^3$，右边 $f^2=x^4$。$\\frac{x^3}{x^4}=\\frac1x\\to\\infty$，方向反了，排除。\n- **C**：左边 $x^2$（二阶），右边 $e^x-1\\sim x$（一阶），$x^2=o(x)$ ✓，保留。\n- **D**：左边 $x^2$，右边 $g^2=x^2$，同阶，排除。\n\n四选一 → **C**。\n\n## 核心结论\n\n**等价无穷小替换不改变高阶关系**：若 $u\\sim v$，则 $o(u)$ 与 $o(v)$ 是同一集合。$e^{g}-1\\sim g$ 使 $o(g)$ 原样传给 $o(e^g-1)$，故 C 天然成立。\n\n## 🎯 避坑总结\n\n- 「$f$ 比 $g$ 快」推不出「$f$ 比 $g^2$ 快」：$g^2$ 的阶取决于 $g$ 自身，$f$ 相对 $g^2$ 可高可低可同阶（$f=x^3,g=x$ 时 $f=o(g^2)$；$f=x^{1.5},g=x$ 时反被 $g^2$ 高阶）。D 踩的就是这个。\n- **方向别倒**：$f=o(g)$ 乘出一个 $f$，得 $f^2=o(fg)$，不是 $fg=o(f^2)$（B 的陷阱）。\n- **加减会被主项主导**：$f+g$ 里 $g$ 是低阶主项，结果与 $g$ 同阶，不可能更高阶（A 的陷阱）。\n- 特值法只做否证：A、B、D 各有反例，C 无（单选即定案）；解答题需补 $e^g-1\\sim g$ 的正面证明。\n",
           "tags": [],
           "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：高阶无穷小关系判定（2025数二第4题）.md",
+          "isPastExam": false
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：含参变量积分极限（放缩法与夹逼定理）.md",
+          "date": "2026-10-03",
+          "titleMarkdown": "错题 · 含参变量积分极限（放缩法与夹逼定理）",
+          "title": "错题 · 含参变量积分极限（放缩法与夹逼定理）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 错题 · 含参变量积分极限（放缩法与夹逼定理）\n\n**来源**：（待补充）\n**日期**：2026-10-03\n**题型**：填空题\n**考点归类**：定积分 / 含参变量积分极限 / 夹逼定理（放缩法）\n**易错指数**：⭐⭐⭐（误用分部积分硬算）\n\n---\n\n## 原题\n\n$$\\lim_{n\\to\\infty}\\int_0^1 x^{n}\\sqrt{x+3}\\,\\mathrm dx=\\underline{\\qquad}.$$\n\n**正确答案**：$0$。\n\n---\n\n## 解题步骤（纯推导）\n\n对于任意 $x\\in[0,1]$，函数 $\\sqrt{x+3}$ 单调递增，所以有\n\n$$\\sqrt{3}\\le\\sqrt{x+3}\\le 2.$$\n\n又因为 $x^{n}\\ge 0$，所以被积函数满足\n\n$$0\\le x^{n}\\sqrt{x+3}\\le 2x^{n}.$$\n\n对上述不等式在区间 $[0,1]$ 上积分：\n\n$$0\\le\\int_0^1 x^{n}\\sqrt{x+3}\\,\\mathrm dx\\le\\int_0^1 2x^{n}\\,\\mathrm dx=2\\left[\\frac{x^{n+1}}{n+1}\\right]_0^1=\\frac{2}{n+1}.$$\n\n当 $n\\to\\infty$ 时，$\\dfrac{2}{n+1}\\to 0$。根据夹逼定理，原极限为\n\n$$\\lim_{n\\to\\infty}\\int_0^1 x^{n}\\sqrt{x+3}\\,\\mathrm dx=0.$$\n\n---\n\n## 🚩 核心破局点与易错点\n\n1. **【破局神技】**：看到 $n\\to\\infty$ 且积分区间为 $[0,1]$，第一反应必须是**夹逼定理（放缩法）**。$x^{n}$ 在 $(0,1)$ 上迅速趋近于 $0$，整个积分必然趋近于 $0$。\n\n2. **【避坑提醒】**：\n   - 千万不要试图用**分部积分法**硬算。$\\displaystyle\\int x^{n}\\sqrt{x+3}\\,\\mathrm dx$ 会陷入递推泥潭，计算量极大且极易出错。\n   - 也不要用**积分中值定理**（除非题目只让证明极限为 $0$；本题是填空题要求精确值，直接放缩最稳妥）。\n\n---\n\n## 🎯 考场口诀\n\n「零到一，$x$ 的 $n$ 次方；求极限，必定零；有界函数放两边，夹逼定理秒出局。」\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：含参变量积分极限（放缩法与夹逼定理）.md",
           "isPastExam": false
         },
         {
