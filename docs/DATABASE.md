@@ -18,8 +18,9 @@
 
 ## State semantics
 
-- 首次 `correct` 建立 Day 1，下一次安排绝对 Day 4
-- `correct` 按 Day 4 → Day 7 → Day 30 推进，Day 30 后进入长期巩固并按实际复习日每 30 天重复
+- 首次 `correct` 建立 Day 1，下一次在实际完成日 3 天后进入 Day 4
+- `correct` 按实际完成日滚动计算下一节点：Day 4 → Day 7 间隔 3 天，Day 7 → Day 30 间隔 23 天；逾期完成不会把后续节点压到次日
+- Day 30 后进入长期巩固，并按实际复习日每 30 天重复
 - `hard` 保留周期和阶段并安排次日补强
 - `wrong` 清空当前周期，下一次 `correct` 建立新 Day 1
 - `mastered` 题目不进入今日队列

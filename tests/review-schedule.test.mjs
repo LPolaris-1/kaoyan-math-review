@@ -24,7 +24,7 @@ test("absolute Ebbinghaus days are anchored to one Day 1", () => {
   assert.equal(plannedDateForDay("2026-08-20", 30), "2026-09-18");
 });
 
-test("the first correct review establishes Day 1 and targets absolute Day 4", () => {
+test("the first correct review establishes Day 1 and targets Day 4 three days later", () => {
   const result = scheduleReview({ masteryLevel: 0, reviewStage: 0 }, "correct", "2026-08-20");
   assert.deepEqual(result, {
     masteryLevel: 1,
@@ -35,7 +35,7 @@ test("the first correct review establishes Day 1 and targets absolute Day 4", ()
   });
 });
 
-test("scheduled correct reviews advance to absolute Day 4, Day 7 and Day 30", () => {
+test("on-time correct reviews preserve the Day 1, 4, 7 and 30 intervals", () => {
   const day4 = scheduleReview({
     masteryLevel: 1,
     reviewStage: 1,
@@ -101,7 +101,7 @@ test("wrong invalidates the current cycle and waits for a new Day 1", () => {
   });
 });
 
-test("early correct improves mastery without advancing the absolute timeline", () => {
+test("early correct improves mastery without advancing the pending stage", () => {
   const result = scheduleReview({
     masteryLevel: 2,
     reviewStage: 2,
@@ -114,16 +114,27 @@ test("early correct improves mastery without advancing the absolute timeline", (
   assert.equal(result.cycleStartedAt, "2026-08-20");
 });
 
-test("overdue correct keeps absolute node semantics but never schedules in the past", () => {
+test("overdue Day 4 correct schedules Day 7 three days from actual completion", () => {
   const result = scheduleReview({
     masteryLevel: 1,
     reviewStage: 1,
     cycleStartedAt: "2026-08-20",
-    nextReviewDate: "2026-08-21",
-  }, "correct", "2026-08-25");
+    nextReviewDate: "2026-08-23",
+  }, "correct", "2026-09-02");
   assert.equal(result.reviewStage, 2);
-  assert.equal(result.nextReviewDate, "2026-08-26");
+  assert.equal(result.nextReviewDate, "2026-09-05");
   assert.equal(result.cycleStartedAt, "2026-08-20");
+});
+
+test("overdue Day 7 correct schedules Day 30 twenty-three days from actual completion", () => {
+  const result = scheduleReview({
+    masteryLevel: 2,
+    reviewStage: 2,
+    cycleStartedAt: "2026-08-20",
+    nextReviewDate: "2026-08-26",
+  }, "correct", "2026-09-10");
+  assert.equal(result.reviewStage, 3);
+  assert.equal(result.nextReviewDate, "2026-10-03");
 });
 
 test("progress metadata distinguishes active, reinforcement, maintenance and unstarted states", () => {
@@ -141,6 +152,8 @@ test("progress metadata distinguishes active, reinforcement, maintenance and uns
     reviewStage: 1,
     cycleStartedAt: "2026-08-20",
     nextReviewDate: "2026-08-25",
+    lastResult: "hard",
+    lastReviewedAt: "2026-08-24T01:00:00.000Z",
   }, "2026-08-24");
   assert.equal(reinforcement.isSupplementalRetry, true);
   assert.equal(reinforcement.statusLabel, "Day 4 · 补强中");
@@ -163,12 +176,26 @@ test("timeline nodes expose completed, current, future and missed nodes", () => 
     reviewStage: 1,
     cycleStartedAt: "2026-08-20",
     nextReviewDate: "2026-08-25",
+    lastResult: "hard",
+    lastReviewedAt: "2026-08-24T01:00:00.000Z",
   }, "2026-08-24");
   assert.deepEqual(nodes.map(({ day, plannedDate, status }) => ({ day, plannedDate, status })), [
     { day: 1, plannedDate: "2026-08-20", status: "completed" },
-    { day: 4, plannedDate: "2026-08-23", status: "missed" },
-    { day: 7, plannedDate: "2026-08-26", status: "future" },
-    { day: 30, plannedDate: "2026-09-18", status: "future" },
+    { day: 4, plannedDate: "2026-08-25", status: "current" },
+    { day: 7, plannedDate: "2026-08-28", status: "future" },
+    { day: 30, plannedDate: "2026-09-20", status: "future" },
+  ]);
+
+  assert.deepEqual(getTimelineNodes({
+    reviewStage: 2,
+    cycleStartedAt: "2026-08-20",
+    nextReviewDate: "2026-09-05",
+    lastResult: "correct",
+  }, "2026-09-02").map(({ day, plannedDate, status }) => ({ day, plannedDate, status })), [
+    { day: 1, plannedDate: "2026-08-20", status: "completed" },
+    { day: 4, plannedDate: "2026-08-23", status: "completed" },
+    { day: 7, plannedDate: "2026-09-05", status: "current" },
+    { day: 30, plannedDate: "2026-09-28", status: "future" },
   ]);
 
   assert.deepEqual(getTimelineNodes({ reviewStage: 4, cycleStartedAt: "2026-08-20" }, "2026-09-20")

@@ -40,7 +40,7 @@ test("review action uses scheduleReview and records the before/after cycle state
   });
 });
 
-test("first correct event records Day 1 while progress schedules absolute Day 4", () => {
+test("first correct event records Day 1 while progress schedules Day 4 three days later", () => {
   const { changes, event } = buildReviewAction({
     base: {
       itemId: "new-item",
@@ -100,6 +100,21 @@ test("hard preserves Day 1 and stage while creating a reinforcement event", () =
   assert.equal(changes.nextReviewDate, "2026-08-25");
   assert.equal(event.targetDay, 4);
   assert.equal(event.scheduledDate, "2026-08-23");
+});
+
+test("an overdue review records its original due date and rolls the next interval from completion", () => {
+  const { changes, event } = buildReviewAction({
+    base: baseProgress,
+    action: "review",
+    result: "correct",
+    today: "2026-09-02",
+    now: "2026-09-02T01:00:00.000Z",
+  });
+  assert.equal(changes.reviewStage, 2);
+  assert.equal(changes.nextReviewDate, "2026-09-05");
+  assert.equal(event.targetDay, 4);
+  assert.equal(event.scheduledDate, "2026-08-23");
+  assert.equal(event.occurredDate, "2026-09-02");
 });
 
 test("setCycleStart accepts a historical Day 1 and recalculates the current target", () => {
