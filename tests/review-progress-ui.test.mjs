@@ -59,6 +59,12 @@ test("复习总览使用客户端派生时间轴、KPI、逾期和四象限筛�
   assert.match(source, /未来 7 天/);
   assert.match(source, /未来 30 天/);
   assert.match(source, /未设置 Day 1/);
+  assert.match(source, /今日实际负载/);
+  assert.match(source, /昨日新题/);
+  assert.match(source, /到期复习/);
+  assert.match(source, /十日内待补/);
+  assert.match(source, /补足进度/);
+  assert.match(source, /role="progressbar"/);
   assert.match(source, /overview-timeline/);
   assert.match(source, /四象限/);
   assert.match(source, /onReviewNow\(item\.id\)/);
@@ -66,6 +72,7 @@ test("复习总览使用客户端派生时间轴、KPI、逾期和四象限筛�
   assert.match(library, /groupReviewsByDate/);
   assert.match(library, /groupOverdue/);
   assert.match(library, /buildQuadrantEntries/);
+  assert.match(library, /buildDailyReviewLoad/);
 });
 
 test("全部进度样式包含桌面四节点和移动端响应式布局", async () => {
@@ -76,6 +83,8 @@ test("全部进度样式包含桌面四节点和移动端响应式布局", async
   assert.match(source, /\.queue-intake/);
   assert.match(source, /\.today-progress/);
   assert.match(source, /\.today-progress-track/);
+  assert.match(source, /\.overview-daily-load/);
+  assert.match(source, /\.overview-catchup-track/);
 });
 
 test("复习事件 API 支持按日期批量读取并保留单题查询", async () => {

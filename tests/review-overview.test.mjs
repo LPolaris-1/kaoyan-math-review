@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   OVERVIEW_RANGES,
+  buildDailyReviewLoad,
   buildQuadrantEntries,
   calculateReviewSummary,
   groupByScheduleDay,
@@ -12,8 +13,9 @@ import {
 const today = "2026-08-27";
 
 function entry(id, overrides = {}) {
+  const { itemDate, ...progressOverrides } = overrides;
   return {
-    item: { id, title: id },
+    item: { id, title: id, date: itemDate ?? "2026-08-20" },
     progress: {
       itemId: id,
       masteryLevel: 1,
@@ -24,10 +26,101 @@ function entry(id, overrides = {}) {
       cycleStartedAt: "2026-08-26",
       lastReviewedAt: null,
       lastResult: null,
-      ...overrides,
+      ...progressOverrides,
     },
   };
 }
+
+function reviewEvent(itemId, overrides = {}) {
+  return {
+    itemId,
+    eventType: "review",
+    result: "correct",
+    occurredDate: today,
+    scheduledDate: today,
+    reviewStageBefore: 1,
+    ...overrides,
+  };
+}
+
+test("daily load includes yesterday intake, due work, and unfinished intake from the last ten days", () => {
+  const entries = [
+    entry("yesterday", { itemDate: "2026-08-26", cycleStartedAt: null, reviewStage: 0 }),
+    entry("due", { itemDate: "2026-08-01" }),
+    entry("overdue", { itemDate: "2026-08-01", nextReviewDate: "2026-08-26" }),
+    entry("catchup", { itemDate: "2026-08-20", cycleStartedAt: null, reviewStage: 0 }),
+    entry("too-old", { itemDate: "2026-08-16", cycleStartedAt: null, reviewStage: 0 }),
+    entry("today-import", { itemDate: today, cycleStartedAt: null, reviewStage: 0 }),
+  ];
+  const load = buildDailyReviewLoad(entries, [], today);
+  assert.deepEqual(load.groups.map(({ key, total }) => [key, total]), [
+    ["yesterday", 1],
+    ["due", 2],
+    ["catchup", 1],
+  ]);
+  assert.equal(load.total, 4);
+  assert.equal(load.completed, 0);
+  assert.equal(load.remaining, 4);
+  assert.equal(load.catchup.total, 1);
+});
+
+test("daily load keeps a stable denominator after formal review and deduplicates categories", () => {
+  const entries = [
+    entry("yesterday-done", {
+      itemDate: "2026-08-26",
+      cycleStartedAt: today,
+      reviewStage: 1,
+      nextReviewDate: "2026-08-30",
+      lastReviewedAt: `${today}T02:00:00.000Z`,
+      lastResult: "correct",
+    }),
+    entry("catchup-done", {
+      itemDate: "2026-08-20",
+      cycleStartedAt: today,
+      reviewStage: 1,
+      nextReviewDate: "2026-08-30",
+      lastReviewedAt: `${today}T02:10:00.000Z`,
+      lastResult: "correct",
+    }),
+    entry("due-done", {
+      itemDate: "2026-08-01",
+      reviewStage: 2,
+      nextReviewDate: "2026-08-30",
+      lastReviewedAt: `${today}T02:20:00.000Z`,
+      lastResult: "correct",
+    }),
+  ];
+  const events = [
+    reviewEvent("yesterday-done", { reviewStageBefore: 0 }),
+    reviewEvent("catchup-done", { reviewStageBefore: 0 }),
+    reviewEvent("catchup-done", { result: "hard", reviewStageBefore: 0 }),
+    reviewEvent("due-done", { scheduledDate: today, reviewStageBefore: 1 }),
+  ];
+  const load = buildDailyReviewLoad(entries, events, today);
+  assert.deepEqual(load.groups.map(({ key, total, completed }) => [key, total, completed]), [
+    ["yesterday", 1, 1],
+    ["due", 1, 1],
+    ["catchup", 1, 1],
+  ]);
+  assert.equal(load.total, 3);
+  assert.equal(load.completed, 3);
+  assert.equal(load.remaining, 0);
+  assert.deepEqual(load.catchup, { total: 1, completed: 1, remaining: 0 });
+});
+
+test("daily load excludes mastered and future-only work while preserving completed-today items", () => {
+  const entries = [
+    entry("mastered-old", { itemDate: "2026-08-20", cycleStartedAt: null, reviewStage: 0, mastered: true }),
+    entry("future", { itemDate: "2026-08-01", nextReviewDate: "2026-09-02" }),
+    entry("mastered-today", { itemDate: "2026-08-20", cycleStartedAt: null, reviewStage: 0, mastered: true }),
+  ];
+  const load = buildDailyReviewLoad(entries, [
+    { itemId: "mastered-today", eventType: "master", occurredDate: today, reviewStageBefore: 0 },
+  ], today);
+  assert.equal(load.total, 1);
+  assert.equal(load.completed, 1);
+  assert.equal(load.groups.find(({ key }) => key === "catchup")?.total, 1);
+});
 
 test("overview summary separates due, overdue, future windows, and unstarted", () => {
   const entries = [

@@ -4,6 +4,7 @@ import { useEffect, useMemo, type CSSProperties } from "react";
 import { getReviewProgressMeta, quadrantFor } from "../../../lib/review-schedule.mjs";
 import {
   OVERVIEW_RANGES,
+  buildDailyReviewLoad,
   calculateReviewSummary,
   groupByScheduleDay,
   groupOverdue,
@@ -15,6 +16,7 @@ import { InlineMathMarkdown } from "../inline-math-markdown";
 
 type ReviewItem = {
   id: string;
+  date: string;
   title: string;
   titleMarkdown?: string;
   subject: string;
@@ -35,6 +37,14 @@ type Progress = {
 };
 
 type Entry = { item: ReviewItem; progress: Progress };
+type ReviewEvent = {
+  itemId: string;
+  eventType: string;
+  result?: string | null;
+  occurredDate: string;
+  scheduledDate?: string | null;
+  reviewStageBefore?: number | null;
+};
 type ReviewMeta = {
   phase: "mastered" | "unstarted" | "maintenance" | "active";
   currentTargetDay: number | null;
@@ -58,6 +68,7 @@ const quadrantMeta: Record<Exclude<QuadrantKey, "all">, { label: string; caption
 
 export function ReviewOverview({
   entries,
+  events,
   today,
   range,
   selectedDate,
@@ -69,6 +80,7 @@ export function ReviewOverview({
   onReviewNow,
 }: {
   entries: Entry[];
+  events: ReviewEvent[];
   today: string;
   range: 7 | 30 | 60;
   selectedDate: string | null;
@@ -80,6 +92,7 @@ export function ReviewOverview({
   onReviewNow: (itemId: string) => void;
 }) {
   const filteredEntries = useMemo(() => filterByQuadrants(entries, quadrants), [entries, quadrants]);
+  const dailyLoad = useMemo(() => buildDailyReviewLoad(entries, events, today), [entries, events, today]);
   const summary = useMemo(() => calculateReviewSummary(filteredEntries, today), [filteredEntries, today]);
   const dateGroups = useMemo(() => groupReviewsByDate(filteredEntries, today, range), [filteredEntries, today, range]);
   const overdue = useMemo(() => groupOverdue(filteredEntries, today), [filteredEntries, today]);
@@ -103,8 +116,10 @@ export function ReviewOverview({
     <section className="rolling-section review-overview">
       <div className="section-heading">
         <div><p className="section-kicker">REVIEW OVERVIEW / 复习总览</p><h2>看清接下来每一天的复习负载</h2></div>
-        <p>时间轴由当前复习进度派生，不重新请求 API；逾期题单独保留，不会被挪进今天。</p>
+        <p>今日负载按“昨日新题 → 到期复习 → 十日内待补”统计；未来时间轴仍只展示正式调度节点。</p>
       </div>
+
+      <DailyLoadPanel load={dailyLoad} />
 
       <div className="overview-kpi-grid" aria-label="复习总览统计">
         <Kpi label="今日到期" value={summary.dueToday} onClick={() => onKpiNavigate("due")} />
@@ -154,6 +169,36 @@ export function ReviewOverview({
             return <button type="button" key={key} aria-pressed={isSelected} className={`overview-quadrant overview-quadrant-${key} ${isSelected ? "is-selected" : ""}`} onClick={() => onUpdateQuery({ quadrants: toggleQuadrant(quadrants, key), date: null, itemId: null })}><span>{quadrantMeta[key].caption}</span><strong>{count}</strong><b>{quadrantMeta[key].label}</b></button>;
           })}
         </div>
+      </div>
+    </section>
+  );
+}
+
+function DailyLoadPanel({ load }: { load: ReturnType<typeof buildDailyReviewLoad> }) {
+  const catchupPercent = load.catchup.total
+    ? Math.round(load.catchup.completed / load.catchup.total * 100)
+    : 0;
+  return (
+    <section className="overview-daily-load" aria-label="今日实际负载">
+      <div className="overview-daily-load-heading">
+        <div><span>今日实际负载</span><strong>{load.total} 题</strong></div>
+        <p>已完成 {load.completed} 道 · 剩余 {load.remaining} 道</p>
+      </div>
+      <div className="overview-load-groups">
+        {load.groups.map((group, index) => (
+          <div className={`overview-load-group overview-load-group-${group.key}`} key={group.key}>
+            <span>{index + 1}. {group.label}</span>
+            <strong>{group.total}</strong>
+            <small>完成 {group.completed} · 待做 {group.remaining}</small>
+          </div>
+        ))}
+      </div>
+      <div className="overview-catchup-progress">
+        <div><span>十日内未完成任务 · 补足进度</span><b>{load.catchup.completed} / {load.catchup.total}</b></div>
+        <div className="overview-catchup-track" role="progressbar" aria-label="十日内待补进度" aria-valuemin={0} aria-valuemax={load.catchup.total} aria-valuenow={load.catchup.completed}>
+          <i style={{ width: `${catchupPercent}%` }} />
+        </div>
+        <small>{load.catchup.total ? `还需补足 ${load.catchup.remaining} 道；超过 10 天的未开始题暂不计入。` : "当前没有十日内待补任务。"}</small>
       </div>
     </section>
   );

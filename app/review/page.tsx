@@ -17,6 +17,7 @@ import { parseReviewQuery, serializeReviewQuery } from "../../lib/review-navigat
 
 type ReviewItem = {
   id: string;
+  date: string;
   title: string;
   titleMarkdown?: string;
   subject: string;
@@ -79,6 +80,8 @@ type ReviewEvent = {
   eventType: string;
   result?: string | null;
   occurredDate: string;
+  scheduledDate?: string | null;
+  reviewStageBefore?: number | null;
 };
 
 const frequencyLabels = {
@@ -314,6 +317,8 @@ export default function RollingReviewPage() {
             eventType: payload.action === "master" ? "master" : "review",
             result: payload.result ?? null,
             occurredDate: today,
+            scheduledDate: progressById[itemId]?.nextReviewDate ?? today,
+            reviewStageBefore: progressById[itemId]?.reviewStage ?? 0,
           },
         ]);
       }
@@ -416,6 +421,7 @@ export default function RollingReviewPage() {
       {tab === "overview" && (
         <ReviewOverview
           entries={entries}
+          events={todayEvents}
           today={today}
           range={query.range}
           selectedDate={query.date}

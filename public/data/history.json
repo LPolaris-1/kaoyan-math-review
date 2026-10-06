@@ -1,9 +1,41 @@
 {
-  "generatedAt": "2026-10-05T15:24:20.300Z",
+  "generatedAt": "2026-10-06T03:35:52.323Z",
   "source": "06-Resources/学习/考研/考研数学/错题本/原档案",
-  "totalNotes": 313,
-  "totalDays": 61,
+  "totalNotes": 314,
+  "totalDays": 62,
   "days": [
+    {
+      "date": "2026-10-06",
+      "count": 1,
+      "subjectCounts": {
+        "高数": 1
+      },
+      "topics": [
+        "定积分应用、液体静压力、相关变化率、微元法、形心法"
+      ],
+      "takeaways": [],
+      "summary": "1 道错题 · 高数 1 道",
+      "items": [
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：三角形薄板静水压力与水面上升的相关变化率（微元法·形心法）.md",
+          "date": "2026-10-06",
+          "titleMarkdown": "高数错题-三角形薄板静水压力与水面上升的相关变化率（微元法·形心法）",
+          "title": "高数错题-三角形薄板静水压力与水面上升的相关变化率（微元法·形心法）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "定积分应用、液体静压力、相关变化率、微元法、形心法",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 高数错题-三角形薄板静水压力与水面上升的相关变化率（微元法·形心法）\n\n**日期**：2026-10-06\n**来源**：手写习题（来源待补）\n**知识点**：定积分的物理应用、液体静压力、相关变化率、微元法、形心法\n**难度**：⭐⭐⭐\n\n---\n\n## 📌 题目\n\n边长为 $2$ 的等边三角形薄平板铅直沉没在水中，且一条边与水面相齐。记重力加速度为 $g$，水的密度为 $\\rho$。\n\n（1）求该平板一侧所受的水压力；\n（2）当水面开始以 $0.1$ 的速度上涨时，求平板一侧所受水压力的变化率。\n\n**答案：**（1）$F=\\rho g$；（2）$\\dfrac{\\mathrm dF}{\\mathrm dt}=0.1\\sqrt{3}\\,\\rho g\\approx 0.173\\,\\rho g$（压力增大）。\n\n---\n\n## 💡 破题思路\n\n- **坐标系**：与水面相齐的那条边取为上边，自该边沿板面铅直向下为 $x$ 轴正方向。\n- **几何**：等边三角形边长 $2$，高（最大深度）$H=2\\cdot\\dfrac{\\sqrt3}{2}=\\sqrt3$，深度范围 $x\\in[0,\\sqrt3]$。\n- **宽度函数**：取深度 $x$ 处厚 $\\mathrm dx$ 的水平微元带，用**相似三角形**线性插值。水面（$x=0$）宽 $2$，顶点（$x=\\sqrt3$）宽 $0$：\n\n$$w(x)=2\\cdot\\frac{\\sqrt3-x}{\\sqrt3}=2\\left(1-\\frac{x}{\\sqrt3}\\right).$$\n\n- **微元**：深度 $x$ 处压强 $P=\\rho g x$，微元压力 $\\mathrm dF=\\rho g x\\cdot w(x)\\,\\mathrm dx$。\n\n---\n\n## 📝 解答\n\n### （1）静水压力\n\n$$F=\\int_0^{\\sqrt3}\\rho g x\\cdot 2\\left(1-\\frac{x}{\\sqrt3}\\right)\\mathrm dx\n=\\frac{2\\rho g}{\\sqrt3}\\int_0^{\\sqrt3}\\left(\\sqrt3\\,x-x^{2}\\right)\\mathrm dx.$$\n\n$$F=\\frac{2\\rho g}{\\sqrt3}\\left[\\frac{\\sqrt3}{2}x^{2}-\\frac{x^{3}}{3}\\right]_0^{\\sqrt3}\n=\\frac{2\\rho g}{\\sqrt3}\\left(\\frac{3\\sqrt3}{2}-\\sqrt3\\right)\n=\\frac{2\\rho g}{\\sqrt3}\\cdot\\frac{\\sqrt3}{2}=\\rho g.$$\n\n写成边长 $l$ 的通用式即 $F=\\dfrac{1}{8}\\rho g l^{3}$，代入 $l=2$ 得 $F=\\rho g$。\n\n**形心法验证**：形心深度为 $\\dfrac{H}{3}=\\dfrac{\\sqrt3}{3}$，面积 $S=\\dfrac{\\sqrt3}{4}\\cdot 2^{2}=\\sqrt3$，\n\n$$F=\\rho g\\cdot\\frac{\\sqrt3}{3}\\cdot\\sqrt3=\\rho g.$$\n\n（一般地 $F=\\rho g\\cdot\\dfrac{H}{3}\\cdot S=\\rho g\\cdot\\dfrac{\\sqrt3 l}{6}\\cdot\\dfrac{\\sqrt3}{4}l^{2}=\\dfrac{1}{8}\\rho g l^{3}$。）\n\n$$\\boxed{\\ F=\\rho g\\ }$$\n\n### （2）水面上升时水压力的变化率\n\n设水面高出上边的高度为 $h$，则板面上任一点的深度变为 $x+h$，压强 $P=\\rho g(x+h)$：\n\n$$F(h)=\\int_0^{\\sqrt3}\\rho g(x+h)\\cdot 2\\left(1-\\frac{x}{\\sqrt3}\\right)\\mathrm dx\n=\\rho g\\left[\\int_0^{\\sqrt3} x\\,w(x)\\,\\mathrm dx+h\\int_0^{\\sqrt3} w(x)\\,\\mathrm dx\\right].$$\n\n其中 $\\displaystyle\\int_0^{\\sqrt3} x\\,w(x)\\,\\mathrm dx=1$（即 $h=0$ 时的 $\\frac{F}{\\rho g}$），$\\displaystyle\\int_0^{\\sqrt3} w(x)\\,\\mathrm dx=\\sqrt3$（三角形面积）。故\n\n$$F(h)=\\rho g\\left(1+\\sqrt3\\,h\\right).$$\n\n对时间求导：\n\n$$\\frac{\\mathrm dF}{\\mathrm dt}=\\sqrt3\\,\\rho g\\cdot\\frac{\\mathrm dh}{\\mathrm dt}=\\sqrt3\\,\\rho g\\times 0.1=0.1\\sqrt3\\,\\rho g\\approx 0.173\\,\\rho g.$$\n\n水面上升使浸没加深、压力增大，故变化率为**正**：\n\n$$\\boxed{\\ \\frac{\\mathrm dF}{\\mathrm dt}=0.1\\sqrt3\\,\\rho g\\approx 0.173\\,\\rho g\\ \\text{（增大）}\\ }$$\n\n---\n\n## 🚩 易错点（本题手写解法的具体问题）\n\n- **压强符号方向搞反**：手写第（2）问把压强写成 $\\rho g(x-h)$，于是积出 $F=\\rho g(1-\\sqrt3 h)$、变化率 $-\\sqrt3\\rho g\\cdot 0.1$。但水面在三角形上边**之上**时，板上任一点相对水面的深度是 $x+h$（越积越深），压强应取 $\\rho g(x+h)$。**符号是本题唯一的错点**，结果应为 $F(h)=\\rho g(1+\\sqrt3 h)$、变化率为 $+0.1\\sqrt3\\rho g$。\n- **物理意义的自检**：水面上涨 ⇒ 同一块板下沉更深 ⇒ 压力一定变大。若算出负的变化率，说明符号或深度定义反了。\n- **相关变化率要“先建函数再求导”**：先把 $F$ 写成关于 $h$ 的函数 $F(h)$，再对 $t$ 求导并代 $\\frac{\\mathrm dh}{\\mathrm dt}$；不要直接把常数代进去。\n- **宽度函数用相似三角形**：$w(x)$ 随深度线性变化（水面 $2$ → 顶点 $0$），先写出 $w(x)$ 再积分；被积函数先展开成幂函数，避免分部积分。\n- **摆放方式决定答案**：本题结论依赖“一条边与水面相齐、整体全没”。若换成直角顶点或别的边接触水面，积分区间与 $w(x)$ 全变，答案随之改变。\n\n---\n\n## 识别信号\n\n- “平板 / 闸门 / 薄片沉入液体，求一侧受到的（水）压力” → 定积分应用·静压力，套 $F=\\displaystyle\\int \\rho g\\,y\\,w(y)\\,\\mathrm dy$（$y$ 为深度）。\n- 板形为**三角形 / 梯形 / 抛物线弓形**，宽度随深度变化 → 先用**相似三角形**写出宽度函数 $w(y)$（线性），再积分。\n- 题干再加“水面以某速度升降 / 运动” → 属于**相关变化率**：引入水面高度 $h(t)$，写 $F(h)$ 后对 $t$ 求导，代 $\\frac{\\mathrm dh}{\\mathrm dt}$。\n- 等腰 / 等边 / 直角三角形 → 常用**形心法** $F=\\rho g\\cdot \\bar y\\cdot S$ 快速校验微元法结果。\n\n---\n\n## 🔗 关联\n\n- 属高数“定积分物理应用”题型族（液体静压力、变力做功、形心 / 转动惯量）。\n- 与 [[06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-液体静压力（等腰直角三角形平板一侧水压力）（2020数二真题第12题）|高数错题-液体静压力（2020数二第12题）]] 同属“静压力 + 相似三角形宽度函数”题型，可对照两者的几何摆放与积分区间。\n- 与 [[06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-相关变化率动点在曲线y=x^3上l对时间的变化率（2016数二真题第13题）|高数错题-相关变化率（2016数二第13题）]] 同属“相关变化率”题型。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/错题：三角形薄板静水压力与水面上升的相关变化率（微元法·形心法）.md",
+          "isPastExam": false
+        }
+      ]
+    },
     {
       "date": "2026-10-05",
       "count": 13,

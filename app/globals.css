@@ -147,6 +147,13 @@ button { cursor: pointer; }
 .progress-card-footer { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; color: var(--muted); font-size: 11px; }
 .immediate-review-button { margin-left: auto; border: 1px solid var(--blue); border-radius: 100px; padding: 7px 11px; color: var(--blue); background: #fff; font-size: 11px; font-weight: 700; }
 .immediate-review-button:hover { color: #fff; background: var(--blue); }
+.overview-daily-load { margin-bottom: 18px; padding: 16px; border: 1px solid #dce7e8; border-radius: 13px; background: #f7fbfb; }
+.overview-daily-load-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
+.overview-daily-load-heading div { display: flex; align-items: baseline; gap: 9px; }.overview-daily-load-heading span { color: var(--muted); font-size: 11px; }.overview-daily-load-heading strong { color: var(--ink); font-size: 23px; }.overview-daily-load-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+.overview-load-groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.overview-load-group { padding: 11px; border: 1px solid #e4eded; border-radius: 10px; background: rgba(255, 255, 255, .78); }.overview-load-group span, .overview-load-group small { display: block; color: var(--muted); font-size: 11px; }.overview-load-group strong { display: block; margin: 5px 0 3px; color: var(--blue); font-size: 21px; }.overview-load-group-yesterday { border-left: 3px solid #d86446; }.overview-load-group-due { border-left: 3px solid #d5a53b; }.overview-load-group-catchup { border-left: 3px solid #9ebbc1; }
+.overview-catchup-progress { margin-top: 13px; }.overview-catchup-progress > div:first-child { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 11px; }.overview-catchup-progress b { color: var(--blue); }.overview-catchup-progress > small { display: block; margin-top: 6px; color: var(--muted); font-size: 10px; }
+.overview-catchup-track { height: 6px; margin-top: 7px; overflow: hidden; border-radius: 999px; background: #e6eeee; }.overview-catchup-track i { display: block; height: 100%; border-radius: inherit; background: #a9c6cc; transition: width .18s ease; }
 .overview-kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; margin-bottom: 18px; }
 .overview-kpi { width: 100%; padding: 15px; border: 1px solid var(--line); border-radius: 11px; color: inherit; background: #fff; text-align: left; cursor: pointer; }
 .overview-kpi:hover, .overview-kpi:focus-visible { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(62, 113, 126, .12); }
@@ -209,6 +216,8 @@ button { cursor: pointer; }
   .progress-timeline { grid-template-columns: repeat(3, 1fr); }
   .progress-card-footer { display: grid; gap: 5px; }
   .overview-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .overview-daily-load-heading { align-items: flex-start; flex-direction: column; }
+  .overview-load-groups { grid-template-columns: 1fr; }
   .overview-toolbar, .overview-subheading, .overview-item { align-items: flex-start; flex-direction: column; }
   .overview-timeline { display: flex; overflow-x: auto; padding-bottom: 4px; }
   .overview-day { flex: 0 0 88px; }
