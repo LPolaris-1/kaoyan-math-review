@@ -1,22 +1,45 @@
 {
-  "generatedAt": "2026-10-07T04:14:07.787Z",
+  "generatedAt": "2026-10-07T15:39:04.445Z",
   "source": "06-Resources/学习/考研/考研数学/错题本/原档案",
-  "totalNotes": 326,
+  "totalNotes": 331,
   "totalDays": 63,
   "days": [
     {
       "date": "2026-10-07",
-      "count": 2,
+      "count": 7,
       "subjectCounts": {
-        "高数": 2
+        "线代": 2,
+        "高数": 5
       },
       "topics": [
+        "三对角行列式递推、等比与等差构造、数学归纳法、克拉默法则、含参方程组解的讨论",
+        "特征值与特征向量、向量组线性无关的证明、相似变换与矩阵表示",
+        "一阶线性微分方程、积分因子法、凑微分法、全微分条件辨析",
+        "含反三角函数的定积分、三角换元、降幂公式、分部积分",
         "含绝对值的变限积分、函数奇偶性判定、变限积分求导、单调性讨论",
-        "由参数方程确定的函数、导数定义求极限、参数方程求导法、显式反解对比"
+        "旋转体侧面积与体积、变限积分方程求导、可分离变量微分方程、反双曲函数"
       ],
       "takeaways": [],
-      "summary": "2 道错题 · 高数 2 道",
+      "summary": "7 道错题 · 线代 2 道、高数 5 道",
       "items": [
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-含反三角函数的定积分计算（三角换元与分部积分）（2008数二真题第17题）.md",
+          "date": "2026-10-07",
+          "titleMarkdown": "高数错题-含反三角函数的定积分计算（三角换元与分部积分）（2008数二真题第17题）",
+          "title": "高数错题-含反三角函数的定积分计算（三角换元与分部积分）（2008数二真题第17题）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "含反三角函数的定积分、三角换元、降幂公式、分部积分",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 高数错题-含反三角函数的定积分计算（三角换元与分部积分）（2008数二真题第17题）\n\n**日期**：2026-10-07\n**来源**：2008年数二真题 第17题\n**知识点**：含反三角函数的定积分、三角换元、降幂公式、分部积分\n**难度**：⭐⭐⭐\n\n---\n\n## 📌 原题\n\n计算\n\n$$\\int_{0}^{1}\\frac{x^{2}\\arcsin x}{\\sqrt{1-x^{2}}}\\,\\mathrm dx.$$\n\n**答案：$\\dfrac{\\pi^{2}}{16}+\\dfrac{1}{4}$。**\n\n---\n\n## 💡 破题思路\n\n- 被积函数含 $\\sqrt{1-x^{2}}$ 与 $\\arcsin x$，令 $x=\\sin\\theta$ 可同时消去根号和反三角函数，转化为纯三角积分。\n- $\\sin^{2}\\theta$ 用二倍角公式降幂，拆成两项；其中 $\\displaystyle\\int\\theta\\cos 2\\theta\\,\\mathrm d\\theta$ 必须用分部积分，注意符号与系数。\n- 若一开始就取 $u=\\arcsin x$ 直接分部积分，会引入较复杂的原函数，计算量更大；先换元是本题最稳妥的通法。\n\n---\n\n## 📝 方法一：三角换元 + 拆项分部积分（推荐）\n\n**第一步 三角换元。** 令 $x=\\sin\\theta$，$\\theta\\in\\left[0,\\dfrac{\\pi}{2}\\right]$，则\n\n$$\\mathrm dx=\\cos\\theta\\,\\mathrm d\\theta,\\quad \\sqrt{1-x^{2}}=\\cos\\theta,\\quad \\arcsin x=\\theta,\\quad x^{2}=\\sin^{2}\\theta.$$\n\n原积分化为\n\n$$I=\\int_{0}^{\\frac{\\pi}{2}}\\theta\\sin^{2}\\theta\\,\\mathrm d\\theta.$$\n\n**第二步 降幂拆分。** 利用 $\\sin^{2}\\theta=\\dfrac{1-\\cos 2\\theta}{2}$：\n\n$$I=\\frac{1}{2}\\int_{0}^{\\frac{\\pi}{2}}\\theta\\,\\mathrm d\\theta-\\frac{1}{2}\\int_{0}^{\\frac{\\pi}{2}}\\theta\\cos 2\\theta\\,\\mathrm d\\theta.$$\n\n第一项：\n\n$$\\frac{1}{2}\\int_{0}^{\\frac{\\pi}{2}}\\theta\\,\\mathrm d\\theta=\\frac{1}{2}\\cdot\\frac{1}{2}\\left(\\frac{\\pi}{2}\\right)^{2}=\\frac{\\pi^{2}}{16}.$$\n\n记第二项 $J=\\displaystyle\\int_{0}^{\\frac{\\pi}{2}}\\theta\\cos 2\\theta\\,\\mathrm d\\theta$，则\n\n$$I=\\frac{\\pi^{2}}{16}-\\frac{1}{2}J.$$\n\n**第三步 分部积分计算 $J$。**\n\n$$J=\\int_{0}^{\\frac{\\pi}{2}}\\theta\\cos 2\\theta\\,\\mathrm d\\theta=\\left[\\theta\\cdot\\frac{\\sin 2\\theta}{2}\\right]_{0}^{\\frac{\\pi}{2}}-\\int_{0}^{\\frac{\\pi}{2}}\\frac{\\sin 2\\theta}{2}\\,\\mathrm d\\theta.$$\n\n第一项为 $0$。第二项：\n\n$$-\\frac{1}{2}\\int_{0}^{\\frac{\\pi}{2}}\\sin 2\\theta\\,\\mathrm d\\theta=\\left[\\frac{\\cos 2\\theta}{4}\\right]_{0}^{\\frac{\\pi}{2}}=\\frac{\\cos\\pi-\\cos 0}{4}=\\frac{-1-1}{4}=-\\frac{1}{2}.$$\n\n所以 $J=-\\dfrac{1}{2}$。\n\n**第四步 代回求 $I$。**\n\n$$I=\\frac{\\pi^{2}}{16}-\\frac{1}{2}\\left(-\\frac{1}{2}\\right)=\\frac{\\pi^{2}}{16}+\\frac{1}{4}.$$\n\n---\n\n## 📝 方法二：直接分部积分（备选，计算略繁）\n\n**第一步 取 $u=\\arcsin x$，$\\mathrm dv=\\dfrac{x^{2}}{\\sqrt{1-x^{2}}}\\,\\mathrm dx$。** 先求 $v$：\n\n$$v=\\int\\frac{x^{2}}{\\sqrt{1-x^{2}}}\\,\\mathrm dx\\xrightarrow{x=\\sin t}\\int\\sin^{2}t\\,\\mathrm dt=\\frac{1}{2}(t-\\sin t\\cos t)=\\frac{1}{2}\\left(\\arcsin x-x\\sqrt{1-x^{2}}\\right).$$\n\n**第二步 分部积分。**\n\n$$I=\\left[\\arcsin x\\cdot v\\right]_{0}^{1}-\\int_{0}^{1}v\\cdot\\frac{1}{\\sqrt{1-x^{2}}}\\,\\mathrm dx.$$\n\n边界项：\n\n$$\\left[\\arcsin x\\cdot\\frac{1}{2}\\left(\\arcsin x-x\\sqrt{1-x^{2}}\\right)\\right]_{0}^{1}=\\frac{1}{2}\\left(\\frac{\\pi}{2}\\right)^{2}=\\frac{\\pi^{2}}{8}.$$\n\n剩余积分：\n\n$$-\\frac{1}{2}\\int_{0}^{1}\\frac{\\arcsin x-x\\sqrt{1-x^{2}}}{\\sqrt{1-x^{2}}}\\,\\mathrm dx=-\\frac{1}{2}\\left[\\int_{0}^{1}\\frac{\\arcsin x}{\\sqrt{1-x^{2}}}\\,\\mathrm dx-\\int_{0}^{1}x\\,\\mathrm dx\\right].$$\n\n其中\n\n$$\\int_{0}^{1}\\frac{\\arcsin x}{\\sqrt{1-x^{2}}}\\,\\mathrm dx=\\left[\\frac{1}{2}(\\arcsin x)^{2}\\right]_{0}^{1}=\\frac{1}{2}\\left(\\frac{\\pi}{2}\\right)^{2}=\\frac{\\pi^{2}}{8},$$\n\n$$\\int_{0}^{1}x\\,\\mathrm dx=\\frac{1}{2}.$$\n\n因此剩余积分\n\n$$=-\\frac{1}{2}\\left(\\frac{\\pi^{2}}{8}-\\frac{1}{2}\\right)=-\\frac{\\pi^{2}}{16}+\\frac{1}{4}.$$\n\n所以\n\n$$I=\\frac{\\pi^{2}}{8}-\\frac{\\pi^{2}}{16}+\\frac{1}{4}=\\frac{\\pi^{2}}{16}+\\frac{1}{4}.$$\n\n---\n\n## 🚩 易错点\n\n- **换元后上下限要一起换**：$x$ 从 $0$ 到 $1$ 对应 $\\theta$ 从 $0$ 到 $\\dfrac{\\pi}{2}$，别忘替换。\n- **降幂与分部积分的符号**：$\\sin^{2}\\theta=\\dfrac{1-\\cos 2\\theta}{2}$ 带负号；分部积分 $\\displaystyle\\int\\theta\\cos 2\\theta\\,\\mathrm d\\theta$ 中 $\\cos 2\\theta$ 的原函数是 $\\dfrac{\\sin 2\\theta}{2}$，再积一次 $\\sin 2\\theta$ 又引入系数与负号，极易算错。\n- **方法选择**：直接以 $u=\\arcsin x$ 分部积分会绕远，先三角换元再算更稳。\n\n---\n\n## 识别信号\n\n- 被积函数同时含 $\\sqrt{1-x^{2}}$ 与 $\\arcsin x$（或 $\\arccos x$）→ 令 $x=\\sin\\theta$ 一次消去根号与反三角。\n- 出现 $\\sin^{2}\\theta$、$\\cos^{2}\\theta$ 与 $\\theta$ 相乘 → 先降幂拆项，再对 $\\theta\\cos 2\\theta$ 型分部积分。\n- 求 $\\displaystyle\\int\\arcsin x\\,\\mathrm dx$ 型 → 结果形式 $\\dfrac{1}{2}\\left(\\arcsin x-x\\sqrt{1-x^{2}}\\right)$，可作为常用原函数记忆。\n\n---\n\n## 考场口诀\n\n> **\"反三角配根号，换元 $\\sin$ 最巧妙；降幂拆项分部积，结果 $\\dfrac{\\pi^{2}}{16}+\\dfrac{1}{4}$。\"**\n\n---\n\n## 🔗 关联\n\n- 同属\"三角换元 + 定积分计算\"题型族。\n- 同属\"含反三角函数的积分\"题型族。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-含反三角函数的定积分计算（三角换元与分部积分）（2008数二真题第17题）.md",
+          "isPastExam": true
+        },
         {
           "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-含绝对值的变限积分与函数性质判定（李永乐660题第54161题）.md",
           "date": "2026-10-07",
@@ -36,6 +59,42 @@
           "isPastExam": false
         },
         {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-旋转体侧面积等于体积两倍反求曲线方程（变限积分与微分方程）.md",
+          "date": "2026-10-07",
+          "titleMarkdown": "高数错题-旋转体侧面积等于体积两倍反求曲线方程（变限积分与微分方程）",
+          "title": "高数错题-旋转体侧面积等于体积两倍反求曲线方程（变限积分与微分方程）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "旋转体侧面积与体积、变限积分方程求导、可分离变量微分方程、反双曲函数",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 高数错题-旋转体侧面积等于体积两倍反求曲线方程（变限积分与微分方程）\n\n**日期**：2026-10-07\n**来源**：2008年数二真题 第19题\n**知识点**：旋转体侧面积与体积、变限积分方程求导、可分离变量微分方程\n**难度**：⭐⭐⭐\n\n---\n\n## 📌 原题\n\n设 $f(x)$ 是区间 $[0,+\\infty)$ 上具有连续导数的单调增加函数，且 $f(0)=1$。对任意的 $t\\in[0,+\\infty)$，直线 $x=0$、$x=t$，曲线 $y=f(x)$ 以及 $x$ 轴所围成的曲边梯形绕 $x$ 轴旋转一周生成一旋转体。若该旋转体的侧面积在数值上等于其体积的 $2$ 倍，求函数 $f(x)$ 的表达式。\n\n**答案：$f(x)=\\dfrac{\\mathrm e^{x}+\\mathrm e^{-x}}{2}$。**\n\n---\n\n## 💡 破题思路\n\n- 先写出**旋转体体积**与**侧面积**的微元公式，把\"侧面积 = 2 × 体积\"翻译成**变限积分方程**。\n- 变限积分方程**两端对上限 $t$ 求导**，去掉积分号，得到关于 $f$ 与 $f'$ 的微分方程。\n- 利用 $f$ 单调增加且 $f(0)=1$ 定出 $f>0$、$f'\\ge 0$，去掉根号与去绝对值的符号问题，再用**可分离变量**求解。\n\n---\n\n## 📝 解答\n\n### 第一步：写出体积与侧面积\n\n旋转体在区间 $[0,t]$ 上的体积 $V(t)$ 与侧面积 $S(t)$ 分别为\n\n$$V(t)=\\int_{0}^{t}\\pi f^{2}(x)\\,\\mathrm dx,\\qquad S(t)=\\int_{0}^{t}2\\pi f(x)\\sqrt{1+[f'(x)]^{2}}\\,\\mathrm dx.$$\n\n### 第二步：依据题意列变限积分方程\n\n由 $S(t)=2V(t)$：\n\n$$\\int_{0}^{t}2\\pi f(x)\\sqrt{1+[f'(x)]^{2}}\\,\\mathrm dx=2\\int_{0}^{t}\\pi f^{2}(x)\\,\\mathrm dx.$$\n\n两边同约去 $2\\pi$，得变限积分方程\n\n$$\\int_{0}^{t}f(x)\\sqrt{1+[f'(x)]^{2}}\\,\\mathrm dx=\\int_{0}^{t}f^{2}(x)\\,\\mathrm dx.$$\n\n### 第三步：两端对 $t$ 求导\n\n方程两边对 $t$ 求导，并将自变量 $t$ 回写为 $x$：\n\n$$f(x)\\sqrt{1+[f'(x)]^{2}}=f^{2}(x).$$\n\n### 第四步：约去 $f$ 并平方\n\n由于 $f(x)$ 单调增加且 $f(0)=1$，故在该区间内 $f(x)\\ge 1>0$。方程两边约去 $f(x)$ 并平方：\n\n$$1+[f'(x)]^{2}=f^{2}(x)\\ \\Longrightarrow\\ [f'(x)]^{2}=f^{2}(x)-1.$$\n\n又由 $f$ 单调增加可知 $f'(x)\\ge 0$，故得一阶微分方程\n\n$$\\frac{\\mathrm df}{\\mathrm dx}=\\sqrt{f^{2}-1}.$$\n\n### 第五步：分离变量并积分\n\n对该可分离变量方程积分：\n\n$$\\int\\frac{\\mathrm df}{\\sqrt{f^{2}-1}}=\\int \\mathrm dx\\ \\Longrightarrow\\ \\ln\\left|f+\\sqrt{f^{2}-1}\\right|=x+C.$$\n\n代入初始条件 $f(0)=1$：\n\n$$\\ln\\left|1+\\sqrt{1^{2}-1}\\right|=0+C\\ \\Longrightarrow\\ \\ln 1=C\\ \\Longrightarrow\\ C=0.$$\n\n因此有\n\n$$f+\\sqrt{f^{2}-1}=\\mathrm e^{x}.$$\n\n### 第六步：解关于 $f$ 的代数方程\n\n利用共轭关系 $\\left(f+\\sqrt{f^{2}-1}\\right)\\left(f-\\sqrt{f^{2}-1}\\right)=1$，可得\n\n$$f-\\sqrt{f^{2}-1}=\\mathrm e^{-x}.$$\n\n将两式相加并除以 $2$，得\n\n$$f(x)=\\frac{\\mathrm e^{x}+\\mathrm e^{-x}}{2}.$$\n\n（即 $f(x)=\\cosh x$，且 $\\cosh 0=1$，符合初始条件。）\n\n---\n\n## 🚩 易错点\n\n- **侧面积公式别漏 $\\sqrt{1+[f'(x)]^{2}}$**：体积用 $\\pi f^{2}$，侧面积用 $2\\pi f\\sqrt{1+[f'(x)]^{2}}$，两者不是同一被积函数，混淆会直接列错方程。\n- **变限积分方程求导要对上限求导**：$\\dfrac{\\mathrm d}{\\mathrm dt}\\displaystyle\\int_{0}^{t}g(x)\\,\\mathrm dx=g(t)$，别忘把回代后的变量写回 $x$。\n- **约去 $f$ 前的正负判定**：必须先由\"单调增 + $f(0)=1$\"推出 $f\\ge 1>0$ 才能约去 $f$；由单调增推出 $f'\\ge 0$ 才能把 $\\sqrt{[f'(x)]^{2}}$ 写成 $f'(x)$ 并取正根，缺这一步会丢解或引入伪解。\n- **积分结果与共轭技巧**：$\\displaystyle\\int\\frac{\\mathrm df}{\\sqrt{f^{2}-1}}=\\ln\\left|f+\\sqrt{f^{2}-1}\\right|$ 是常见原函数；解出 $f+\\sqrt{f^{2}-1}=\\mathrm e^{x}$ 后，用共轭关系凑出 $\\mathrm e^{-x}$ 再相加，是解这类\"根号套根号\"的标准手法。\n\n---\n\n## 识别信号\n\n- 题目用**几何量之间的关系**（侧面积/体积/弧长等）反求曲线 → 先写微元公式，再列**变限积分方程**并两端求导。\n- 出现 $f^{2}-1$、$\\sqrt{f^{2}-1}$ 型 → 联想 $\\ln\\left|f+\\sqrt{f^{2}-1}\\right|$ 型原函数与双曲函数/共轭配对。\n- 条件只给单调性与某点值 → 往往用来**定号、去绝对值、定常数**。\n\n---\n\n## 考场口诀\n\n> **\"侧面积列体积式，两端求导去积分；单调定号约 $f$ 项，分离变量套对数；共轭配对相加半，得解余双曲余弦。\"**\n\n---\n\n## 🔗 关联\n\n- 同属\"旋转体体积/侧面积\"题型族，与 [[06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-函数方程与二重积分求旋转体体积（2020数二真题第18题）|2020数二第18题（函数方程与旋转体体积）]] 呼应。\n- 同属\"变限积分方程 + 微分方程\"题型族。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-旋转体侧面积等于体积两倍反求曲线方程（变限积分与微分方程）.md",
+          "isPastExam": true
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-一阶线性微分方程通解与全微分条件辨析（2008数二真题）.md",
+          "date": "2026-10-07",
+          "titleMarkdown": "高数错题-一阶线性微分方程通解与全微分条件辨析（2008数二真题）",
+          "title": "高数错题-一阶线性微分方程通解与全微分条件辨析（2008数二真题）",
+          "subject": "高数",
+          "chapter": "",
+          "topic": "一阶线性微分方程、积分因子法、凑微分法、全微分条件辨析",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 高数错题-一阶线性微分方程通解与全微分条件辨析（2008数二真题）\n\n**日期**：2026-10-07\n**来源**：2008年数二真题 第10题\n**知识点**：一阶线性微分方程、积分因子法、凑微分法、全微分条件\n**难度**：⭐⭐\n\n---\n\n## 📌 原题\n\n微分方程\n\n$$(y+x^{2}\\mathrm e^{-x})\\,\\mathrm dx-x\\,\\mathrm dy=0$$\n\n的通解是 $y=\\underline{\\qquad}$。\n\n**答案：$y=Cx-x\\mathrm e^{-x}$。**\n\n---\n\n## 💡 破题思路\n\n- 看到 $y$ 与 $\\mathrm dy$、$x$ 与 $\\mathrm dx$ 混合，且能整理成 $y'+P(x)y=Q(x)$ 的形式，立刻判定为**一阶线性微分方程**。\n- 化为标准形式必须把 $y'$ 的系数化为 $1$，本题两边同除以 $x$，得 $y'-\\dfrac{1}{x}y=x\\mathrm e^{-x}$。\n- 见到 $y\\,\\mathrm dx-x\\,\\mathrm dy$ 这种结构，优先尝试**凑微分**凑出 $\\mathrm d\\left(\\dfrac{y}{x}\\right)$，往往比套公式更快。\n\n---\n\n## 📝 方法一：常数变易法（万能通法，保底首选）\n\n**第一步 化为标准形式。** 原方程变形为\n\n$$x\\frac{\\mathrm dy}{\\mathrm dx}-y=x^{2}\\mathrm e^{-x}.$$\n\n两边同除以 $x$（设 $x\\neq 0$），得标准一阶线性方程\n\n$$y'-\\frac{1}{x}y=x\\mathrm e^{-x},$$\n\n此时 $P(x)=-\\dfrac{1}{x}$，$Q(x)=x\\mathrm e^{-x}$。\n\n**第二步 计算积分因子。**\n\n$$\\mu(x)=\\mathrm e^{\\int P(x)\\,\\mathrm dx}=\\mathrm e^{\\int-\\frac{1}{x}\\,\\mathrm dx}=\\mathrm e^{-\\ln|x|}=\\frac{1}{|x|},$$\n\n取一个正的形式 $\\mu(x)=\\dfrac{1}{x}$ 代入即可。\n\n**第三步 套用通解公式。** 通解公式为\n\n$$y=\\mathrm e^{-\\int P(x)\\,\\mathrm dx}\\left[\\int Q(x)\\mathrm e^{\\int P(x)\\,\\mathrm dx}\\,\\mathrm dx+C\\right].$$\n\n代入得\n\n$$y=x\\left[\\int x\\mathrm e^{-x}\\cdot\\frac{1}{x}\\,\\mathrm dx+C\\right]=x\\left[\\int \\mathrm e^{-x}\\,\\mathrm dx+C\\right].$$\n\n积分得\n\n$$y=x(-\\mathrm e^{-x}+C)=Cx-x\\mathrm e^{-x}.$$\n\n---\n\n## 📝 方法二：全微分/凑微分法（考场秒杀，极度推荐）\n\n**第一步 拆分并重组。** 原方程可变形为\n\n$$y\\,\\mathrm dx-x\\,\\mathrm dy+x^{2}\\mathrm e^{-x}\\,\\mathrm dx=0.$$\n\n**第二步 逆向使用商的求导法则。** 观察前两项 $y\\,\\mathrm dx-x\\,\\mathrm dy$。由商求导法则\n\n$$\\mathrm d\\left(\\frac{y}{x}\\right)=\\frac{x\\,\\mathrm dy-y\\,\\mathrm dx}{x^{2}},$$\n\n故 $y\\,\\mathrm dx-x\\,\\mathrm dy=-x^{2}\\mathrm d\\left(\\dfrac{y}{x}\\right)$。\n\n**第三步 代入化简。** 将上式代回原式：\n\n$$-x^{2}\\mathrm d\\left(\\frac{y}{x}\\right)+x^{2}\\mathrm e^{-x}\\,\\mathrm dx=0.$$\n\n两边同除以 $-x^{2}$（设 $x\\neq 0$）：\n\n$$\\mathrm d\\left(\\frac{y}{x}\\right)-\\mathrm e^{-x}\\,\\mathrm dx=0,$$\n\n即\n\n$$\\mathrm d\\left(\\frac{y}{x}\\right)=\\mathrm e^{-x}\\,\\mathrm dx.$$\n\n**第四步 两边积分。**\n\n$$\\frac{y}{x}=\\int \\mathrm e^{-x}\\,\\mathrm dx=-\\mathrm e^{-x}+C.$$\n\n两边同乘 $x$，得通解\n\n$$y=Cx-x\\mathrm e^{-x}.$$\n\n---\n\n## ❓ 核心疑惑：这题满足全微分成立的条件吗？\n\n**疑问：这道题本身是全微分方程吗？**\n\n**解答：不满足。** 对 $M(x,y)\\,\\mathrm dx+N(x,y)\\,\\mathrm dy=0$，若为全微分方程须满足 $\\dfrac{\\partial M}{\\partial y}=\\dfrac{\\partial N}{\\partial x}$。代入检验：\n\n- $M(x,y)=y+x^{2}\\mathrm e^{-x}$，$N(x,y)=-x$；\n- $\\dfrac{\\partial M}{\\partial y}=1$，$\\dfrac{\\partial N}{\\partial x}=-1$。\n\n因 $1\\neq-1$，即 $\\dfrac{\\partial M}{\\partial y}\\neq\\dfrac{\\partial N}{\\partial x}$，故原方程**不是**全微分方程。\n\n**为什么凑微分法还能行？** 因为第二步中两边同除以 $-x^{2}$，本质上相当于乘了一个积分因子 $\\mu(x)=-\\dfrac{1}{x^{2}}$。代入后新方程变为\n\n$$-\\mathrm e^{-x}\\,\\mathrm dx+\\frac{1}{x}\\,\\mathrm dy=0.$$\n\n再验证条件：$\\dfrac{\\partial(-\\mathrm e^{-x})}{\\partial y}=0$，$\\dfrac{\\partial\\left(\\frac{1}{x}\\right)}{\\partial x}=0$，偏导相等，此时它才成为全微分方程。\n\n---\n\n## 🚩 易错点\n\n- **别忘了先化标准形式**：套公式前必须把 $y'$ 的系数化成 $1$，否则 $P(x)$、$Q(x)$ 会取错。\n- **积分因子去绝对值**：$\\mathrm e^{\\int-\\frac{1}{x}\\mathrm dx}=\\mathrm e^{-\\ln|x|}=\\dfrac{1}{|x|}$，解方程时只取正形式 $\\dfrac{1}{x}$ 代入是合法的，不必纠结绝对值。\n- **全微分条件易误判**：本题 $\\dfrac{\\partial M}{\\partial y}=1\\neq-1=\\dfrac{\\partial N}{\\partial x}$，原方程并非全微分方程；是乘了积分因子后才变成全微分方程，别把\"乘因子后成立\"当成\"原式成立\"。\n- **凑微分优先**：见到 $y\\,\\mathrm dx-x\\,\\mathrm dy$（或 $x\\,\\mathrm dy+y\\,\\mathrm dx$）先想凑微分，比硬套公式快得多。\n\n---\n\n## 识别信号\n\n- 方程可整理为 $y'+P(x)y=Q(x)$ → 一阶线性，直接上积分因子/常数变易公式。\n- 出现 $y\\,\\mathrm dx-x\\,\\mathrm dy$ → 凑 $\\mathrm d\\left(\\dfrac{y}{x}\\right)$；出现 $x\\,\\mathrm dy+y\\,\\mathrm dx$ → 凑 $\\mathrm d(xy)$。\n- 判断/辨析全微分方程 → 核对 $\\dfrac{\\partial M}{\\partial y}$ 与 $\\dfrac{\\partial N}{\\partial x}$ 是否相等。\n\n---\n\n## 考场口诀\n\n> **\"微分方程求通解，先化标准再识别；积分因子套公式，万能通法保底牌；若遇 $y\\,\\mathrm dx$ 减 $x\\,\\mathrm dy$，凑出分式商求导，秒杀只需两步走；全微条件需偏导，不等莫慌找因子。\"**\n\n---\n\n## 🔗 关联\n\n- 同属\"一阶线性微分方程 / 积分因子法\"题型族。\n- 同属\"凑微分与全微分条件辨析\"题型族，与 [[06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-全微分求原函数（凑微分法与偏积分法对比）（2017真题第12题）|2017真题第12题（全微分求原函数）]] 呼应。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-一阶线性微分方程通解与全微分条件辨析（2008数二真题）.md",
+          "isPastExam": true
+        },
+        {
           "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-由参数方程确定的函数与导数定义求极限（双解法对比）.md",
           "date": "2026-10-07",
           "titleMarkdown": "高数错题-由参数方程确定的函数与导数定义求极限（双解法对比）",
@@ -52,6 +111,42 @@
           "tags": [],
           "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-由参数方程确定的函数与导数定义求极限（双解法对比）.md",
           "isPastExam": false
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/线代/线代错题-三对角行列式递推与含参方程组解的讨论（克拉默法则与通解）.md",
+          "date": "2026-10-07",
+          "titleMarkdown": "线代错题-三对角行列式递推与含参方程组解的讨论（克拉默法则与通解）",
+          "title": "线代错题-三对角行列式递推与含参方程组解的讨论（克拉默法则与通解）",
+          "subject": "线代",
+          "chapter": "",
+          "topic": "三对角行列式递推、等比与等差构造、数学归纳法、克拉默法则、含参方程组解的讨论",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 线代错题-三对角行列式递推与含参方程组解的讨论（克拉默法则与通解）\n\n**日期**：2026-10-07\n**来源**：2008年数二真题 第22题\n**知识点**：三对角行列式递推、等比/等差构造、数学归纳法、克拉默法则、含参方程组解的讨论\n**难度**：⭐⭐⭐\n\n---\n\n## 📌 原题\n\n设 $n$ 元线性方程组 $Ax=b$，其系数矩阵 $A$ 的主对角线元素均为 $2a$，上对角线元素均为 $1$，下对角线元素均为 $a^{2}$，其余元素为 $0$，即\n\n$$\nA=\\begin{pmatrix}\n2a & 1 & 0 & \\cdots & 0 \\\\\na^{2} & 2a & 1 & \\cdots & 0 \\\\\n0 & a^{2} & 2a & \\cdots & 0 \\\\\n\\vdots & & \\ddots & \\ddots & \\vdots \\\\\n0 & \\cdots & 0 & a^{2} & 2a\n\\end{pmatrix},\n$$\n\n其中 $x=\\begin{pmatrix}x_{1}&x_{2}&\\cdots&x_{n}\\end{pmatrix}^{T}$，$b=\\begin{pmatrix}1&0&\\cdots&0\\end{pmatrix}^{T}$，记 $D_{n}=|A|$。\n\n(I) 证明行列式 $|A|=(n+1)a^{n}$；\n\n(II) 当 $a$ 为何值时，该方程组有唯一解，并求 $x_{1}$；\n\n(III) 当 $a$ 为何值时，该方程组有无穷多解，并求通解。\n\n**答案：** (I) $|A|=(n+1)a^{n}$；(II) $a\\neq 0$，$\\displaystyle x_{1}=\\frac{n}{(n+1)a}$；(III) $a=0$，$\\displaystyle x=c\\begin{pmatrix}1&0&\\cdots&0\\end{pmatrix}^{T}+\\begin{pmatrix}0&1&0&\\cdots&0\\end{pmatrix}^{T}$（$c$ 为任意常数）。\n\n---\n\n## 💡 破题思路\n\n- **三对角行列式**：按第一行展开，再对余子式按第一列展开，得到二阶递推 $D_{n}=2aD_{n-1}-a^{2}D_{n-2}$，再构造等比/等差或数学归纳求解。\n- **唯一解 / 无穷多解**：先看 $|A|$ 的零点。$|A|\\neq 0$ 时唯一解（克拉默法则）；$|A|=0$ 时再看秩，$R(A)=R(A,b)<n$ 则无穷多解。\n- **求单个分量 $x_{1}$**：用克拉默法则最直接，注意分子分母都是 $a$ 的幂，约分时指数别写错。\n\n---\n\n## 📝 解答\n\n### (I) 求 $|A|$\n\n**方法一：构造等比与等差数列递推法**\n\n设 $n$ 阶行列式为 $D_{n}$。将 $D_{n}$ 按第一行展开，并对展开后的代数余子式按第一列再次展开，可得三对角行列式的递推关系式\n\n$$\nD_{n}=2aD_{n-1}-a^{2}D_{n-2}.\n$$\n\n将上式变形为如下形式，以构造等比数列：\n\n$$\nD_{n}-aD_{n-1}=a\\left(D_{n-1}-aD_{n-2}\\right).\n$$\n\n令 $b_{n}=D_{n}-aD_{n-1}$，则有 $b_{n}=ab_{n-1}$。计算初始项\n\n$$\nb_{2}=D_{2}-aD_{1}=\\left(4a^{2}-a^{2}\\right)-a(2a)=a^{2}.\n$$\n\n由此可知数列 $\\{b_{n}\\}$ 是首项为 $a^{2}$、公比为 $a$ 的等比数列，故当 $n\\ge 2$ 时：\n\n$$\nD_{n}-aD_{n-1}=a^{n-2}\\cdot a^{2}=a^{n}.\n$$\n\n对上式两端同时除以 $a^{n}$，得\n\n$$\n\\frac{D_{n}}{a^{n}}-\\frac{D_{n-1}}{a^{n-1}}=1.\n$$\n\n这说明数列 $\\left\\{\\dfrac{D_{n}}{a^{n}}\\right\\}$ 是公差为 $1$ 的等差数列。由于 $\\dfrac{D_{1}}{a}=\\dfrac{2a}{a}=2$，故该数列的通项为\n\n$$\n\\frac{D_{n}}{a^{n}}=2+(n-1)\\cdot 1=n+1.\n$$\n\n由此证得\n\n$$\n|A|=D_{n}=(n+1)a^{n}.\n$$\n\n**方法二：数学归纳法**\n\n当 $n=1$ 时，$D_{1}=2a=(1+1)a^{1}$，命题成立。当 $n=2$ 时，$D_{2}=4a^{2}-a^{2}=3a^{2}=(2+1)a^{2}$，命题成立。假设对于阶数小于 $n$ 的行列式命题均成立，即 $D_{n-1}=na^{n-1}$，$D_{n-2}=(n-1)a^{n-2}$。根据递推关系式 $D_{n}=2aD_{n-1}-a^{2}D_{n-2}$，代入假设得\n\n$$\nD_{n}=2a\\left(na^{n-1}\\right)-a^{2}\\left((n-1)a^{n-2}\\right)=2na^{n}-(n-1)a^{n}=(n+1)a^{n}.\n$$\n\n综上，对于任意正整数 $n$，命题 $|A|=(n+1)a^{n}$ 均成立。\n\n### (II) 有唯一解求 $a$ 与 $x_{1}$\n\n方程组 $Ax=b$ 有唯一解的充要条件为 $|A|\\neq 0$，由此得 $a\\neq 0$。利用克拉默法则，$\\displaystyle x_{1}=\\frac{|A_{1}|}{|A|}$，其中 $|A_{1}|$ 为将 $A$ 第一列换为 $b$ 后的行列式：\n\n$$\n|A_{1}|=\\begin{vmatrix}\n1 & 1 & 0 & \\cdots & 0 \\\\\n0 & 2a & 1 & \\cdots & 0 \\\\\n0 & a^{2} & 2a & \\cdots & 0 \\\\\n\\vdots & & \\ddots & \\ddots & \\vdots \\\\\n0 & \\cdots & 0 & a^{2} & 2a\n\\end{vmatrix}=1\\cdot D_{n-1}=na^{n-1}.\n$$\n\n计算得唯一解的第一个分量为\n\n$$\nx_{1}=\\frac{na^{n-1}}{(n+1)a^{n}}=\\frac{n}{(n+1)a}.\n$$\n\n### (III) 有无穷多解求 $a$ 与通解\n\n若方程组有无穷多解，需满足 $|A|=0$，即 $a=0$。当 $a=0$ 时，增广矩阵 $(A,b)$ 为\n\n$$\n(A,b)=\\begin{pmatrix}\n0 & 1 & 0 & \\cdots & 0 & 1 \\\\\n0 & 0 & 1 & \\cdots & 0 & 0 \\\\\n\\vdots & & \\ddots & \\ddots & & \\vdots \\\\\n0 & 0 & 0 & \\cdots & 1 & 0 \\\\\n0 & 0 & 0 & \\cdots & 0 & 0\n\\end{pmatrix}.\n$$\n\n由矩阵形状可知 $R(A)=R(A,b)=n-1$。选取 $x_{1}$ 为自由未知量，令 $x_{1}=c$，代回方程组可得 $x_{2}=1$，$x_{3}=0$，$\\cdots$，$x_{n}=0$。故方程组的通解为\n\n$$\nx=c\\begin{pmatrix}1\\\\0\\\\\\vdots\\\\0\\end{pmatrix}+\\begin{pmatrix}0\\\\1\\\\0\\\\\\vdots\\\\0\\end{pmatrix},\n$$\n\n其中 $c$ 为任意常数。\n\n---\n\n## 🚩 易错点\n\n- **递推的推导步骤**：必须先按第一行展开，再对余子式按第一列展开，才能得到 $D_{n}=2aD_{n-1}-a^{2}D_{n-2}$；直接套公式容易写错符号与系数。\n- **等差构造的首项**：数列 $\\left\\{\\dfrac{D_{n}}{a^{n}}\\right\\}$ 的首项是 $\\dfrac{D_{1}}{a}=2$，不是 $D_{0}$；写错会使通项偏移。\n- **解的判定**：$|A|\\neq 0$ 唯一解；$|A|=0$ 且 $R(A)=R(A,b)<n$ 无穷多解（本题 $a=0$ 时 $R=n-1<n$）。要分清\"有解\"与\"秩相等\"。\n- **克拉默法则的适用范围**：仅在 $|A|\\neq 0$ 时可用；$x_{1}$ 的分子分母都是 $a$ 的幂，约分时 $\\frac{a^{n-1}}{a^{n}}=\\frac{1}{a}$，指数别算错。\n- **通解结构**：基础解系取 $e_{1}$、特解取 $e_{2}$，两者不要写反。\n\n---\n\n## 识别信号\n\n- **三对角行列式** → 展开得二阶递推 $D_{n}=aD_{n-1}+bD_{n-2}$，再用等比/等差构造或数学归纳求解。\n- 含参数方程组问 **\"唯一解 / 无穷多解 / 无解\"** → 先算 $|A|$ 的零点，再分别比较秩。\n- 求某个具体分量 $x_{k}$ → 优先克拉默法则或用增广矩阵消元。\n\n---\n\n## 考场口诀\n\n> **\"三对角递推展开，等比等差两相凑；克莱姆求分量，秩定解的多少。\"**\n\n---\n\n## 🔗 关联\n\n- 同属\"行列式计算\"题型族，与 [[06-Resources/学习/考研/考研数学/错题本/原档案/线代/加边法解行列式|加边法解行列式]]、[[06-Resources/学习/考研/考研数学/错题本/原档案/线代/线代错题-代数余子式之差A11-A12（替换行化归为行列式）（2019数二真题第14题）|2019数二第14题（代数余子式之差）]] 呼应。\n- 同属\"含参方程组解的讨论 / 解的结构\"题型族，与 [[06-Resources/学习/考研/考研数学/错题本/原档案/线代/线代错题-由基础解系反求齐次线性方程组|由基础解系反求齐次线性方程组]]、[[06-Resources/学习/考研/考研数学/错题本/原档案/线代/线代错题-含参矩阵方程线性表示与解的结构|含参矩阵方程线性表示与解的结构]] 呼应。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/线代/线代错题-三对角行列式递推与含参方程组解的讨论（克拉默法则与通解）.md",
+          "isPastExam": true
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/线代/线代错题-由特征向量关系证明线性无关并求相似对角化（P⁻¹AP）.md",
+          "date": "2026-10-07",
+          "titleMarkdown": "线代错题-由特征向量关系证明线性无关并求相似对角化（$P^{-1}AP$）",
+          "title": "线代错题-由特征向量关系证明线性无关并求相似对角化（$P^{-1}AP$）",
+          "subject": "线代",
+          "chapter": "",
+          "topic": "特征值与特征向量、向量组线性无关的证明、相似变换与矩阵表示",
+          "methods": [],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "# 线代错题-由特征向量关系证明线性无关并求相似对角化（$P^{-1}AP$）\n\n**日期**：2026-10-07\n**来源**：2008年数二真题 第23题\n**知识点**：特征值与特征向量、向量组线性无关的证明、相似变换与矩阵表示\n**难度**：⭐⭐⭐\n\n---\n\n## 📌 原题\n\n设 $A$ 为 $3$ 阶矩阵，$\\alpha_{1},\\alpha_{2}$ 为 $A$ 的分别属于特征值 $-1,1$ 的特征向量，向量 $\\alpha_{3}$ 满足\n\n$$\nA\\alpha_{3}=\\alpha_{2}+\\alpha_{3}.\n$$\n\n(I) 证明 $\\alpha_{1},\\alpha_{2},\\alpha_{3}$ 线性无关；\n\n(II) 令 $P=(\\alpha_{1},\\alpha_{2},\\alpha_{3})$，求 $P^{-1}AP$。\n\n**答案：** (II) $\\displaystyle P^{-1}AP=\\begin{pmatrix}-1&0&0\\\\0&1&1\\\\0&0&1\\end{pmatrix}$。\n\n---\n\n## 💡 破题思路\n\n- **证线性无关**：设 $k_{1}\\alpha_{1}+k_{2}\\alpha_{2}+k_{3}\\alpha_{3}=\\mathbf 0$，两边左乘 $A$ 并代入已知的特征向量关系，与原式相减消元，逐步逼出 $k_{1}=k_{2}=k_{3}=0$。\n- **求 $P^{-1}AP$**：把 $A$ 分别作用在 $P$ 的三个列向量上，再用 $P$ 的列向量表示结果，即得 $AP=P\\Lambda$，从而 $P^{-1}AP=\\Lambda$（由 (I) 知 $P$ 可逆）。\n\n---\n\n## 📝 解答\n\n### (I) 证明 $\\alpha_{1},\\alpha_{2},\\alpha_{3}$ 线性无关\n\n设存在常数 $k_{1},k_{2},k_{3}$，使得\n\n$$\nk_{1}\\alpha_{1}+k_{2}\\alpha_{2}+k_{3}\\alpha_{3}=\\mathbf 0.\n$$\n\n对 (1) 式两边左乘 $A$，利用 $A\\alpha_{1}=-\\alpha_{1}$，$A\\alpha_{2}=\\alpha_{2}$，$A\\alpha_{3}=\\alpha_{2}+\\alpha_{3}$，得\n\n$$\n-k_{1}\\alpha_{1}+k_{2}\\alpha_{2}+k_{3}(\\alpha_{2}+\\alpha_{3})=\\mathbf 0,\n$$\n\n即\n\n$$\n-k_{1}\\alpha_{1}+(k_{2}+k_{3})\\alpha_{2}+k_{3}\\alpha_{3}=\\mathbf 0.\n$$\n\n用 (2) 式减去 (1) 式得\n\n$$\n-2k_{1}\\alpha_{1}+k_{3}\\alpha_{2}=\\mathbf 0.\n$$\n\n由于 $\\alpha_{1},\\alpha_{2}$ 是分属不同特征值的特征向量，故线性无关，由上式得\n\n$$\nk_{1}=0,\\qquad k_{3}=0.\n$$\n\n把 $k_{1}=k_{3}=0$ 代回 (1) 式，得 $k_{2}\\alpha_{2}=\\mathbf 0$。因 $\\alpha_{2}$ 为特征向量，故 $\\alpha_{2}\\neq\\mathbf 0$，从而 $k_{2}=0$。\n\n因此 $k_{1}=k_{2}=k_{3}=0$，即 $\\alpha_{1},\\alpha_{2},\\alpha_{3}$ 线性无关。\n\n### (II) 求 $P^{-1}AP$\n\n由已知条件，整理 $A$ 作用在 $P$ 各列上的结果：\n\n$$\nA\\alpha_{1}=-\\alpha_{1},\\qquad A\\alpha_{2}=\\alpha_{2},\\qquad A\\alpha_{3}=\\alpha_{2}+\\alpha_{3}.\n$$\n\n用矩阵乘法表示为\n\n$$\nAP=A(\\alpha_{1},\\alpha_{2},\\alpha_{3})=(A\\alpha_{1},A\\alpha_{2},A\\alpha_{3})=(-\\alpha_{1},\\alpha_{2},\\alpha_{2}+\\alpha_{3}).\n$$\n\n将右端用 $P$ 表示：\n\n$$\n(-\\alpha_{1},\\alpha_{2},\\alpha_{2}+\\alpha_{3})=(\\alpha_{1},\\alpha_{2},\\alpha_{3})\\begin{pmatrix}-1&0&0\\\\0&1&1\\\\0&0&1\\end{pmatrix}.\n$$\n\n即 $AP=P\\Lambda$，其中\n\n$$\n\\Lambda=\\begin{pmatrix}-1&0&0\\\\0&1&1\\\\0&0&1\\end{pmatrix}.\n$$\n\n由 (I) 知 $\\alpha_{1},\\alpha_{2},\\alpha_{3}$ 线性无关，故 $P$ 可逆。两边左乘 $P^{-1}$：\n\n$$\nP^{-1}AP=\\begin{pmatrix}-1&0&0\\\\0&1&1\\\\0&0&1\\end{pmatrix}.\n$$\n\n---\n\n## 🚩 易错点\n\n- **左乘 $A$ 后要回代**：$A\\alpha_{3}$ 不是 $\\alpha_{3}$ 也不是 $k_{3}\\alpha_{3}$，而是 $\\alpha_{2}+\\alpha_{3}$，代入时必须整体替换，否则 (2) 式会写错。\n- **两式相减的用法**：(2) − (1) 是为消去 $\\alpha_{3}$ 项、逼出 $k_{1},k_{3}$；直接联立容易算乱。\n- **\"不同特征值的特征向量线性无关\"这一结论的使用前提**：$\\alpha_{1}$（特征值 $-1$）与 $\\alpha_{2}$（特征值 $1$）分属不同特征值，可直接引用；但 $\\alpha_{3}$ 不是特征向量（$A\\alpha_{3}=\\alpha_{2}+\\alpha_{3}$ 含 $\\alpha_{2}$ 项），不能当特征向量处理。\n- **列向量表示顺序**：$AP=(-\\alpha_{1},\\alpha_{2},\\alpha_{2}+\\alpha_{3})$ 右侧按 $P$ 的列向量分解时，系数要一列一列对齐，第 2 列是 $(0,1,0)^{T}$、第 3 列是 $(0,1,1)^{T}$，别把 $\\Lambda$ 写转置。\n\n---\n\n## 识别信号\n\n- 题干给出 $A\\alpha_{1},A\\alpha_{2},A\\alpha_{3}$ 的线性组合关系 → 目标是**求 $P^{-1}AP$**，直接\"逐个作用再写成 $AP=P\\Lambda$\"。\n- 要证一堆由 $A$ 作用得到的向量线性无关 → **左乘 $A$ + 相减消元**是标准套路。\n- 出现\"不同特征值的特征向量\"字样 → 直接调用\"线性无关\"结论。\n\n---\n\n## 考场口诀\n\n> **\"左乘 $A$ 再相减，异值特征必无关；逐列作用凑成 $P\\Lambda$，两边一乘得相似形。\"**\n\n---\n\n## 🔗 关联\n\n- 同属\"相似对角化 / 特征值与特征向量\"题型族，与 [[06-Resources/学习/考研/考研数学/错题本/原档案/线代/线代错题-三对角行列式递推与含参方程组解的讨论（克拉默法则与通解）|2008数二第22题（三对角行列式与含参方程组）]] 呼应（同为 2008 数二，承接矩阵与方程组考点）。\n- 同属\"矩阵相似变换与矩阵表示\"题型族。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/线代/线代错题-由特征向量关系证明线性无关并求相似对角化（P⁻¹AP）.md",
+          "isPastExam": true
         }
       ]
     },
