@@ -14,8 +14,9 @@ import {
   hasQuestionEvidence, hasProcessEvidence, inspectSourceBoundary, classifyPastExam
 } from "../scripts/shared/data-lib.mjs";
 import { normalizeMathDelimiters, collectMathSegments } from "../app/math-content.mjs";
-import { findPlainMath, findPseudoMatrices } from "../scripts/shared/math-gate.mjs";
+import { findPlainMath, findPseudoMatrices, scanLatexGate } from "../scripts/shared/math-gate.mjs";
 import katex from "katex";
+import { findMathRenderIssues } from "../scripts/shared/markdown-render-gate.mjs";
 
 const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "review-test-"));
 
@@ -602,6 +603,39 @@ test("collectMathSegments: unclosed $ stays in textOutsideMath", () => {
   const { segments, textOutsideMath } = collectMathSegments(input);
   assert.strictEqual(segments.length, 0);
   assert.ok(textOutsideMath.includes("$x"));
+});
+
+test("Markdown math gate rejects tagged formulas written as same-line $$ math", () => {
+  const issues = findMathRenderIssues(String.raw`$$x=1.\tag{1}$$`);
+  assert.ok(issues.some((issue) => issue.type === "tag-display"));
+  assert.ok(issues.some((issue) => issue.type === "katex-render"));
+});
+
+test("Markdown math gate rejects adjacent same-line display blocks that merge in remark-math", () => {
+  const issues = findMathRenderIssues(String.raw`$$x=1
+=2.$$
+
+$$y=3
+=4.$$`);
+  assert.ok(issues.some((issue) => issue.type === "katex-render"));
+});
+
+test("Markdown math gate accepts numeric tags in true display blocks", () => {
+  const issues = findMathRenderIssues("$$\n" + String.raw`x=1.\tag{1}` + "\n$$");
+  assert.deepEqual(issues, []);
+});
+
+test("Markdown math gate rejects Unicode and text equation labels", () => {
+  const circled = findMathRenderIssues("$$\n" + String.raw`x=1.\tag{①}` + "\n$$");
+  const text = findMathRenderIssues("$$\n" + String.raw`x=1.\tag{式1}` + "\n$$");
+  assert.ok(circled.some((issue) => issue.type === "tag-label"));
+  assert.ok(text.some((issue) => issue.type === "tag-label"));
+});
+
+test("LaTeX import gate uses the website renderer before history generation", () => {
+  const issues = scanLatexGate([{ filePath: "sample.md", body: String.raw`$$x=1.\tag{1}$$` }]);
+  assert.ok(issues.some((issue) => issue.signals.includes("网页 KaTeX 渲染失败")));
+  assert.ok(issues.some((issue) => issue.signals.includes("公式编号格式")));
 });
 
 // ========== strict plain-math import gate ==========

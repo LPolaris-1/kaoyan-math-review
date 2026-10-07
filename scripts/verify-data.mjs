@@ -11,6 +11,7 @@ import {
 import { collectMathSegments } from "../app/math-content.mjs";
 import katex from "katex";
 import { reportLatexGate, scanLatexGate } from "./shared/math-gate.mjs";
+import { findMathRenderIssues } from "./shared/markdown-render-gate.mjs";
 
 const projectDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputFile = path.join(projectDir, "public", "data", "history.json");
@@ -294,6 +295,10 @@ for (const item of allItems) {
         throw e;
       }
     }
+  }
+  for (const issue of findMathRenderIssues(item.content)) {
+    console.error(`Markdown math render error: ${item.sourcePath}: ${issue.message}`);
+    katexErrors++;
   }
 }
 console.log(`KaTeX render: ${katexErrors === 0 ? `PASS (${katexFormulaCount} formulas)` : `${katexErrors} error(s)`}`);

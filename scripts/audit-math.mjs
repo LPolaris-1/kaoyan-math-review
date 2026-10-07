@@ -10,17 +10,14 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { SOURCE_DIR, walk, parseMarkdownFile } from "./shared/data-lib.mjs";
-import { findPlainMath } from "./shared/math-gate.mjs";
+import { scanLatexGate } from "./shared/math-gate.mjs";
 
 export function parseAuditArgs(argv = []) {
   return { strict: argv.includes("--strict"), json: argv.includes("--json") };
 }
 
 export function auditEntries(entries) {
-  const issues = [];
-  for (const entry of entries) {
-    issues.push(...findPlainMath(entry.body, entry.filePath));
-  }
+  const issues = scanLatexGate(entries);
   return { files: entries.length, issues, issueCount: issues.length };
 }
 

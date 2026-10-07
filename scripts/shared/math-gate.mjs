@@ -1,4 +1,5 @@
 import { normalizeMathDelimiters } from "../../app/math-content.mjs";
+import { findMathRenderIssues } from "./markdown-render-gate.mjs";
 
 const MATH_BLOCK = /\$\$[\s\S]*?\$\$|\$(?:\\.|[^$\n])*\$/g;
 
@@ -116,7 +117,20 @@ export function findPlainMath(body, filePath = "") {
 }
 
 export function scanLatexGate(entries) {
-  return entries.flatMap(({ filePath, body }) => findPlainMath(body, filePath));
+  return entries.flatMap(({ filePath, body }) => {
+    const renderIssues = findMathRenderIssues(body).map((issue) => {
+      const offset = body.indexOf(issue.source);
+      const lineNumber = offset < 0 ? 1 : body.slice(0, offset).split(/\r?\n/).length;
+      return {
+        filePath,
+        lineNumber,
+        snippet: issue.source.trim().slice(0, 240),
+        signals: [issue.type === "katex-render" ? "网页 KaTeX 渲染失败" : "公式编号格式"],
+        message: issue.message,
+      };
+    });
+    return findPlainMath(body, filePath).concat(renderIssues);
+  });
 }
 
 export function formatLatexGateIssue(issue) {
