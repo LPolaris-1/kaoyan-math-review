@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { MarkdownContent } from "./components/markdown-content";
 import { InlineMathMarkdown } from "./components/inline-math-markdown";
+import { loadHistory } from "../lib/history-loader.mjs";
 
 type ReviewItem = {
   id: string;
@@ -65,6 +66,8 @@ function formatGeneratedAt(value: string) {
 
 export default function Home() {
   const [data, setData] = useState<HistoryData | null>(null);
+  const [historyError, setHistoryError] = useState("");
+  const [historyAttempt, setHistoryAttempt] = useState(0);
   const [selectedDate, setSelectedDate] = useState("");
   const [subject, setSubject] = useState("全部");
   const [query, setQuery] = useState("");
@@ -73,13 +76,20 @@ export default function Home() {
   const [savingId, setSavingId] = useState("");
 
   useEffect(() => {
-    fetch("/data/history.json", { cache: "no-store" })
-      .then((response) => response.json())
+    let active = true;
+    loadHistory()
       .then((history: HistoryData) => {
+        if (!active) return;
         setData(history);
         setSelectedDate(history.days[0]?.date || "");
       })
-      .catch(() => setData({ generatedAt: "", totalNotes: 0, totalDays: 0, days: [] }));
+      .catch((caught: Error) => {
+        if (active) setHistoryError(caught.message);
+      });
+    return () => { active = false; };
+  }, [historyAttempt]);
+
+  useEffect(() => {
     fetch("/api/review-progress")
       .then(async (response) => {
         const body = await response.json();
@@ -92,6 +102,11 @@ export default function Home() {
       })
       .catch((error: Error) => setProgressError(error.message));
   }, []);
+
+  function retryHistory() {
+    setHistoryError("");
+    setHistoryAttempt((current) => current + 1);
+  }
 
   const currentDay = data?.days.find((day) => day.date === selectedDate) || null;
   const filteredItems = useMemo(() => currentDay?.items.filter((item) => {
@@ -119,6 +134,7 @@ export default function Home() {
     }
   }
 
+  if (historyError) return <main className="loading-shell"><div className="loading-card" role="alert">{historyError} <button type="button" onClick={retryHistory}>重试加载</button></div></main>;
   if (!data) return <main className="loading-shell"><div className="loading-card">正在加载错题复盘…</div></main>;
 
   return (

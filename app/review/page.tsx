@@ -14,6 +14,7 @@ import {
   shanghaiToday,
 } from "../../lib/review-schedule.mjs";
 import { parseReviewQuery, serializeReviewQuery } from "../../lib/review-navigation.mjs";
+import { loadHistory } from "../../lib/history-loader.mjs";
 
 type ReviewItem = {
   id: string;
@@ -138,6 +139,8 @@ export default function RollingReviewPage() {
   const [progressById, setProgressById] = useState<Record<string, Progress>>({});
   const [query, setQuery] = useState<ReviewQuery>(() => parseReviewQuery(typeof window === "undefined" ? "" : window.location.search));
   const [error, setError] = useState("");
+  const [historyError, setHistoryError] = useState("");
+  const [historyAttempt, setHistoryAttempt] = useState(0);
   const [notice, setNotice] = useState("");
   const [savingId, setSavingId] = useState("");
   const [todayEvents, setTodayEvents] = useState<ReviewEvent[]>([]);
@@ -151,14 +154,20 @@ export default function RollingReviewPage() {
   const [today, setToday] = useState(() => shanghaiToday());
 
   useEffect(() => {
-    fetch("/data/history.json", { cache: "no-store" })
-      .then((response) => response.json())
+    let active = true;
+    loadHistory()
       .then((data: HistoryData) => {
+        if (!active) return;
         setHistory(data);
         setExamDate((current) => current || derivePastExamDays(data.days)[0]?.date || "");
       })
-      .catch(() => setError("错题历史加载失败，请稍后重试。"));
+      .catch((caught: Error) => {
+        if (active) setHistoryError(caught.message);
+      });
+    return () => { active = false; };
+  }, [historyAttempt]);
 
+  useEffect(() => {
     fetch("/api/review-progress")
       .then(async (response) => {
         const body = await response.json();
@@ -173,6 +182,11 @@ export default function RollingReviewPage() {
       .catch((caught: Error) => setError(caught.message));
 
   }, []);
+
+  function retryHistory() {
+    setHistoryError("");
+    setHistoryAttempt((current) => current + 1);
+  }
 
   useEffect(() => {
     fetch(`/api/review-events?date=${encodeURIComponent(today)}`)
@@ -340,6 +354,9 @@ export default function RollingReviewPage() {
     }
   }
 
+  if (historyError) {
+    return <main className="loading-shell"><div className="loading-card" role="alert">{historyError} <button type="button" onClick={retryHistory}>重试加载</button></div></main>;
+  }
   if (!history) {
     return <main className="loading-shell"><div className="loading-card">正在生成今日滚动复习…</div></main>;
   }

@@ -69,7 +69,12 @@ test("review UI owns navigation in the URL and exposes deep-link actions", async
   assert.match(page, /pushState/);
   assert.match(page, /replaceState/);
   assert.match(page, /popstate/);
-  assert.match(page, /fetch\("\/data\/history\.json", \{ cache: "no-store" \}\)/);
+  assert.match(page, /loadHistory\(\)/);
+  assert.match(page, /if \(historyError\)/);
+  assert.match(page, /onClick=\{retryHistory\}/);
+  assert.match(page, /const \[historyError, setHistoryError\] = useState\(""\)/);
+  assert.match(page, /setProgressLoaded\(true\);\s*setError\(""\)/);
+  assert.doesNotMatch(page, /cache: "no-store"/);
   assert.match(overview, /toggleQuadrant/);
   assert.match(overview, /onKpiNavigate/);
   assert.match(overview, /onViewProgress/);

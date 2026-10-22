@@ -106,7 +106,11 @@ test("首页恢复为单一「每日复盘」，不再提供真题模式标签�
   assert.match(source, /DAILY REVIEW \/ 每日复盘/);
   assert.match(source, /const \[selectedDate, setSelectedDate\] = useState\(""\)/);
   assert.match(source, /data\.days\.slice\(0, 14\)/);
-  assert.match(source, /fetch\("\/data\/history\.json", \{ cache: "no-store" \}\)/);
+  assert.match(source, /loadHistory\(\)/);
+  assert.match(source, /historyError/);
+  assert.match(source, /onClick=\{retryHistory\}/);
+  assert.doesNotMatch(source, /cache: "no-store"/);
+  assert.doesNotMatch(source, /setData\(\{ generatedAt: "", totalNotes: 0/);
   assert.match(source, /搜索题目、主题或方法/);
   // mastered POST + lazy Markdown/KaTeX card are reused, not duplicated
   assert.match(source, /onSetMastered=\{setMastered\}/);
