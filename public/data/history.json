@@ -1,9 +1,47 @@
 {
-  "generatedAt": "2026-10-23T14:11:03.423Z",
+  "generatedAt": "2026-10-24T15:42:23.664Z",
   "source": "06-Resources/学习/考研/考研数学/错题本/原档案",
-  "totalNotes": 406,
-  "totalDays": 77,
+  "totalNotes": 407,
+  "totalDays": 78,
   "days": [
+    {
+      "date": "2026-10-24",
+      "count": 1,
+      "subjectCounts": {
+        "高数": 1
+      },
+      "topics": [
+        "已知某函数是 f 的原函数，求 f(ln x) 的不定积分"
+      ],
+      "takeaways": [],
+      "summary": "1 道错题 · 高数 1 道",
+      "items": [
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-已知原函数求f(lnx)的不定积分（先还原再换元分部）（张宇1000题第167795题）.md",
+          "date": "2026-10-24",
+          "titleMarkdown": "高数错题-已知原函数求 $f(\\ln x)$ 的不定积分",
+          "title": "高数错题-已知原函数求 $f(\\ln x)$ 的不定积分",
+          "subject": "高数",
+          "chapter": "第9讲 一元函数积分学的计算",
+          "topic": "已知某函数是 f 的原函数，求 f(ln x) 的不定积分",
+          "methods": [
+            "由原函数求导还原 f(x)",
+            "复合代入 f(ln x)",
+            "换元 t = ln x 化为多项式乘指数",
+            "两次分部积分降次",
+            "拆项凑微分（巧算）"
+          ],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "\n# 高数错题-已知原函数求 $f(\\ln x)$ 的不定积分\n\n**来源**：张宇1000题（第167795题，来源以用户当次说明为准）\n**知识点**：原函数与导数的互逆关系、复合函数的代入、换元积分、分部积分、不定积分常数\n**核心方法**：先由「原函数」条件还原 $f(x)$，再代入 $f(\\ln x)$，最后换元降为多项式乘指数\n**错因**：跳过还原步骤，直接对 $f(\\ln x)$ 分部积分，导致必须求 $f$ 的二阶导\n\n---\n\n## 一、题目\n\n已知 $x^{2}e^{x}$ 是 $f(x)$ 在 $(0,+\\infty)$ 上的一个原函数，则\n\n$$\n\\int f(\\ln x)\\,\\mathrm{d}x = \\underline{\\qquad\\qquad}\n$$\n\n**答案**：\n\n$$\n\\int f(\\ln x)\\,\\mathrm{d}x=\\frac{1}{2}x^{2}\\left(\\ln x\\right)^{2}+\\frac{1}{2}x^{2}\\ln x-\\frac{1}{4}x^{2}+C\n$$\n\n---\n\n## 二、为什么「先还原再积分」是正路\n\n「$x^{2}e^{x}$ 是 $f$ 的一个原函数」这句话的唯一含义是\n\n$$\n\\int f(x)\\,\\mathrm{d}x=x^{2}e^{x}+C\n$$\n\n两边求导就得到 $f(x)$ 的解析式。这是本题的全部入口，必须先做完。\n\n再看「直接分部积分」这条路。写成\n\n$$\n\\int f(\\ln x)\\,\\mathrm{d}x=x f(\\ln x)-\\int x\\,\\mathrm{d}\\left(f(\\ln x)\\right)\n$$\n\n而\n\n$$\n\\mathrm{d}\\left(f(\\ln x)\\right)=f'(\\ln x)\\cdot\\frac{1}{x}\\,\\mathrm{d}x\n$$\n\n$x$ 与 $\\frac{1}{x}$ 相消，于是\n\n$$\n\\int f(\\ln x)\\,\\mathrm{d}x=x f(\\ln x)-\\int f'(\\ln x)\\,\\mathrm{d}x\n$$\n\n问题出在最后这一项：要算它，就得先知道 $f'(x)$ 的解析式。而\n\n$$\nf'(x)=\\left(x^{2}e^{x}\\right)''=e^{x}\\left(x^{2}+4x+2\\right)\n$$\n\n于是\n\n$$\n\\int f'(\\ln x)\\,\\mathrm{d}x=\\int x\\left[\\left(\\ln x\\right)^{2}+4\\ln x+2\\right]\\mathrm{d}x\n$$\n\n这个积分的难度与原题**完全相同**，却多背了一次求导。也就是说：这条路逻辑没错，但它是把「一次还原 + 一次积分」换成了「两次求导 + 一次同样难度的积分」，纯亏。方向上应当放弃。\n\n**结论**：不定积分的通用第一准则——先求被积函数的解析式，再谈积分技巧。上来做符号变形，通常只是把难度挪个位置。\n\n---\n\n## 三、标准解法\n\n### 第一步：还原 $f(x)$\n\n由 $\\int f(x)\\,\\mathrm{d}x=x^{2}e^{x}+C$，两边求导：\n\n$$\nf(x)=\\left(x^{2}e^{x}\\right)'=2xe^{x}+x^{2}e^{x}=e^{x}\\left(x^{2}+2x\\right)\n$$\n\n### 第二步：代入 $f(\\ln x)$\n\n把 $x$ 整体换成 $\\ln x$，并用 $e^{\\ln x}=x$（这里用到 $x>0$，与题目给定区间一致）：\n\n$$\nf(\\ln x)=e^{\\ln x}\\left[\\left(\\ln x\\right)^{2}+2\\ln x\\right]=x\\left[\\left(\\ln x\\right)^{2}+2\\ln x\\right]\n$$\n\n### 第三步：换元\n\n令 $t=\\ln x$，则 $x=e^{t}$，$\\mathrm{d}x=e^{t}\\,\\mathrm{d}t$：\n\n$$\n\\int f(\\ln x)\\,\\mathrm{d}x=\\int e^{t}\\left(t^{2}+2t\\right)e^{t}\\,\\mathrm{d}t=\\int e^{2t}\\left(t^{2}+2t\\right)\\mathrm{d}t\n$$\n\n这一步是关键：换元把「幂函数乘对数」变成了「多项式乘指数」。后者是标准套路，前者不是。\n\n### 第四步：两次分部积分\n\n第一次，取 $u=t^{2}+2t$，$\\mathrm{d}v=e^{2t}\\,\\mathrm{d}t$，则 $\\mathrm{d}u=(2t+2)\\,\\mathrm{d}t$，$v=\\frac{1}{2}e^{2t}$：\n\n$$\n\\int e^{2t}\\left(t^{2}+2t\\right)\\mathrm{d}t=\\frac{1}{2}e^{2t}\\left(t^{2}+2t\\right)-\\int e^{2t}\\left(t+1\\right)\\mathrm{d}t\n$$\n\n第二次，对 $\\int e^{2t}(t+1)\\,\\mathrm{d}t$ 取 $u=t+1$，$\\mathrm{d}v=e^{2t}\\,\\mathrm{d}t$：\n\n$$\n\\int e^{2t}\\left(t+1\\right)\\mathrm{d}t=\\frac{1}{2}e^{2t}\\left(t+1\\right)-\\frac{1}{4}e^{2t}\n$$\n\n代回：\n\n$$\n\\int e^{2t}\\left(t^{2}+2t\\right)\\mathrm{d}t=\\frac{1}{2}e^{2t}\\left(t^{2}+2t\\right)-\\frac{1}{2}e^{2t}\\left(t+1\\right)+\\frac{1}{4}e^{2t}+C\n$$\n\n$$\n=\\frac{1}{2}e^{2t}\\left(t^{2}+2t-t-1+\\frac{1}{2}\\right)+C=\\frac{1}{2}e^{2t}\\left(t^{2}+t-\\frac{1}{2}\\right)+C\n$$\n\n### 第五步：回代\n\n$$\n\\int f(\\ln x)\\,\\mathrm{d}x=\\frac{1}{2}x^{2}\\left[\\left(\\ln x\\right)^{2}+\\ln x-\\frac{1}{2}\\right]+C\n$$\n\n展开即\n\n$$\n\\int f(\\ln x)\\,\\mathrm{d}x=\\frac{1}{2}x^{2}\\left(\\ln x\\right)^{2}+\\frac{1}{2}x^{2}\\ln x-\\frac{1}{4}x^{2}+C\n$$\n\n---\n\n## 四、验算（考场必做，一步即可）\n\n设 $A=\\frac{1}{2}x^{2}$，$B=\\left(\\ln x\\right)^{2}+\\ln x-\\frac{1}{2}$，则 $A'=x$，$B'=\\frac{2\\ln x}{x}+\\frac{1}{x}$。由 $(AB)'=A'B+AB'$：\n\n$$\n\\left(AB\\right)'=x\\left[\\left(\\ln x\\right)^{2}+\\ln x-\\frac{1}{2}\\right]+\\frac{1}{2}x^{2}\\left(\\frac{2\\ln x+1}{x}\\right)\n$$\n\n$$\n=x\\left(\\ln x\\right)^{2}+x\\ln x-\\frac{1}{2}x+x\\ln x+\\frac{1}{2}x=x\\left(\\ln x\\right)^{2}+2x\\ln x\n$$\n\n正是 $f(\\ln x)$。验算通过。\n\n**验算的价值**：这类题的错误几乎都出在常数项（$\\frac{1}{2}$ 与 $\\frac{1}{4}$ 谁配谁），而对结果求一次导能立刻暴露。\n\n---\n\n## 五、巧算：拆项凑微分，不绕两轮分部\n\n观察目标 $\\int e^{2t}(t^{2}+2t)\\,\\mathrm{d}t$，先把被积式拆成「已经被 $e^{2t}$ 吃掉的形式」：\n\n$$\nt^{2}+2t=\\left(t^{2}+t\\right)+\\left(t+\\frac{1}{2}\\right)-\\frac{1}{2}\n$$\n\n而\n\n$$\n\\left(e^{2t}\\cdot\\frac{t^{2}}{2}\\right)'=e^{2t}\\left(t^{2}+t\\right),\\qquad\\left(e^{2t}\\cdot\\frac{t}{2}\\right)'=e^{2t}\\left(t+\\frac{1}{2}\\right)\n$$\n\n所以\n\n$$\n\\int e^{2t}\\left(t^{2}+2t\\right)\\mathrm{d}t=e^{2t}\\left(\\frac{t^{2}}{2}+\\frac{t}{2}-\\frac{1}{4}\\right)+C\n$$\n\n一步出结果，与两次分部积分完全一致。\n\n**口诀**：多项式乘指数，永远能把结果写成 $e^{2t}$ 乘一个同次多项式；把系数逐项待定，比连做两次分部更快，也不容易丢常数。\n\n---\n\n## 六、易错点\n\n1. **忘了 $+C$**：不定积分最后必须带常数，填空题漏掉直接零分。\n2. **不换元硬做**：在 $\\int x\\left[\\left(\\ln x\\right)^{2}+2\\ln x\\right]\\mathrm{d}x$ 上直接分部，计算量成倍增加，且每轮都要处理 $\\frac{1}{x}$。\n3. **换元后忘记换 $\\mathrm{d}x$**：$t=\\ln x$ 时 $\\mathrm{d}x=e^{t}\\,\\mathrm{d}t$，漏掉这个因子会少一个 $e^{t}$。\n4. **把 $e^{\\ln x}$ 当成 $\\ln x$**：$e^{\\ln x}=x$（$x>0$），这一步是本题化简的核心。\n5. **还原 $f$ 时把原函数再积分一次**：原函数求导才是 $f$，方向不能反。\n6. **系数配错**：$\\frac{1}{2}e^{2t}(t^{2}+2t)$ 与 $\\frac{1}{2}e^{2t}(t+1)$ 相减后带出的 $\\frac{1}{4}$ 容易丢掉。务必验算。\n\n---\n\n## 七、一句话模板\n\n> 见「$\\Phi(x)$ 是 $f$ 的原函数 + 求 $f(\\ln x)$ 的积分」：先求导得 $f$，再代入，再换元把 $\\ln x$ 打成 $e^{t}$，最后按多项式乘指数做；不要对 $f(\\ln x)$ 直接分部。\n\n---\n\n## 关联\n\n- 同属第 9 讲，可对照「先还原解析式再积分」的统一思路：[[06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-由原函数求函数平均值（原函数跳跃间断点分段积分）|高数错题-由原函数求函数平均值（原函数跳跃间断点分段积分）]]\n- 原函数存在性与连续性的辨析：[[06-Resources/学习/考研/考研数学/错题本/整理档案/高数/第08讲 一元函数积分学的概念与性质/题型-原函数存在性与达布定理|题型-原函数存在性与达布定理]]\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-已知原函数求f(lnx)的不定积分（先还原再换元分部）（张宇1000题第167795题）.md",
+          "isPastExam": false
+        }
+      ]
+    },
     {
       "date": "2026-10-23",
       "count": 11,
