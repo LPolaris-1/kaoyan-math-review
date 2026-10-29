@@ -15,8 +15,7 @@ if (isDirectRun) await runSmoke();
 
 async function runSmoke() {
   const root = path.resolve(process.argv[2] ?? process.cwd());
-  const history = JSON.parse(fs.readFileSync(path.join(root, "public/data/history.json"), "utf8"));
-  const index = JSON.parse(fs.readFileSync(path.join(root, "public/data/history-index.json"), "utf8"));
+  const { history, index } = loadCanonicalHistory(root);
   const expectedNotes = uniqueHistoryItems(history);
   const expectedDays = Array.isArray(history.days) ? history.days.length : 0;
   if (expectedNotes === 0 || expectedDays === 0) throw new Error("canonical history data is empty");
@@ -117,6 +116,35 @@ async function runSmoke() {
     await stopChild(child);
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
+}
+
+// Source trees keep the canonical data under public/data. Immutable release
+// artifacts ship only dist/client/data, so accept both without requiring
+// public/ in a release.
+export function resolveHistoryDataDir(root) {
+  const candidates = [
+    path.join("public", "data"),
+    path.join("dist", "client", "data"),
+  ];
+  for (const relative of candidates) {
+    const directory = path.join(root, relative);
+    if (
+      fs.existsSync(path.join(directory, "history.json")) &&
+      fs.existsSync(path.join(directory, "history-index.json"))
+    ) {
+      return directory;
+    }
+  }
+  throw new Error(
+    `canonical history data not found; checked ${candidates.join(", ")} under ${root}`,
+  );
+}
+
+export function loadCanonicalHistory(root) {
+  const dataDir = resolveHistoryDataDir(root);
+  const history = JSON.parse(fs.readFileSync(path.join(dataDir, "history.json"), "utf8"));
+  const index = JSON.parse(fs.readFileSync(path.join(dataDir, "history-index.json"), "utf8"));
+  return { dataDir, history, index };
 }
 
 function uniqueHistoryItems(data) {

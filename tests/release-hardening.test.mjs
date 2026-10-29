@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
-import { assertNoCache } from "../scripts/smoke-selfhost.mjs";
+import { assertNoCache, loadCanonicalHistory } from "../scripts/smoke-selfhost.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const verifyScript = path.join(root, "scripts/verify-release.mjs");
@@ -120,6 +120,60 @@ test("selfhost smoke accepts Fetch Headers and Node raw header objects", () => {
   );
   assert.throws(() => assertNoCache(new Headers(), "/fetch"), /cache policy is missing; expected no-cache/);
 });
+
+test("selfhost smoke reads canonical history from an artifact-only release layout", () => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "smoke-data-test-"));
+  try {
+    const dataDir = path.join(fixture, "dist", "client", "data");
+    writeHistoryFixture(dataDir, 1);
+
+    const result = loadCanonicalHistory(fixture);
+    assert.equal(result.dataDir, dataDir);
+    assert.equal(result.history.totalNotes, 1);
+    assert.equal(result.index.totalDays, 1);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
+test("selfhost smoke prefers source-tree public/data over built dist data", () => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "smoke-data-test-"));
+  try {
+    writeHistoryFixture(path.join(fixture, "public", "data"), 2);
+    writeHistoryFixture(path.join(fixture, "dist", "client", "data"), 1);
+
+    const result = loadCanonicalHistory(fixture);
+    assert.equal(result.dataDir, path.join(fixture, "public", "data"));
+    assert.equal(result.history.totalNotes, 2);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
+test("selfhost smoke fails clearly when canonical history data is absent", () => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "smoke-data-test-"));
+  try {
+    assert.throws(
+      () => loadCanonicalHistory(fixture),
+      /canonical history data not found; checked public[\\/]data, dist[\\/]client[\\/]data under /,
+    );
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
+function writeHistoryFixture(directory, totalNotes) {
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(path.join(directory, "history.json"), JSON.stringify({
+    totalNotes,
+    days: [{ date: "2026-01-01", items: [{ id: "one", content: "fixture" }] }],
+  }));
+  fs.writeFileSync(path.join(directory, "history-index.json"), JSON.stringify({
+    totalNotes,
+    totalDays: 1,
+    days: [{ date: "2026-01-01", count: 1, items: [{ id: "one" }] }],
+  }));
+}
 
 function withFixture(callback) {
   const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "release-verify-test-"));
