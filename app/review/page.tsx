@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { MarkdownContent } from "../components/markdown-content";
 import { InlineMathMarkdown } from "../components/inline-math-markdown";
+import { LazyHistoryContent } from "../components/lazy-history-content";
 import { ProgressOverview } from "../components/review/progress-overview";
 import { ReviewOverview } from "../components/review/review-overview";
 import {
@@ -27,7 +27,7 @@ type ReviewItem = {
   methods: string[];
   keyPoints: string[];
   pitfalls: string[];
-  content: string;
+  content?: string;
   sourcePath: string;
   isPastExam: boolean;
 };
@@ -594,8 +594,6 @@ function ReviewCard({
   disabled: boolean;
   onAction: (payload: Record<string, string>) => void;
 }) {
-  const [hasOpened, setHasOpened] = useState(false);
-
   return (
     <article className="rolling-card" id={`review-item-${encodeURIComponent(item.id)}`}>
       <div className="rolling-number">{String(index + 1).padStart(2, "0")}</div>
@@ -622,12 +620,7 @@ function ReviewCard({
         <h3><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></h3>
         {item.topic && <p className="question-topic">{item.topic}</p>}
         <div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div>
-        <details onToggle={(event) => {
-          if (event.currentTarget.open) setHasOpened(true);
-        }}>
-          <summary>展开题目与完整推导</summary>
-          {hasOpened && <div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div>}
-        </details>
+        <LazyHistoryContent date={item.date} itemId={item.id} sourcePath={item.sourcePath} summary="展开题目与完整推导" />
         <div className="review-actions">
           <button className="result-wrong" disabled={disabled} onClick={() => onAction({ action: "review", result: "wrong" })}>做错了</button>
           <button className="result-hard" disabled={disabled} onClick={() => onAction({ action: "review", result: "hard" })}>有点模糊</button>
@@ -657,8 +650,6 @@ function PastExamCard({
   disabled: boolean;
   onSetMastered: (itemId: string, mastered: boolean) => void;
 }) {
-  const [hasOpened, setHasOpened] = useState(false);
-
   return (
     <article className="question-card">
       <div className="question-index">{String(index + 1).padStart(2, "0")}</div>
@@ -678,12 +669,7 @@ function PastExamCard({
         <h3><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></h3>
         {item.topic && <p className="question-topic">{item.topic}</p>}
         <div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div>
-        <details onToggle={(event) => {
-          if (event.currentTarget.open) setHasOpened(true);
-        }}>
-          <summary>查看原档案题目与完整推导</summary>
-          {hasOpened && <div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div>}
-        </details>
+        <LazyHistoryContent date={item.date} itemId={item.id} sourcePath={item.sourcePath} />
       </div>
     </article>
   );

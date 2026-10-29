@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
+import { assertNoCache } from "../scripts/smoke-selfhost.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const verifyScript = path.join(root, "scripts/verify-release.mjs");
@@ -76,6 +77,15 @@ test("missing client assets directory fails", () => {
   });
 });
 
+test("missing generated history index fails clearly", () => {
+  withFixture((fixture) => {
+    fs.rmSync(path.join(fixture, "dist/client/data/history-index.json"));
+    const result = runVerify(fixture);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /missing required history file: dist\/client\/data\/history-index\.json/);
+  });
+});
+
 test("Sites-only server marker fails selfhost verification", () => {
   withFixture((fixture) => {
     fs.writeFileSync(path.join(fixture, "dist/server/wrangler.json"), "{}\n");
@@ -85,7 +95,13 @@ test("Sites-only server marker fails selfhost verification", () => {
   });
 });
 
-test("selfhost smoke script serves pages, assets and history", () => {
+test("selfhost smoke script serves pages, assets and history", (t) => {
+  const skipReason = selfhostSmokeSkipReason();
+  if (skipReason) {
+    t.skip(skipReason);
+    return;
+  }
+
   const result = spawnSync(process.execPath, ["scripts/smoke-selfhost.mjs"], {
     cwd: root,
     encoding: "utf8",
@@ -93,6 +109,16 @@ test("selfhost smoke script serves pages, assets and history", () => {
   });
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   assert.match(result.stdout, /selfhost smoke passed/);
+});
+
+test("selfhost smoke accepts Fetch Headers and Node raw header objects", () => {
+  assert.doesNotThrow(() => assertNoCache(new Headers({ "cache-control": "no-cache, must-revalidate" }), "/fetch"));
+  assert.doesNotThrow(() => assertNoCache({ "cache-control": "no-cache, must-revalidate" }, "/node"));
+  assert.throws(
+    () => assertNoCache({ "cache-control": "public, max-age=3600" }, "/node"),
+    /cache policy is public, max-age=3600; expected no-cache/,
+  );
+  assert.throws(() => assertNoCache(new Headers(), "/fetch"), /cache policy is missing; expected no-cache/);
 });
 
 function withFixture(callback) {
@@ -106,10 +132,26 @@ function withFixture(callback) {
 }
 
 function createFixture(fixture) {
-  for (const directory of ["dist/client/assets", "dist/server", "scripts", "selfhost"]) {
+  for (const directory of ["dist/client/assets", "dist/client/data/history-days", "dist/server", "scripts", "selfhost"]) {
     fs.mkdirSync(path.join(fixture, directory), { recursive: true });
   }
   fs.writeFileSync(path.join(fixture, "dist/client/assets/app.js"), "console.log('fixture');\n");
+  fs.writeFileSync(path.join(fixture, "dist/client/data/history.json"), "{\"days\":[]}\n");
+  fs.writeFileSync(path.join(fixture, "dist/client/data/history-index.json"), JSON.stringify({
+    generatedAt: "2026-01-01T00:00:00.000Z",
+    totalNotes: 1,
+    totalDays: 1,
+    days: [{ date: "2026-01-01", count: 1, items: [{ id: "one" }] }],
+  }));
+  for (const file of [
+    "history.json.br", "history.json.gz",
+    "history-index.json.br", "history-index.json.gz",
+    "history-days/2026-01-01.json",
+    "history-days/2026-01-01.json.br",
+    "history-days/2026-01-01.json.gz",
+  ]) {
+    fs.writeFileSync(path.join(fixture, "dist/client/data", file), "fixture");
+  }
   fs.writeFileSync(path.join(fixture, "dist/RELEASE.json"), JSON.stringify({
     git_commit: "pending",
     branch: "main",
@@ -136,6 +178,34 @@ function createFixture(fixture) {
 
 function runVerify(fixture) {
   return spawnSync(process.execPath, [verifyScript, fixture], { encoding: "utf8" });
+}
+
+function selfhostSmokeSkipReason() {
+  const releasePath = path.join(root, "dist/RELEASE.json");
+  const historyIndexPath = path.join(root, "dist/client/data/history-index.json");
+  if (!fs.existsSync(releasePath)) {
+    return "dist/RELEASE.json is missing; the real selfhost smoke runs in release:gate after the final build:selfhost";
+  }
+  if (!fs.existsSync(historyIndexPath)) {
+    return "dist/client/data/history-index.json is missing; the real selfhost smoke runs in release:gate after the final build:selfhost";
+  }
+
+  let metadata;
+  try {
+    metadata = JSON.parse(fs.readFileSync(releasePath, "utf8"));
+  } catch {
+    return "dist/RELEASE.json is not valid provenance; the real selfhost smoke runs in release:gate after the final build:selfhost";
+  }
+
+  const headResult = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" });
+  if (headResult.error || headResult.status !== 0) {
+    return "current git HEAD is unavailable; the real selfhost smoke runs in release:gate after the final build:selfhost";
+  }
+  if (metadata.git_commit !== headResult.stdout.trim()) {
+    return `dist/RELEASE.json provenance is behind git HEAD (${metadata.git_commit} != ${headResult.stdout.trim()}); the real selfhost smoke runs in release:gate after the final build:selfhost`;
+  }
+
+  return null;
 }
 
 function runGit(cwd, args) {

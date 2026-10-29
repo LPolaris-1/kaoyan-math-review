@@ -9,6 +9,7 @@ const pagePath = new URL("../app/review/page.tsx", import.meta.url);
 const eventsRoutePath = new URL("../app/api/review-events/route.ts", import.meta.url);
 const cssPath = new URL("../app/globals.css", import.meta.url);
 const homePath = new URL("../app/page.tsx", import.meta.url);
+const lazyContentPath = new URL("../app/components/lazy-history-content.tsx", import.meta.url);
 
 test("全部进度页面使用统一调度输出并提供 Day 1 API 操作", async () => {
   const source = await readFile(componentPath, "utf8");
@@ -116,7 +117,9 @@ test("首页恢复为单一「每日复盘」，不再提供真题模式标签�
   assert.match(source, /onSetMastered=\{setMastered\}/);
   assert.match(source, /progressById\[item\.id\]\?\.mastered/);
   assert.equal((source.match(/function HistoryQuestionCard/g) || []).length, 1);
-  assert.match(source, /if \(event\.currentTarget\.open\) setHasOpened\(true\)/);
+  assert.match(source, /<LazyHistoryContent date=\{item\.date\} itemId=\{item\.id\}/);
+  assert.match(source, /content\?: string/);
+  assert.doesNotMatch(source, /<MarkdownContent/);
   assert.equal(source.includes("/api/review-progress"), true);
   assert.doesNotMatch(source, /NaN/);
 });
@@ -150,6 +153,17 @@ test("滚动复习页新增真题标签：按 isPastExam 派生日期分组并�
   assert.match(source, /action: mastered \? "master" : "unmaster"/);
   // lazy-on-first-open + Markdown/KaTeX
   assert.match(source, /function PastExamCard/);
-  assert.match(source, /if \(event\.currentTarget\.open\) setHasOpened\(true\)/);
-  assert.match(source, /<MarkdownContent value=\{item\.content\} \/>/);
+  assert.match(source, /<LazyHistoryContent date=\{item\.date\} itemId=\{item\.id\}/);
+  assert.match(source, /content\?: string/);
+});
+
+test("history detail loads only on first expansion and shares the per-day loader", async () => {
+  const source = await readFile(lazyContentPath, "utf8");
+  assert.match(source, /loadHistoryDay/);
+  assert.match(source, /if \(event\.currentTarget\.open && !hasOpened\)/);
+  assert.match(source, /if \(!hasOpened \|\| content !== null\) return/);
+  assert.match(source, /正在加载当日题目/);
+  assert.match(source, /重试/);
+  assert.match(source, /<MarkdownContent value=\{content\} \/>/);
+  assert.match(source, /setContent\(item\.content\)/);
 });

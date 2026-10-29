@@ -11,6 +11,7 @@ import {
   classifyPastExam
 } from "./shared/data-lib.mjs";
 import { reportLatexGate, scanLatexGate } from "./shared/math-gate.mjs";
+import { prepareHistoryData } from "./prepare-history-data.mjs";
 
 const projectDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputDir = path.join(projectDir, "public", "data");
@@ -148,6 +149,7 @@ const nextHistory = buildHistory(historicalDates, sourceEntries);
 
 if (JSON.stringify(comparable(existing)) === JSON.stringify(comparable(nextHistory))) {
   console.log(`Unchanged ${outputFile}`);
+  prepareDerivedHistory();
   process.exit(0);
 }
 
@@ -157,3 +159,13 @@ const tmp = `${outputFile}.tmp`;
 fs.writeFileSync(tmp, `${json}\n`, "utf8");
 fs.renameSync(tmp, outputFile);
 console.log(`Generated ${outputFile}`);
+prepareDerivedHistory();
+
+function prepareDerivedHistory() {
+  const result = prepareHistoryData({ dataDir: outputDir, historyPath: outputFile });
+  console.log(
+    result.changed
+      ? `Generated history index and ${result.days} day shards`
+      : `History derived data already up to date (${result.days} days)`,
+  );
+}

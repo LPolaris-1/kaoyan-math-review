@@ -9,6 +9,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertRuntimeDependencies } from "./verify-runtime.mjs";
+import { prepareHistoryData } from "./prepare-history-data.mjs";
 
 const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -28,6 +29,18 @@ try {
   assertRuntimeDependencies(projectRoot);
 } catch (error) {
   console.error(`[build:selfhost] Runtime dependency check failed: ${error.message}`);
+  process.exit(1);
+}
+
+try {
+  const prepared = prepareHistoryData();
+  console.log(
+    prepared.changed
+      ? `[build:selfhost] Generated history index and ${prepared.days} day shards`
+      : `[build:selfhost] History derived data is up to date (${prepared.days} days)`,
+  );
+} catch (error) {
+  console.error(`[build:selfhost] Failed to prepare derived history data: ${error.message}`);
   process.exit(1);
 }
 

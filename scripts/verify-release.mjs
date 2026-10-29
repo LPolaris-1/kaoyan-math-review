@@ -25,6 +25,7 @@ for (const relative of required) {
 
 const assets = collectFiles(path.join(root, "dist/client/assets"));
 if (assets.length === 0) fail("required release directory is empty: dist/client/assets");
+verifyHistoryData(root);
 if (fs.existsSync(path.join(root, "dist/server/wrangler.json"))) {
   fail("selfhost release contains Sites-only dist/server/wrangler.json; rebuild with build:selfhost");
 }
@@ -100,6 +101,44 @@ function collectFiles(directory) {
     else if (entry.isFile()) files.push(absolute);
   }
   return files;
+}
+
+function verifyHistoryData(projectRoot) {
+  const dataDir = path.join(projectRoot, "dist/client/data");
+  const requiredDataFiles = [
+    "history.json",
+    "history.json.br",
+    "history.json.gz",
+    "history-index.json",
+    "history-index.json.br",
+    "history-index.json.gz",
+    "history-days",
+  ];
+  for (const relative of requiredDataFiles) {
+    if (!fs.existsSync(path.join(dataDir, relative))) fail(`missing required history file: dist/client/data/${relative}`);
+  }
+
+  let index;
+  try {
+    index = JSON.parse(fs.readFileSync(path.join(dataDir, "history-index.json"), "utf8"));
+  } catch (error) {
+    fail(`invalid dist/client/data/history-index.json: ${error.message}`);
+  }
+  if (!Array.isArray(index?.days) || index.days.length === 0) fail("history-index.json contains no days");
+  if (index.totalDays !== index.days.length) fail("history-index.json totalDays does not match days.length");
+
+  for (const day of index.days) {
+    if (typeof day?.date !== "string" || !Array.isArray(day.items)) fail("history-index.json contains an invalid day");
+    if (day.items.some((item) => item && typeof item === "object" && Object.hasOwn(item, "content"))) {
+      fail(`history-index.json item still contains content: ${day.date}`);
+    }
+    for (const suffix of [".json", ".json.br", ".json.gz"]) {
+      const relative = `history-days/${day.date}${suffix}`;
+      const absolute = path.join(dataDir, relative);
+      if (!fs.existsSync(absolute)) fail(`missing required history file: dist/client/data/${relative}`);
+      if (fs.statSync(absolute).size === 0) fail(`empty required history file: dist/client/data/${relative}`);
+    }
+  }
 }
 
 function gitHead(projectRoot) {

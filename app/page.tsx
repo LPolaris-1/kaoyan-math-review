@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { MarkdownContent } from "./components/markdown-content";
 import { InlineMathMarkdown } from "./components/inline-math-markdown";
+import { LazyHistoryContent } from "./components/lazy-history-content";
 import { loadHistory } from "../lib/history-loader.mjs";
 
 type ReviewItem = {
   id: string;
+  date: string;
   title: string;
   titleMarkdown?: string;
   subject: string;
@@ -18,7 +19,7 @@ type ReviewItem = {
   keyPoints: string[];
   pitfalls: string[];
   answer: string;
-  content: string;
+  content?: string;
   sourcePath: string;
 };
 
@@ -221,8 +222,6 @@ function HistoryQuestionCard({
   disabled: boolean;
   onSetMastered: (itemId: string, mastered: boolean) => void;
 }) {
-  const [hasOpened, setHasOpened] = useState(false);
-
   return (
     <article className="question-card">
       <div className="question-index">{String(index + 1).padStart(2, "0")}</div>
@@ -242,12 +241,7 @@ function HistoryQuestionCard({
         <h3><InlineMathMarkdown value={item.titleMarkdown ?? item.title} /></h3>
         {item.topic && <p className="question-topic">{item.topic}</p>}
         <div className="method-row">{item.methods.slice(0, 4).map((method) => <span key={method}>{method}</span>)}</div>
-        <details onToggle={(event) => {
-          if (event.currentTarget.open) setHasOpened(true);
-        }}>
-          <summary>查看原档案题目与完整推导</summary>
-          {hasOpened && <div className="detail-content"><MarkdownContent value={item.content} /><p className="source-note">来源：{item.sourcePath}</p></div>}
-        </details>
+        <LazyHistoryContent date={item.date} itemId={item.id} sourcePath={item.sourcePath} />
       </div>
     </article>
   );

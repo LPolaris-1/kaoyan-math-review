@@ -12,9 +12,11 @@ import { collectMathSegments } from "../app/math-content.mjs";
 import katex from "katex";
 import { reportLatexGate, scanLatexGate } from "./shared/math-gate.mjs";
 import { findMathRenderIssues } from "./shared/markdown-render-gate.mjs";
+import { findDerivedArtifactIssues } from "./prepare-history-data.mjs";
 
 const projectDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputFile = path.join(projectDir, "public", "data", "history.json");
+const outputDir = path.dirname(outputFile);
 
 function esc(str) {
   return JSON.stringify(str).slice(1, -1);
@@ -93,6 +95,16 @@ const canonicalSrcIds = new Set(
 const allItems = history.days.flatMap((day) => day.items);
 const historyCanonicalIds = new Set(allItems.map((item) => item.sourcePath));
 let errors = 0;
+
+console.log("");
+console.log("=== Derived History Gate ===");
+const derivedIssues = findDerivedArtifactIssues(history, outputDir);
+if (derivedIssues.length > 0) {
+  for (const issue of derivedIssues) console.error(`FAIL ${issue}`);
+  errors += derivedIssues.length;
+} else {
+  console.log(`Index and ${history.days.length} day shards match history.json; compressed bytes: PASS`);
+}
 
 console.log("");
 console.log("=== Wrong-question Admission Gate ===");

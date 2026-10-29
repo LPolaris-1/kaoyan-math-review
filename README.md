@@ -31,9 +31,10 @@ npm run dev
 ## 数据约定
 
 - 原始输入：`06-Resources/学习/考研/考研数学/错题本/原档案/`
-- 生成数据：`public/data/history.json`
+- 生成数据：`public/data/history.json`（canonical）；`public/data/history-index.json`、`public/data/history-days/YYYY-MM-DD.json` 及其 `.br`/`.gz` 变体由 `scripts/prepare-history-data.mjs` 自动派生，已加入 `.gitignore`，不手工编辑
 - 日期识别：优先沿用 `history.json` 中已锁定的历史日期；新文件依次使用文件创建时间（birthtime，有效且非 1970-01-01）→ 文件修改时间（mtime）；无法获取时不计入
 - 原档案只读，历史数据全量重建且不删除旧日期
+- `npm run dev`、`npm run build`/`build:selfhost`、`npm run build:sites` 和 `npm run data:build` 都会先重新校验并按需生成派生产物；`npm run data:verify` 会校验索引、日期分片与压缩字节
 
 ## 自建服务器运行模式（可选）
 

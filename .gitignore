@@ -41,6 +41,16 @@ next-env.d.ts
 /outputs/
 /work/
 
+# generated history index, per-day shards and compression variants
+/public/data/history-index.json
+/public/data/history-index.json.br
+/public/data/history-index.json.gz
+/public/data/history-days/
+/public/data/history.json.br
+/public/data/history.json.gz
+/public/data/.history-stage-*
+/public/data/.history-backup-*
+
 # self-host production data and credentials
 /review.db*
 /auth.env
