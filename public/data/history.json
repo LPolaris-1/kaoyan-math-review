@@ -1,9 +1,47 @@
 {
-  "generatedAt": "2026-10-28T15:32:07.886Z",
+  "generatedAt": "2026-10-29T13:59:23.776Z",
   "source": "06-Resources/学习/考研/考研数学/错题本/原档案",
-  "totalNotes": 429,
-  "totalDays": 81,
+  "totalNotes": 430,
+  "totalDays": 82,
   "days": [
+    {
+      "date": "2026-10-29",
+      "count": 1,
+      "subjectCounts": {
+        "高数": 1
+      },
+      "topics": [
+        "抽象函数乘积等式 F·f 型：两边积分升次再定号（李林880题57695）"
+      ],
+      "takeaways": [],
+      "summary": "1 道错题 · 高数 1 道",
+      "items": [
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-抽象函数乘积等式两边积分求f（FF′型凑微分链）.md",
+          "date": "2026-10-29",
+          "titleMarkdown": "高数错题-抽象函数乘积等式两边积分求 $f$",
+          "title": "高数错题-抽象函数乘积等式两边积分求 $f$",
+          "subject": "高数",
+          "chapter": "第09讲 一元函数积分学的计算",
+          "topic": "抽象函数乘积等式 F·f 型：两边积分升次再定号（李林880题57695）",
+          "methods": [
+            "乘积式整体积分（f·f′ 型凑微分，升次为 f²）",
+            "三角恒等变形把系数改成 tan x 的导数",
+            "两次凑微分链：sec²x dx = d(tan x)，d(tan x) 除以 tan x = d ln|tan x|",
+            "由区间单调性确定开方符号",
+            "对 F 再求一次导得 f"
+          ],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "\n# 高数错题-抽象函数乘积等式两边积分求 $f$\n\n**来源**：李林880题（第 57695 题，原书题号 5）\n**知识点**：原函数与导数的互逆关系、乘积式整体积分、凑微分链、由单调性定开方符号\n**核心方法**：把 $Ff$ 认成 $\\frac{1}{2}\\left(F^{2}\\right)'$ 整体积分，右端两次凑微分，得到 $F^{2}$ 后先用初值定常数、再用区间定正负，最后求导得 $f$\n**错因**：盯着右端的三角分式硬找原函数，漏掉「乘积式先升次」这一破局动作\n\n---\n\n## 一、题目（李林880题 57695，原书题号 5，填空题）\n\n已知 $F(x)$ 是 $f(x)$ 的一个原函数，即 $F'(x)=f(x)$，且满足\n\n$$\nF(x)f(x)=\\frac{\\ln(\\tan x)}{\\sin x\\cos x},\\qquad \\frac{\\pi}{4}<x<\\frac{\\pi}{2}\n$$\n\n又已知 $F\\left(\\frac{\\pi}{4}\\right)=0$，且在该区间上 $F(x)>0$，求 $f(x)$。\n\n**答案**：\n\n$$\nf(x)=\\frac{1}{\\sin x\\cos x}\n$$\n\n---\n\n## 二、破题：左端根本不用「找原函数」\n\n看到 $F(x)f(x)$ 这种「一个函数乘它自己的导数」的结构，唯一该做的动作是把 $F$ 看成一个整体：\n\n$$\n\\int F(x)F'(x)\\,\\mathrm{d}x=\\int F\\,\\mathrm{d}F=\\frac{F^{2}}{2}+C\n$$\n\n也就是说，$Ff$ 不是难积，而是**已经积完了**——它就是 $\\frac{1}{2}F^{2}$ 的导数。整道题真正的难点全在右端：把一个三角分式凑成 $\\tan x$ 的微分，做两次。\n\n**口诀**：见到 $f\\cdot f'$，先升次；不要先去化简乘积，也不要先解微分方程。\n\n---\n\n## 三、标准解法\n\n### 第一步：两边同时积分，左端直接升次\n\n$$\n\\int F(x)F'(x)\\,\\mathrm{d}x=\\int\\frac{\\ln(\\tan x)}{\\sin x\\cos x}\\,\\mathrm{d}x\n$$\n\n左端：\n\n$$\n\\int F(x)F'(x)\\,\\mathrm{d}x=\\frac{\\left[F(x)\\right]^{2}}{2}+C_1\n$$\n\n### 第二步：右端先把系数改写成 $\\tan x$ 的导数\n\n由 $\\sin x=\\tan x\\cos x$，得\n\n$$\n\\frac{1}{\\sin x\\cos x}=\\frac{1}{\\tan x\\cdot\\cos^{2}x}=\\frac{\\sec^{2}x}{\\tan x}\n$$\n\n于是右端变成\n\n$$\n\\int\\frac{\\ln(\\tan x)}{\\sin x\\cos x}\\,\\mathrm{d}x=\\int\\frac{\\ln(\\tan x)\\cdot\\sec^{2}x}{\\tan x}\\,\\mathrm{d}x\n$$\n\n这一步是整题的枢纽：$\\sec^{2}x$ 正好是 $\\tan x$ 的导数，分子那个除不掉的 $\\tan x$ 也在后面等着配对。\n\n### 第三步：两次凑微分\n\n第一次，用 $\\sec^{2}x\\,\\mathrm{d}x=\\mathrm{d}(\\tan x)$：\n\n$$\n\\int\\frac{\\ln(\\tan x)\\sec^{2}x}{\\tan x}\\,\\mathrm{d}x=\\int\\frac{\\ln(\\tan x)}{\\tan x}\\,\\mathrm{d}(\\tan x)\n$$\n\n第二次，用 $\\frac{1}{\\square}\\,\\mathrm{d}\\square=\\mathrm{d}\\ln|\\square|$，并把方框整体换成 $\\tan x$。这里可以放心去掉绝对值：在 $\\left(\\frac{\\pi}{4},\\frac{\\pi}{2}\\right)$ 上 $\\tan x>1>0$，故 $|\\tan x|=\\tan x$。\n\n$$\n\\int\\frac{\\ln(\\tan x)}{\\tan x}\\,\\mathrm{d}(\\tan x)=\\int\\ln(\\tan x)\\,\\mathrm{d}\\ln(\\tan x)=\\frac{1}{2}\\left[\\ln(\\tan x)\\right]^{2}+C_2\n$$\n\n注意最后一步的形式：把 $\\ln(\\tan x)$ 整体看成一个新变量 $u$，就是最基本的 $\\int u\\,\\mathrm{d}u=\\frac{u^{2}}{2}$。所以这道题的本质是**同一个「升次」动作做了两次**，只是外层换成了 $\\ln$。\n\n### 第四步：初值定常数\n\n把两端对起来：\n\n$$\n\\frac{\\left[F(x)\\right]^{2}}{2}+C_1=\\frac{1}{2}\\left[\\ln(\\tan x)\\right]^{2}+C_2\n$$\n\n即\n\n$$\n\\left[F(x)\\right]^{2}=\\left[\\ln(\\tan x)\\right]^{2}+C,\\qquad C=2C_2-2C_1\n$$\n\n代入 $F\\left(\\frac{\\pi}{4}\\right)=0$。此时 $\\tan\\frac{\\pi}{4}=1$，$\\ln 1=0$，所以\n\n$$\n0=0+C\\quad\\Longrightarrow\\quad C=0\n$$\n\n得\n\n$$\n\\left[F(x)\\right]^{2}=\\left[\\ln(\\tan x)\\right]^{2}\n$$\n\n### 第五步：定号（本题最容易丢分的地方）\n\n平方相等只给出 $F=\\pm\\ln(\\tan x)$。必须用区间把符号钉死：\n\n在 $\\left(\\frac{\\pi}{4},\\frac{\\pi}{2}\\right)$ 上 $\\tan x$ 单调递增，且 $\\tan x>1$，故 $\\ln(\\tan x)>0$；又题设 $F(x)>0$，于是\n\n$$\nF(x)=\\ln(\\tan x)\n$$\n\n### 第六步：再求一次导得 $f$\n\n$$\nf(x)=F'(x)=\\left(\\ln(\\tan x)\\right)'=\\frac{\\sec^{2}x}{\\tan x}=\\frac{1}{\\sin x\\cos x}\n$$\n\n---\n\n## 四、验算\n\n三条都要过：\n\n1. **初值**：$F\\left(\\frac{\\pi}{4}\\right)=\\ln 1=0$，符合。\n2. **导数**：由 $\\ln(\\tan x)=\\ln\\sin x-\\ln\\cos x$ 直接求导，\n$$\n\\left(\\ln\\tan x\\right)'=\\frac{\\cos x}{\\sin x}+\\frac{\\sin x}{\\cos x}=\\frac{\\cos^{2}x+\\sin^{2}x}{\\sin x\\cos x}=\\frac{1}{\\sin x\\cos x}\n$$\n3. **原方程**：$F\\cdot f=\\ln(\\tan x)\\cdot\\frac{1}{\\sin x\\cos x}$，正是题给的右端。\n\n三处独立吻合，答案正确。\n\n---\n\n## 五、另一条路：先「猜」再验\n\n右端 $\\frac{1}{\\sin x\\cos x}=\\frac{2}{\\sin 2x}$，而 $(\\ln\\tan x)'$ 恰好也是它——这说明本题的 $f$ 与 $(\\ln\\tan x)'$ 是同一个函数，$F$ 就是 $\\ln(\\tan x)$。考场上若被右端的三角形式卡住，可以先对 $\\ln(\\tan x)$、$\\ln(\\sin x)$、$\\ln(\\cos x)$ 这类「对数的导数」做一次口算，往往能直接猜出 $F$，再补齐积分与定号。但书写时仍要按上面的路子写：**先升次，再定常数，再定号**，否则步骤分拿不到。\n\n---\n\n## 六、易错点\n\n1. **想直接开方写两个解**：$F=\\pm\\ln(\\tan x)$ 只写一半。题设给了 $F>0$，符号必须由区间单调性判定，不能凭感觉选。\n2. **忘记初值定常数**：$C\\ne 0$ 时 $F^{2}=\\left[\\ln(\\tan x)\\right]^{2}+C$ 开不出初等表达式，这一步是压轴，漏了整题崩。\n3. **凑错微分**：$\\sec^{2}x\\,\\mathrm{d}x=\\mathrm{d}(\\tan x)$，不是 $\\mathrm{d}(\\sec x)$，也不是 $\\mathrm{d}\\left(\\frac{1}{\\cos x}\\right)$。\n4. **绝对值随手丢**：$\\int\\frac{1}{\\square}\\mathrm{d}\\square=\\ln|\\square|$ 是带绝对值的；本题因为 $\\tan x>1$ 才能去掉。若区间落到 $\\left(0,\\frac{\\pi}{4}\\right)$，$\\tan x<1$ 而仍为正，结论形式要重算符号。\n5. **两个常数变一个**：两边各出一个常数，必须合并成 $C=2C_2-2C_1$，别当两个独立常数处理。\n6. **停在 $F$ 上**：题目问的是 $f$，最后必须再求一次导。\n7. **系数变形方向错**：$\\frac{1}{\\sin x\\cos x}\\to\\frac{\\sec^{2}x}{\\tan x}$ 的目的是「造出 $\\tan x$ 的导数」，不是随便化简；方向反了（例如往 $\\frac{1}{\\sin 2x}$ 走）就凑不出微分。\n\n---\n\n## 七、一句话模板\n\n> 见「$Ff=\\varphi(x)$ 且 $F'=f$」：左端一律写成 $\\frac{1}{2}\\left(F^{2}\\right)'$ 整体积分，右端凑两次微分（先凑内层、再把 $\\frac{1}{\\square}\\mathrm{d}\\square$ 收成 $\\mathrm{d}\\ln|\\square|$）；得到 $F^{2}$ 后用初值定常数、用区间单调性定正负，最后对 $F$ 再求一次导交答案。\n\n---\n\n## 关联\n\n- 同属第 09 讲的凑微分家族：[[06-Resources/学习/考研/考研数学/错题本/整理档案/高数/第09讲 一元函数积分学的计算/题型-对数复合型凑微分与分部积分|题型-对数复合型凑微分与分部积分]]\n- 同为「已知原函数关系求 $f$」，但那条路是先还原解析式：[[06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-已知原函数求f(lnx)的不定积分（先还原再换元分部）（张宇1000题第167795题）|高数错题-已知原函数求 $f(\\ln x)$ 的不定积分]]\n- 同属「函数方程反解 $f$」，对照设常数法与变限积分方程：[[06-Resources/学习/考研/考研数学/错题本/整理档案/高数/第11讲 应用(二)积分等式与积分不等式/题型-积分方程求函数（设常数法与变限积分方程）|题型-积分方程求函数（设常数法与变限积分方程）]]\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-抽象函数乘积等式两边积分求f（FF′型凑微分链）.md",
+          "isPastExam": false
+        }
+      ]
+    },
     {
       "date": "2026-10-28",
       "count": 6,
@@ -5559,7 +5597,9 @@
         "线代": 4,
         "高数": 1
       },
-      "topics": [],
+      "topics": [
+        "连乘型 1^∞ 极限（取对数化积为和）"
+      ],
       "takeaways": [],
       "summary": "5 道错题 · 线代 4 道、高数 1 道",
       "items": [
@@ -5623,14 +5663,19 @@
           "titleMarkdown": "题型：连乘型 $1^\\infty$ 极限 · 夹逼 + 拉格朗日中值定理（方法二）",
           "title": "题型：连乘型 $1^\\infty$ 极限 · 夹逼 + 拉格朗日中值定理（方法二）",
           "subject": "高数",
-          "chapter": "",
-          "topic": "",
-          "methods": [],
+          "chapter": "第1讲 函数极限与连续",
+          "topic": "连乘型 1^∞ 极限（取对数化积为和）",
+          "methods": [
+            "取对数化积为和",
+            "等价无穷小逐项替换",
+            "夹逼定理",
+            "拉格朗日中值定理"
+          ],
           "question": "",
           "keyPoints": [],
           "pitfalls": [],
           "answer": "",
-          "content": "# 题型：连乘型 $1^\\infty$ 极限 · 夹逼 + 拉格朗日中值定理（方法二）\n\n**科目**：高数（极限 / 对数化积为和 / 夹逼定理）\n**日期**：2026-08-31\n**来源**：错题整理\n**难度**：⭐⭐⭐⭐（$1^\\infty$ 型转化为 $0\\cdot\\infty$ 型 + 放缩夹逼）\n\n---\n\n## 题目\n\n求极限\n$$\\lim_{x\\to\\infty} \\left( \\frac{x^n}{(x+1)(x+2)\\cdots(x+n)} \\right)^x$$\n\n**正确答案**：$e^{-\\frac{n(n+1)}{2}}$\n\n---\n\n## ✅ 标准解题步骤（夹逼 + 拉格朗日中值定理法）\n\n### 第一步：取对数，化积为和\n\n令 $L = \\lim_{x\\to\\infty} \\left( \\frac{x^n}{(x+1)(x+2)\\cdots(x+n)} \\right)^x$\n\n取对数：\n$$\\ln L = \\lim_{x\\to\\infty} x \\ln \\left( \\frac{x^n}{(x+1)(x+2)\\cdots(x+n)} \\right) = \\lim_{x\\to\\infty} x \\sum_{i=1}^{n} \\ln\\left( \\frac{x}{x+i} \\right) = \\lim_{x\\to\\infty} x \\sum_{i=1}^{n} \\ln\\left( 1 + \\frac{i}{x} \\right)$$\n\n⚠️ 注意：这里前面有一个负号，因为 $\\ln\\left(\\frac{x}{x+i}\\right) = -\\ln\\left(1 + \\frac{i}{x}\\right)$，先把负号提出来：\n$$\\ln L = - \\lim_{x\\to\\infty} x \\sum_{i=1}^{n} \\ln\\left( 1 + \\frac{i}{x} \\right)$$\n\n### 第二步：利用拉格朗日中值定理进行放缩\n\n令 $f(t) = \\ln t$，在区间 $[x,\\ x+i]$ 上应用拉格朗日中值定理。\n\n存在 $c \\in (x,\\ x+i)$，使得：\n$$\\ln(x+i) - \\ln x = f'(c) \\cdot (x+i - x) = \\frac{i}{c}$$\n\n即：$\\ln\\left(1 + \\frac{i}{x}\\right) = \\frac{i}{c}$\n\n因为 $x < c < x+i$，所以 $\\frac{1}{x+i} < \\frac{1}{c} < \\frac{1}{x}$。\n\n因此：\n$$\\frac{i}{x+i} < \\ln\\left(1 + \\frac{i}{x}\\right) < \\frac{i}{x}$$\n\n### 第三步：乘以 $x$ 并求和\n\n将不等式各项乘以 $x$（因为 $x\\to\\infty$，所以 $x>0$）：\n$$\\frac{xi}{x+i} < x \\ln\\left(1 + \\frac{i}{x}\\right) < i$$\n\n对 $i=1$ 到 $n$ 求和：\n$$\\sum_{i=1}^{n} \\frac{xi}{x+i} < \\sum_{i=1}^{n} x \\ln\\left(1 + \\frac{i}{x}\\right) < \\sum_{i=1}^{n} i$$\n\n### 第四步：利用夹逼定理求极限\n\n求左边的极限：\n$$\\lim_{x\\to\\infty} \\sum_{i=1}^{n} \\frac{xi}{x+i} = \\sum_{i=1}^{n} \\lim_{x\\to\\infty} \\frac{i}{1 + \\frac{i}{x}} = \\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$\n\n求右边的极限：\n$$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$\n\n因为左右两边的极限都是 $\\frac{n(n+1)}{2}$，由夹逼定理可知，中间的极限也为 $\\frac{n(n+1)}{2}$。\n\n所以：$- \\lim_{x\\to\\infty} x \\sum_{i=1}^{n} \\ln\\left( 1 + \\frac{i}{x} \\right) = - \\frac{n(n+1)}{2}$\n\n即：$\\ln L = -\\frac{n(n+1)}{2}$，最终：\n$$L = e^{-\\frac{n(n+1)}{2}}$$\n\n---\n\n## 🚨 用这种方法时的核心陷阱（避坑指南）\n\n1. **取对数后千万别把符号弄丢了**：原式里是 $\\frac{x}{x+i}$，取对数后是 $\\ln(1+\\frac{i}{x})$ 的相反数。千万记得最后结果带负号！\n2. **求和指标 $i$ 是有限的**：题目中 $n$ 是固定常数，所以 $i$ 从 $1$ 到 $n$ 是有限项求和，极限可以直接穿进括号里面。如果是 $n$ 也趋于无穷大（比如数列极限），就不能这样简单夹逼了。\n3. **关于拉格朗日中值定理的好处**：有些同学会直接背常见不等式 $\\frac{u}{1+u} < \\ln(1+u) < u$。如果忘了这个不等式，用拉格朗日中值定理在考场上自己推导一遍（如本题），可以保证绝对不会错，而且能拿满分。\n\n---\n\n## 📝 错题本终极总结（考场速记）\n\n- **两大高阶解法**：\n  - 泰勒展开法（较难，需精确到 $\\frac{1}{x}$ 项）：$-\\sum_{i=1}^n \\ln(1 + \\frac{i}{x}) \\sim -\\sum_{i=1}^n \\frac{i}{x}$。\n  - 夹逼 + 拉格朗日中值定理法（最基础，不易算错）：把对数放缩在 $\\frac{i}{x+i}$ 和 $\\frac{i}{x}$ 之间，乘以 $x$ 后左右两侧极限都收敛到 $\\sum i$。\n- **考题导向**：这类\"连乘式求极限\"几乎成了考研/竞赛必考题，强烈建议把 **取对数 → 化积为和 → 放缩夹逼（或泰勒）** 这一套流程练熟！\n",
+          "content": "# 题型：连乘型 $1^\\infty$ 极限 · 夹逼 + 拉格朗日中值定理（方法二）\n\n**科目**：高数（极限 / 对数化积为和 / 夹逼定理）\n**日期**：2026-08-31\n**来源**：错题整理\n**难度**：⭐⭐⭐⭐（$1^\\infty$ 型转化为 $0\\cdot\\infty$ 型 + 放缩夹逼）\n\n---\n\n## 题目\n\n求极限\n$$\\lim_{x\\to\\infty} \\left( \\frac{x^n}{(x+1)(x+2)\\cdots(x+n)} \\right)^x$$\n\n**正确答案**：$e^{-\\frac{n(n+1)}{2}}$\n\n---\n\n## ✅ 标准解题步骤（夹逼 + 拉格朗日中值定理法）\n\n### 第一步：取对数，化积为和\n\n令 $L = \\lim_{x\\to\\infty} \\left( \\frac{x^n}{(x+1)(x+2)\\cdots(x+n)} \\right)^x$\n\n取对数：\n$$\\ln L = \\lim_{x\\to\\infty} x \\ln \\left( \\frac{x^n}{(x+1)(x+2)\\cdots(x+n)} \\right) = \\lim_{x\\to\\infty} x \\sum_{i=1}^{n} \\ln\\left( \\frac{x}{x+i} \\right) = \\lim_{x\\to\\infty} x \\sum_{i=1}^{n} \\ln\\left( 1 + \\frac{i}{x} \\right)$$\n\n⚠️ 注意：这里前面有一个负号，因为 $\\ln\\left(\\frac{x}{x+i}\\right) = -\\ln\\left(1 + \\frac{i}{x}\\right)$，先把负号提出来：\n$$\\ln L = - \\lim_{x\\to\\infty} x \\sum_{i=1}^{n} \\ln\\left( 1 + \\frac{i}{x} \\right)$$\n\n### 第二步：利用拉格朗日中值定理进行放缩\n\n令 $f(t) = \\ln t$，在区间 $[x,\\ x+i]$ 上应用拉格朗日中值定理。\n\n存在 $c \\in (x,\\ x+i)$，使得：\n$$\\ln(x+i) - \\ln x = f'(c) \\cdot (x+i - x) = \\frac{i}{c}$$\n\n即：$\\ln\\left(1 + \\frac{i}{x}\\right) = \\frac{i}{c}$\n\n因为 $x < c < x+i$，所以 $\\frac{1}{x+i} < \\frac{1}{c} < \\frac{1}{x}$。\n\n因此：\n$$\\frac{i}{x+i} < \\ln\\left(1 + \\frac{i}{x}\\right) < \\frac{i}{x}$$\n\n### 第三步：乘以 $x$ 并求和\n\n将不等式各项乘以 $x$（因为 $x\\to\\infty$，所以 $x>0$）：\n$$\\frac{xi}{x+i} < x \\ln\\left(1 + \\frac{i}{x}\\right) < i$$\n\n对 $i=1$ 到 $n$ 求和：\n$$\\sum_{i=1}^{n} \\frac{xi}{x+i} < \\sum_{i=1}^{n} x \\ln\\left(1 + \\frac{i}{x}\\right) < \\sum_{i=1}^{n} i$$\n\n### 第四步：利用夹逼定理求极限\n\n求左边的极限：\n$$\\lim_{x\\to\\infty} \\sum_{i=1}^{n} \\frac{xi}{x+i} = \\sum_{i=1}^{n} \\lim_{x\\to\\infty} \\frac{i}{1 + \\frac{i}{x}} = \\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$\n\n求右边的极限：\n$$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$\n\n因为左右两边的极限都是 $\\frac{n(n+1)}{2}$，由夹逼定理可知，中间的极限也为 $\\frac{n(n+1)}{2}$。\n\n所以：$- \\lim_{x\\to\\infty} x \\sum_{i=1}^{n} \\ln\\left( 1 + \\frac{i}{x} \\right) = - \\frac{n(n+1)}{2}$\n\n即：$\\ln L = -\\frac{n(n+1)}{2}$，最终：\n$$L = e^{-\\frac{n(n+1)}{2}}$$\n\n---\n\n## 🚨 用这种方法时的核心陷阱（避坑指南）\n\n1. **取对数后千万别把符号弄丢了**：原式里是 $\\frac{x}{x+i}$，取对数后是 $\\ln(1+\\frac{i}{x})$ 的相反数。千万记得最后结果带负号！\n2. **求和指标 $i$ 是有限的**：题目中 $n$ 是固定常数，所以 $i$ 从 $1$ 到 $n$ 是有限项求和，极限可以直接穿进括号里面。如果是 $n$ 也趋于无穷大（比如数列极限），就不能这样简单夹逼了。\n3. **关于拉格朗日中值定理的好处**：有些同学会直接背常见不等式 $\\frac{u}{1+u} < \\ln(1+u) < u$。如果忘了这个不等式，用拉格朗日中值定理在考场上自己推导一遍（如本题），可以保证绝对不会错，而且能拿满分。\n\n---\n\n## 📝 错题本终极总结（考场速记）\n\n- **两大高阶解法**：\n  - 泰勒展开法（较难，需精确到 $\\frac{1}{x}$ 项）：$-\\sum_{i=1}^n \\ln(1 + \\frac{i}{x}) \\sim -\\sum_{i=1}^n \\frac{i}{x}$。\n  - 夹逼 + 拉格朗日中值定理法（最基础，不易算错）：把对数放缩在 $\\frac{i}{x+i}$ 和 $\\frac{i}{x}$ 之间，乘以 $x$ 后左右两侧极限都收敛到 $\\sum i$。\n- **考题导向**：这类\"连乘式求极限\"几乎成了考研/竞赛必考题，强烈建议把 **取对数 → 化积为和 → 放缩夹逼（或泰勒）** 这一套流程练熟！\n\n---\n\n## 变式：分母改成 $(x-1)(x-2)\\cdots(x-n)$（答案取正号）\n\n> 2026-10-29 补录。同一族的符号变体：把分母里的 $+$ 全换成 $-$，答案符号随之翻正。原题留如上，本变式单独成节，互不覆盖。\n>\n> **来源**：武忠祥严选题 第 54285 题（原书题号 6），设 $n$ 为正整数。首次做错日期 2026-10-29。\n\n求\n\n$$\n\\lim_{x\\to\\infty}\\left[\\frac{x^{n}}{(x-1)(x-2)\\cdots(x-n)}\\right]^{x}\n$$\n\n**答案**：\n\n$$\ne^{\\frac{n(n+1)}{2}}\n$$\n\n### 第一步：取对数并翻转分子分母\n\n记原式为 $L$，则\n\n$$\n\\ln L=\\lim_{x\\to\\infty}x\\ln\\frac{x^{n}}{(x-1)(x-2)\\cdots(x-n)}\n$$\n\n用 $\\ln a=-\\ln\\frac{1}{a}$ 把分数倒过来，好处是所有因子都变成 $\\ln(1-\\text{小量})$ 的形状：\n\n$$\n\\ln L=-\\lim_{x\\to\\infty}x\\ln\\left[\\frac{(x-1)(x-2)\\cdots(x-n)}{x^{n}}\\right]\n$$\n\n### 第二步：拆成有限项之和\n\n$$\n\\ln L=-\\lim_{x\\to\\infty}x\\left[\\ln\\left(1-\\frac{1}{x}\\right)+\\ln\\left(1-\\frac{2}{x}\\right)+\\cdots+\\ln\\left(1-\\frac{n}{x}\\right)\\right]\n$$\n\n### 第三步：逐项用 $\\ln(1+u)\\sim u$\n\n$x\\to\\infty$ 时 $\\frac{k}{x}\\to0$（$k=1,\\dots,n$ 固定），故 $\\ln\\left(1-\\frac{k}{x}\\right)\\sim-\\frac{k}{x}$。这里可以逐项替换，因为各项同号、相加时不抵消：\n\n$$\n\\ln L=-\\lim_{x\\to\\infty}x\\left(-\\frac{1}{x}-\\frac{2}{x}-\\cdots-\\frac{n}{x}\\right)\n$$\n\n$$\n\\ln L=\\lim_{x\\to\\infty}x\\cdot\\frac{1+2+\\cdots+n}{x}=1+2+\\cdots+n=\\frac{n(n+1)}{2}\n$$\n\n$x$ 与 $\\frac{1}{x}$ 直接约掉，剩下的是纯常数，与 $x$ 无关。\n\n还原即得\n\n$$\nL=e^{\\frac{n(n+1)}{2}}\n$$\n\n### 两个版本的对照\n\n| 分母 | 对数展开 | $\\ln L$ | 答案 |\n| --- | --- | --- | --- |\n| $(x+1)(x+2)\\cdots(x+n)$ | 每项 $+\\frac{k}{x}$ | $-\\frac{n(n+1)}{2}$ | $e^{-\\frac{n(n+1)}{2}}$ |\n| $(x-1)(x-2)\\cdots(x-n)$ | 每项 $-\\frac{k}{x}$ | $+\\frac{n(n+1)}{2}$ | $e^{\\frac{n(n+1)}{2}}$ |\n\n两个版本只差一个符号，本质是同一族题：分母因子是 $x+k$ 还是 $x-k$，决定 $\\ln L$ 的整体符号。\n\n### 本题专属的坑\n\n1. **跳过了 $\\ln a=-\\ln\\frac{1}{a}$ 就直接硬拆**：原式是 $\\ln\\frac{x}{x-k}$，直接拆得 $\\ln x-\\ln(x-k)$，两项都发散，不能分别求极限。必须先凑成 $\\ln\\left(1-\\frac{k}{x}\\right)$ 这种整体形式。这一步是本题结构上的必需，不是可选的技巧。\n2. **负号丢两次又捡回来**：$\\ln a=-\\ln\\frac{1}{a}$ 带一个负号，$\\ln\\left(1-\\frac{k}{x}\\right)\\sim-\\frac{k}{x}$ 又带一个负号，两次相消才得到正号答案。只记其中一个负号，答案就会变成 $e^{-\\frac{n(n+1)}{2}}$，和原题答案混淆。\n3. **以为 $n$ 也在动**：这里 $n$ 是固定正整数，和式只有 $n$ 项，极限可以逐项分配。如果 $n$ 随 $x$ 一起趋于无穷，逐项替换与求和顺序都要重新论证，不能照搬。\n4. **常数别丢在 $x$ 上**：第三步写成了 $\\ln L=\\lim \\frac{1+2+\\cdots+n}{x}\\cdot x$，这个形状容易让人误以为还要再取一次极限。更清楚的写法是先约分：\n\n$$\n\\ln L=-\\lim_{x\\to\\infty}x\\left(-\\frac{1+2+\\cdots+n}{x}\\right)=1+2+\\cdots+n=\\frac{n(n+1)}{2}\n$$\n\n$x$ 与 $\\frac{1}{x}$ 直接抵掉，剩下的就是纯常数 $\\frac{n(n+1)}{2}$，与 $x$ 再无关系。\n",
           "tags": [],
           "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-连乘型1的无穷次方极限（夹逼+拉格朗日中值定理）.md",
           "isPastExam": false
