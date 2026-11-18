@@ -1,21 +1,69 @@
 {
-  "generatedAt": "2026-11-18T14:04:12.106Z",
+  "generatedAt": "2026-11-18T16:06:03.981Z",
   "source": "06-Resources/学习/考研/考研数学/错题本/原档案",
-  "totalNotes": 517,
+  "totalNotes": 521,
   "totalDays": 99,
   "days": [
     {
       "date": "2026-11-18",
-      "count": 1,
+      "count": 5,
       "subjectCounts": {
-        "高数": 1
+        "高数": 5
       },
       "topics": [
-        "0/0 型极限反求参数、换元法、等价无穷小定阶"
+        "参数方程确定的函数二阶导数、隐函数求导、复合求导",
+        "变上限积分、平均值函数的单调性、拉格朗日中值定理定号",
+        "0/0 型极限反求参数、换元法、等价无穷小定阶",
+        "一阶线性微分方程、带绝对值的定积分面积、等比数列求和与极限",
+        "累次积分求导、变限积分、洛必达法则、等价无穷小"
       ],
       "takeaways": [],
-      "summary": "1 道错题 · 高数 1 道",
+      "summary": "5 道错题 · 高数 5 道",
       "items": [
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-参数方程二阶导（分母含cosy需带出y一阶导）.md",
+          "date": "2026-11-18",
+          "titleMarkdown": "高数错题：参数方程二阶导（分母含 y 时的完整求导）",
+          "title": "高数错题：参数方程二阶导（分母含 y 时的完整求导）",
+          "subject": "高数",
+          "chapter": "第04讲 一元函数微分学的计算",
+          "topic": "参数方程确定的函数二阶导数、隐函数求导、复合求导",
+          "methods": [
+            "参数方程二阶导：先求 dy/dx，再对 t 求导后乘 dt/dx",
+            "隐函数求导：分母里的 cos y 是 y 的函数，对 t 求导时要带出 y'",
+            "先代点再化简：t=1、y=0 代入后大量项归零"
+          ],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "\n# 高数错题：参数方程二阶导（分母含 y 时的完整求导）\n\n## 题目\n\n设函数 $y=y(x)$ 由\n\n$$\n\\begin{cases}\nx=t^{2}+2t,\\\\[4pt]\n\\dfrac{1}{2}\\sin y-y+t^{2}=1\n\\end{cases}\n\\qquad (t>0)\n$$\n\n确定，则 $\\left.\\dfrac{\\mathrm{d}^{2}y}{\\mathrm{d}x^{2}}\\right|_{x=3}=$ ______。\n\n## 核心思路\n\n参数方程求二阶导只有一条路：先算 $\\frac{\\mathrm{d}y}{\\mathrm{d}x}=\\frac{y'}{x'}$，再对它**关于 $t$** 求导，最后乘 $\\frac{\\mathrm{d}t}{\\mathrm{d}x}=\\frac{1}{x'}$。本题的坑在分母含 $\\cos y$，对它求导会再冒出一个 $y'$，那个 $y'$ 必须用一阶的结果替换掉。\n\n## 分步解答\n\n**第一步：两个方程分别对 $t$ 求导**\n\n$$\n\\frac{\\mathrm{d}x}{\\mathrm{d}t}=2t+2=2(t+1),\n$$\n\n第二式对 $t$ 求导时，$\\frac{1}{2}\\sin y$ 是 $y$ 的函数，要带出 $y'$：\n\n$$\n\\frac{1}{2}\\cos y\\cdot\\frac{\\mathrm{d}y}{\\mathrm{d}t}-\\frac{\\mathrm{d}y}{\\mathrm{d}t}+2t=0\n\\ \\Longrightarrow\\\n\\frac{\\mathrm{d}y}{\\mathrm{d}t}=\\frac{2t}{1-\\frac{1}{2}\\cos y}.\n$$\n\n记 $h=1-\\frac{1}{2}\\cos y$，则 $\\frac{\\mathrm{d}y}{\\mathrm{d}t}=\\frac{2t}{h}$。\n\n**第二步：求一阶导 $\\frac{\\mathrm{d}y}{\\mathrm{d}x}$**\n\n$$\n\\frac{\\mathrm{d}y}{\\mathrm{d}x}=\\frac{\\mathrm{d}y}{\\mathrm{d}t}\\cdot\\frac{\\mathrm{d}t}{\\mathrm{d}x}\n=\\frac{2t}{h}\\cdot\\frac{1}{2(t+1)}=\\frac{t}{(t+1)h}.\n$$\n\n**第三步：对 $t$ 求导，注意 $h$ 里含 $y$**\n\n先备好 $h$ 对 $t$ 的导数（这一步是本题唯一难点）：\n\n$$\n\\frac{\\mathrm{d}h}{\\mathrm{d}t}=\\frac{1}{2}\\sin y\\cdot\\frac{\\mathrm{d}y}{\\mathrm{d}t}\n=\\frac{1}{2}\\sin y\\cdot\\frac{2t}{h}=\\frac{t\\sin y}{h}.\n$$\n\n再对 $\\frac{\\mathrm{d}y}{\\mathrm{d}x}=\\frac{t}{(t+1)h}$ 用商的求导法则，分母 $(t+1)h$ 记为 $D$：\n\n$$\n\\frac{\\mathrm{d}D}{\\mathrm{d}t}=h+(t+1)\\frac{t\\sin y}{h},\n$$\n\n$$\n\\frac{\\mathrm{d}}{\\mathrm{d}t}\\left(\\frac{\\mathrm{d}y}{\\mathrm{d}x}\\right)\n=\\frac{D-tD'}{D^{2}}\n=\\frac{(t+1)h-t\\left[h+(t+1)\\frac{t\\sin y}{h}\\right]}{(t+1)^{2}h^{2}}\n=\\frac{h-\\frac{t^{2}(t+1)\\sin y}{h}}{(t+1)^{2}h^{2}}.\n$$\n\n**第四步：乘 $\\frac{\\mathrm{d}t}{\\mathrm{d}x}$ 得二阶导**\n\n$$\n\\frac{\\mathrm{d}^{2}y}{\\mathrm{d}x^{2}}=\\frac{\\mathrm{d}}{\\mathrm{d}t}\\left(\\frac{\\mathrm{d}y}{\\mathrm{d}x}\\right)\\cdot\\frac{\\mathrm{d}t}{\\mathrm{d}x}\n=\\frac{h^{2}-t^{2}(t+1)\\sin y}{2(t+1)^{3}h^{3}}.\n$$\n\n**第五步：代点求值**\n\n由 $x=3$ 得 $t^{2}+2t=3$，即 $(t-1)(t+3)=0$，题设 $t>0$，故 $t=1$。\n\n代回第二式：$\\frac{1}{2}\\sin y-y+1=1$，即 $\\frac{1}{2}\\sin y=y$，只有 $y=0$（因 $\\frac{1}{2}\\cos y-1<0$，左端单调递减且仅在 $y=0$ 处为零）。\n\n此时 $h=1-\\frac{1}{2}\\cos 0=\\frac{1}{2}$，故\n\n$$\n\\left.\\frac{\\mathrm{d}^{2}y}{\\mathrm{d}x^{2}}\\right|_{x=3}\n=\\frac{\\left(\\frac{1}{2}\\right)^{2}-1^{2}\\cdot2\\cdot\\sin 0}{2\\cdot2^{3}\\cdot\\left(\\frac{1}{2}\\right)^{3}}\n=\\frac{\\frac{1}{4}}{2}\n=\\frac{1}{8}.\n$$\n\n## 易错点\n\n1. **二阶导直接对 $\\frac{\\mathrm{d}y}{\\mathrm{d}x}$ 关于 $x$ 求导。** 参数方程里 $\\frac{\\mathrm{d}y}{\\mathrm{d}x}$ 是 $t$ 的函数，只能对 $t$ 求导再乘 $\\frac{\\mathrm{d}t}{\\mathrm{d}x}$，漏乘 $\\frac{1}{2(t+1)}$ 是最常见的错。\n2. **对分母 $1-\\frac{1}{2}\\cos y$ 求导时忘掉 $y'$。** 它不是常数，$\\frac{\\mathrm{d}}{\\mathrm{d}t}\\left(\\frac{1}{2}\\cos y\\right)=-\\frac{1}{2}\\sin y\\cdot y'$，而 $y'=\\frac{2t}{h}$，要立刻代回，否则会出现 $y'$ 与 $t$ 混在一起无法化简。\n3. **$x=3$ 解出两个 $t$，别忘了用 $t>0$ 筛。** $(t-1)(t+3)=0$ 给出 $t=1$ 与 $t=-3$，题设 $t>0$ 才排除 $t=-3$；漏掉这个条件会算错。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-参数方程二阶导（分母含cosy需带出y一阶导）.md",
+          "isPastExam": false
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-累次积分求极限（换元x减t等于s消去被积函数中的参数）.md",
+          "date": "2026-11-18",
+          "titleMarkdown": "高数错题：累次积分极限（换元 x−t=s 把含 x 的积分变成变上限积分）",
+          "title": "高数错题：累次积分极限（换元 x−t=s 把含 x 的积分变成变上限积分）",
+          "subject": "高数",
+          "chapter": "第08讲 一元函数积分学的概念与性质",
+          "topic": "累次积分求导、变限积分、洛必达法则、等价无穷小",
+          "methods": [
+            "累次积分求导：外层变上限求导后，内层被积函数里的上限要换成 x",
+            "内层积分含 x 时换元 x-t=s，把它变成纯变上限积分再求导",
+            "反复洛必达直到分母不再是无穷小，最后用 x²-sin x² ~ x⁶/6"
+          ],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "\n# 高数错题：累次积分极限（换元 x−t=s 把含 x 的积分变成变上限积分）\n\n## 题目\n\n（本题满分 10 分）求极限\n\n$$\n\\lim_{x\\to 0}\\frac{\\displaystyle\\int_{0}^{x}\\mathrm{d}u\\int_{0}^{u}\\left[u^{2}-3\\sin (u-t)^{2}\\right]\\mathrm{d}t}{\\sin x^{8}} .\n$$\n\n答案：$\\dfrac{1}{112}$\n\n## 核心思路\n\n分母等价于 $x^{8}$。分子是累次积分，外层对上限 $x$ 求导后，内层被积函数里的 $u$ 要全部换成 $x$，于是内层积分里出现 $x$ 这个参数；这时**不能再对它直接求导**，必须先令 $x-t=s$ 把参数从被积函数里赶走，变成纯变上限积分，然后继续洛必达。\n\n## 分步解答\n\n**第一步：分母换成幂函数**\n\n$x\\to0$ 时 $\\sin x^{8}\\sim x^{8}$，原式化为\n\n$$\n\\lim_{x\\to 0}\\frac{\\displaystyle\\int_{0}^{x}\\mathrm{d}u\\int_{0}^{u}\\left[u^{2}-3\\sin (u-t)^{2}\\right]\\mathrm{d}t}{x^{8}} .\n$$\n\n分母是 $x^{8}$，分子当 $x\\to0$ 趋于 $0$，是 $\\frac{0}{0}$。\n\n**第二步：对累次积分关于上限 $x$ 求导（第一次洛必达）**\n\n记 $F(x)=\\int_{0}^{x}G(u)\\,\\mathrm{d}u$，其中 $G(u)=\\int_{0}^{u}\\left[u^{2}-3\\sin (u-t)^{2}\\right]\\mathrm{d}t$，则 $F'(x)=G(x)$，即把内层积分里的 $u$ 全换成 $x$：\n\n$$\nF'(x)=\\int_{0}^{x}\\left[x^{2}-3\\sin (x-t)^{2}\\right]\\mathrm{d}t\n=x^{3}-3\\int_{0}^{x}\\sin (x-t)^{2}\\,\\mathrm{d}t .\n$$\n\n于是\n\n$$\n\\text{原式}=\\lim_{x\\to 0}\\frac{x^{3}-3\\displaystyle\\int_{0}^{x}\\sin (x-t)^{2}\\,\\mathrm{d}t}{8x^{7}} .\n$$\n\n这一步做的是「外层变上限求导」，注意结果里 $x$ 同时出现在积分外的 $x^{3}$ 和积分内的 $(x-t)$ 中。\n\n**第三步：换元把含 $x$ 的积分变成变上限积分**\n\n令 $x-t=s$，则 $t=0$ 时 $s=x$，$t=x$ 时 $s=0$，$\\mathrm{d}t=-\\mathrm{d}s$：\n\n$$\n\\int_{0}^{x}\\sin (x-t)^{2}\\,\\mathrm{d}t=\\int_{x}^{0}\\sin s^{2}\\,(-\\mathrm{d}s)=\\int_{0}^{x}\\sin s^{2}\\,\\mathrm{d}s .\n$$\n\n所以\n\n$$\n\\text{原式}=\\lim_{x\\to 0}\\frac{x^{3}-3\\displaystyle\\int_{0}^{x}\\sin s^{2}\\,\\mathrm{d}s}{8x^{7}} .\n$$\n\n**第四步：继续洛必达（第二次）**\n\n分子求导：$3x^{2}-3\\sin x^{2}$；分母求导：$56x^{6}$，得\n\n$$\n\\text{原式}=\\lim_{x\\to 0}\\frac{3x^{2}-3\\sin x^{2}}{56x^{6}}\n=\\frac{3}{56}\\lim_{x\\to 0}\\frac{x^{2}-\\sin x^{2}}{x^{6}} .\n$$\n\n**第五步：把 $\\sin x^{2}$ 展开到足够阶**\n\n$\\sin u=u-\\frac{u^{3}}{6}+o(u^{3})$，取 $u=x^{2}$：\n\n$$\n\\sin x^{2}=x^{2}-\\frac{x^{6}}{6}+o(x^{6})\n\\ \\Longrightarrow\\\nx^{2}-\\sin x^{2}=\\frac{x^{6}}{6}+o(x^{6}) .\n$$\n\n代入得\n\n$$\n\\text{原式}=\\frac{3}{56}\\cdot\\frac{1}{6}=\\frac{1}{112} .\n$$\n\n## 易错点\n\n1. **第二次洛必达直接对 $\\int_{0}^{x}\\sin (x-t)^{2}\\mathrm{d}t$ 求导。** 这个积分的被积函数含 $x$，不是变上限积分，不能直接套 $\\frac{\\mathrm{d}}{\\mathrm{d}x}\\int_0^x f=f(x)$；必须先换元 $x-t=s$ 把 $x$ 消掉。\n2. **换元时上下限弄反。** $t:0\\to x$ 对应 $s:x\\to0$，$\\mathrm{d}t=-\\mathrm{d}s$，两个方向相反正好抵消，结果上限仍是 $0\\to x$；漏掉负号会得到 $-\\int_0^x$。\n3. **$x^{2}-\\sin x^{2}$ 用 $\\sin x^{2}\\sim x^{2}$ 代换会得 $0$。** 两个主项相消时必须展到首个非零项，这里要展到 $x^{6}$，得 $\\frac{x^{6}}{6}$，不能停在 $x^{2}$。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-累次积分求极限（换元x减t等于s消去被积函数中的参数）.md",
+          "isPastExam": false
+        },
         {
           "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-已知极限反求参数（换元后等价无穷小定阶）.md",
           "date": "2026-11-18",
@@ -37,6 +85,50 @@
           "content": "\n# 高数错题：已知极限反求参数（换元 + 等价无穷小定阶）\n\n## 题目\n\n已知\n\n$$\n\\lim_{x\\to\\pi}\\frac{\\sqrt[k]{\\sin\\frac{x}{2}}-1}{A(x-\\pi)^{k}}=1,\n$$\n\n求 $A$ 与 $k$ 的值。\n\n> 原稿黑笔算成 $A=\\frac{1}{4}$，$k=1$，错误；正确答案是 $A=-\\frac{1}{16}$，$k=2$。\n\n## 核心思路\n\n极限点是 $\\pi$ 不是 $0$，等价无穷小一个都用不了，所以第一步必须令 $t=x-\\pi$ 把极限点搬到 $0$；再用诱导公式把 $\\sin\\frac{x}{2}$ 化成 $\\cos\\frac{t}{2}$，此时它趋于 $1$，正好凑成 $(1+u)^{\\alpha}-1$ 的形式做等价替换，最后比阶定 $k$、比系数定 $A$。\n\n## 分步解答\n\n**第一步：换元，把极限点搬到 $0$**\n\n令 $t=x-\\pi$，则 $x=t+\\pi$，且 $x\\to\\pi$ 时 $t\\to0$。原极限化为\n\n$$\n\\lim_{t\\to0}\\frac{\\sqrt[k]{\\sin\\frac{t+\\pi}{2}}-1}{A t^{k}}.\n$$\n\n**第二步：诱导公式化简分子**\n\n$$\n\\sin\\frac{t+\\pi}{2}=\\sin\\left(\\frac{t}{2}+\\frac{\\pi}{2}\\right)=\\cos\\frac{t}{2},\n$$\n\n于是\n\n$$\n\\lim_{t\\to0}\\frac{\\sqrt[k]{\\cos\\frac{t}{2}}-1}{A t^{k}}.\n$$\n\n**第三步：把分子凑成 $(1+u)^{\\alpha}-1$ 再等价**\n\n$t\\to0$ 时 $\\cos\\frac{t}{2}\\to1$，所以先写成 $1+\\left(\\cos\\frac{t}{2}-1\\right)$：\n\n$$\n\\left(1+\\left(\\cos\\frac{t}{2}-1\\right)\\right)^{\\frac{1}{k}}-1\\sim\\frac{1}{k}\\left(\\cos\\frac{t}{2}-1\\right).\n$$\n\n又 $1-\\cos\\frac{t}{2}\\sim\\frac{1}{2}\\left(\\frac{t}{2}\\right)^{2}=\\frac{t^{2}}{8}$，即 $\\cos\\frac{t}{2}-1\\sim-\\frac{t^{2}}{8}$，故分子\n\n$$\n\\sim\\frac{1}{k}\\cdot\\left(-\\frac{t^{2}}{8}\\right)=-\\frac{t^{2}}{8k}.\n$$\n\n**第四步：比阶定 $k$，比系数定 $A$**\n\n$$\n\\lim_{t\\to0}\\frac{-\\frac{t^{2}}{8k}}{A t^{k}}=1.\n$$\n\n要等于非零常数，分子分母必须同阶，故 $k=2$。代入后只剩系数比：\n\n$$\n\\frac{-\\frac{1}{8k}}{A}=1\\ \\Longrightarrow\\ \\frac{-\\frac{1}{16}}{A}=1\\ \\Longrightarrow\\ A=-\\frac{1}{16}.\n$$\n\n## 易错点\n\n1. **不换元就直接写 $\\sin\\frac{x}{2}\\sim\\frac{x}{2}$。** 这是最致命的错。等价无穷小只在变量趋于 $0$ 时成立，而 $x\\to\\pi$ 时 $\\frac{x}{2}\\to\\frac{\\pi}{2}$，$\\sin\\frac{x}{2}\\to1$ 而不是 $0$。黑笔的 $k=1$ 多半就是这一步没换元、把 $\\cos\\frac{t}{2}-1$ 当成了 $t$ 的一阶小量。\n2. **等价替换只能换整个因子，不能只换根号里的东西。** 分子是「$k$ 次根号减 $1$」，必须整体凑成 $(1+u)^{\\alpha}-1$ 再替换；直接对 $\\sin\\frac{x}{2}$ 单独替换一定错。\n3. **定阶题不要开局洛必达。** 分子求导会冒出 $(\\cos\\frac{t}{2})^{\\frac{1}{k}-1}$ 这类负指数项，且 $x=\\pi$ 处一阶导为零，仍是 $\\frac{0}{0}$，越导越乱，也看不出谁是几阶无穷小。判断阶数只有等价无穷小（或泰勒）这一条快路。\n",
           "tags": [],
           "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-已知极限反求参数（换元后等价无穷小定阶）.md",
+          "isPastExam": false
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-变上限积分平均值函数单调性证积分不等式（拉格朗日中值定理定号）.md",
+          "date": "2026-11-18",
+          "titleMarkdown": "高数错题：用平均值函数的单调性比较两个变上限积分",
+          "title": "高数错题：用平均值函数的单调性比较两个变上限积分",
+          "subject": "高数",
+          "chapter": "第08讲 一元函数积分学的概念与性质",
+          "topic": "变上限积分、平均值函数的单调性、拉格朗日中值定理定号",
+          "methods": [
+            "构造平均值函数 G(x)=F(x)/x，把积分不等式转成比较平均值",
+            "商的求导后，把 F(x)-F(0) 用拉格朗日中值定理换成 xF'(ξ)",
+            "由 f 单调递增给出 f(x)f(ξ)，从而 G'(x)0"
+          ],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "\n# 高数错题：用平均值函数的单调性比较两个变上限积分\n\n## 题目\n\n设 $f(x)$ 在 $[0,+\\infty)$ 上有连续导数，且 $f'(x)>0$。当 $0<a<x<b$ 时，有（　　）\n\n- A. $\\displaystyle a\\int_{0}^{x}f(t)\\,\\mathrm{d}t<x\\int_{0}^{a}f(t)\\,\\mathrm{d}t$\n- B. $\\displaystyle b\\int_{0}^{x}f(t)\\,\\mathrm{d}t<x\\int_{0}^{b}f(t)\\,\\mathrm{d}t$\n- C. $\\displaystyle x\\int_{0}^{x}f(t)\\,\\mathrm{d}t<b\\int_{0}^{b}f(t)\\,\\mathrm{d}t$\n- D. $\\displaystyle x\\int_{0}^{x}f(t)\\,\\mathrm{d}t>a\\int_{0}^{a}f(t)\\,\\mathrm{d}t$\n\n答案：**B**\n\n## 核心思路\n\n把每个选项两边同除「上限之积」，全部化成平均值 $\\frac{1}{x}\\int_0^x f$ 之间的比较。平均值函数 $G(x)=\\frac{F(x)}{x}$ 在 $f'>0$ 时是递增的，于是 $G(a)<G(x)<G(b)$，只有 B 正好对应 $G(x)<G(b)$。\n\n## 分步解答\n\n**第一步：设原函数，把选项翻译成平均值**\n\n令 $F(x)=\\int_0^x f(t)\\,\\mathrm{d}t$，则 $F(0)=0$，再令\n\n$$\nG(x)=\\frac{F(x)}{x}.\n$$\n\n$G(x)$ 就是 $f$ 在 $[0,x]$ 上的平均值。四个选项同除上限之积后分别变成\n\n- A：$G(x)<G(a)$\n- B：$G(x)<G(b)$\n- C、D：$x^{2}G(x)$ 与 $b^{2}G(b)$、$a^{2}G(a)$ 相比，不是纯平均值比较\n\n所以关键就一条：$G$ 是否单调递增。\n\n**第二步：对 $G$ 求导**\n\n$$\nG'(x)=\\frac{xF'(x)-F(x)}{x^{2}}.\n$$\n\n因 $F(0)=0$，把分子中的 $F(x)$ 写成 $F(x)-F(0)$：\n\n$$\nG'(x)=\\frac{xF'(x)-\\left[F(x)-F(0)\\right]}{x^{2}}.\n$$\n\n**第三步：对 $F$ 在 $[0,x]$ 上用拉格朗日中值定理**\n\n存在 $\\xi\\in(0,x)$ 使 $F(x)-F(0)=xF'(\\xi)$，又 $F'=f$，代入得\n\n$$\nG'(x)=\\frac{xf(x)-xf(\\xi)}{x^{2}}=\\frac{f(x)-f(\\xi)}{x}.\n$$\n\n**第四步：定号**\n\n$f'>0$ 给出 $f$ 严格递增，而 $\\xi<x$，故 $f(x)>f(\\xi)$，于是\n\n$$\nG'(x)>0 .\n$$\n\n即 $G$ 在 $(0,+\\infty)$ 上严格单调递增。\n\n**第五步：比出答案**\n\n由 $0<a<x<b$ 得 $G(a)<G(x)<G(b)$，写开就是\n\n$$\n\\frac{1}{a}\\int_{0}^{a}f(t)\\,\\mathrm{d}t<\\frac{1}{x}\\int_{0}^{x}f(t)\\,\\mathrm{d}t<\\frac{1}{b}\\int_{0}^{b}f(t)\\,\\mathrm{d}t .\n$$\n\n右边这个不等式两边同乘 $xb>0$：\n\n$$\nb\\int_{0}^{x}f(t)\\,\\mathrm{d}t<x\\int_{0}^{b}f(t)\\,\\mathrm{d}t,\n$$\n\n正是 B。A 的符号方向反了（正确方向应是 $G(a)<G(x)$，即 $a\\int_0^x f>x\\int_0^a f$）。\n\n## 易错点\n\n1. **不写 $F(0)=0$ 就套不出中值定理。** 求导后必须把 $F(x)$ 补成 $F(x)-F(0)$，否则无法用 $F(x)-F(0)=xF'(\\xi)$。\n2. **中值定理用在 $F$ 上，不是用在 $f$ 上。** 用完之后立刻把 $F'$ 换回 $f$，符号才定得下来。\n3. **A 和 B 只差一个上限，别选反。** $G$ 递增意味着「区间越长平均值越大」，所以是 $G(a)<G(x)<G(b)$；A 写成了 $G(x)<G(a)$，方向反了。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-变上限积分平均值函数单调性证积分不等式（拉格朗日中值定理定号）.md",
+          "isPastExam": false
+        },
+        {
+          "id": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-由微分方程求f再求带绝对值面积和式的极限（分段去绝对值与等比求和）.md",
+          "date": "2026-11-18",
+          "titleMarkdown": "高数错题：由微分方程求 f 再求面积和式的极限",
+          "title": "高数错题：由微分方程求 f 再求面积和式的极限",
+          "subject": "高数",
+          "chapter": "第15讲 微分方程",
+          "topic": "一阶线性微分方程、带绝对值的定积分面积、等比数列求和与极限",
+          "methods": [
+            "一阶线性方程用公式拼通解，再用 f(0)=0 定常数 C",
+            "带绝对值的面积按 sin πx 的零点和分区间，区间内把绝对值拆成 (-1)^{k-1} sin πx",
+            "每段算出后按等比数列求和，再除以 e^n 取极限"
+          ],
+          "question": "",
+          "keyPoints": [],
+          "pitfalls": [],
+          "answer": "",
+          "content": "\n# 高数错题：由微分方程求 f 再求面积和式的极限\n\n## 题目\n\n（本题满分 12 分）设 $f(x)$ 满足\n\n$$\nf'(x)-f(x)=\\pi e^{x}\\cos \\pi x,\\qquad f(0)=0,\n$$\n\n$y=f(x)$ 在 $[0,n]$（$n$ 为正整数）上与 $x$ 轴所围图形的面积为 $S_n$。\n\n（Ⅰ）求 $f(x)$；\n\n（Ⅱ）求 $\\displaystyle\\lim_{n\\to\\infty}\\frac{S_n}{e^{n}}$。\n\n## 核心思路\n\n（Ⅰ）一阶线性方程，套通解公式，$f(0)=0$ 定出 $C=0$，得 $f(x)=e^{x}\\sin \\pi x$。\n\n（Ⅱ）$|\\sin \\pi x|$ 在每个长度为 $1$ 的区间上符号固定，所以按整数点切开、每段去掉绝对值并补上 $(-1)^{k-1}$，逐段积出来后再等比求和。除以 $e^{n}$ 后只剩首项，极限就是那个常数。\n\n## 分步解答\n\n**第一步：解一阶线性方程定出 $f$**\n\n方程为 $f'-f=\\pi e^{x}\\cos \\pi x$，即 $P(x)=-1$，积分因子 $e^{\\int P\\,\\mathrm{d}x}=e^{-x}$。通解\n\n$$\nf(x)=e^{x}\\left(\\int \\pi e^{x}\\cos \\pi x\\cdot e^{-x}\\,\\mathrm{d}x+C\\right)\n=e^{x}\\left(\\int \\pi \\cos \\pi x\\,\\mathrm{d}x+C\\right)\n=e^{x}\\left(\\sin \\pi x+C\\right).\n$$\n\n由 $f(0)=0$ 得 $e^{0}(0+C)=0$，故 $C=0$：\n\n$$\nf(x)=e^{x}\\sin \\pi x .\n$$\n\n这一步的省力之处：$e^{-x}$ 把被积函数里的 $e^{x}$ 正好约掉，剩下的 $\\int \\pi\\cos \\pi x\\,\\mathrm{d}x=\\sin \\pi x$ 是直接可积的。\n\n**第二步：按零点把积分区间切开**\n\n$\\sin \\pi x$ 在 $[k-1,k]$ 上符号恒为 $(-1)^{k-1}$，所以 $|\\sin \\pi x|=(-1)^{k-1}\\sin \\pi x$，面积\n\n$$\nS_n=\\int_{0}^{n}e^{x}|\\sin \\pi x|\\,\\mathrm{d}x\n=\\sum_{k=1}^{n}\\int_{k-1}^{k}e^{x}|\\sin \\pi x|\\,\\mathrm{d}x\n=\\sum_{k=1}^{n}(-1)^{k-1}\\int_{k-1}^{k}e^{x}\\sin \\pi x\\,\\mathrm{d}x .\n$$\n\n**第三步：算出每段的原函数**\n\n$$\n\\int e^{x}\\sin \\pi x\\,\\mathrm{d}x=\\frac{e^{x}\\left(\\sin \\pi x-\\pi \\cos \\pi x\\right)}{1+\\pi^{2}} .\n$$\n\n用它代入上下限 $k$ 与 $k-1$。因为 $\\sin \\pi k=\\sin \\pi(k-1)=0$，只剩余弦项：\n\n$$\n\\int_{k-1}^{k}e^{x}\\sin \\pi x\\,\\mathrm{d}x\n=\\frac{e^{k}\\left[-\\pi(-1)^{k}\\right]-e^{k-1}\\left[-\\pi(-1)^{k-1}\\right]}{1+\\pi^{2}} .\n$$\n\n**第四步：乘上符号，两项合并**\n\n把上式整理成\n\n$$\n\\int_{k-1}^{k}e^{x}\\sin \\pi x\\,\\mathrm{d}x\n=\\frac{-\\pi(-1)^{k}\\left(e^{k}+e^{k-1}\\right)}{1+\\pi^{2}},\n$$\n\n再乘 $(-1)^{k-1}=-(-1)^{k}$，两个负号与 $(-1)^{2k}$ 一起消掉，得到\n\n$$\n(-1)^{k-1}\\int_{k-1}^{k}e^{x}\\sin \\pi x\\,\\mathrm{d}x\n=\\frac{\\pi(e+1)}{1+\\pi^{2}}e^{k-1}.\n$$\n\n于是\n\n$$\nS_n=\\frac{\\pi(e+1)}{1+\\pi^{2}}\\sum_{k=1}^{n}e^{k-1}\n=\\frac{\\pi(e+1)}{1+\\pi^{2}}\\cdot\\frac{e^{n}-1}{e-1} .\n$$\n\n**第五步：除以 $e^{n}$ 取极限**\n\n$$\n\\frac{S_n}{e^{n}}=\\frac{\\pi(e+1)}{(1+\\pi^{2})(e-1)}\\cdot\\frac{e^{n}-1}{e^{n}} ,\n$$\n\n而 $\\dfrac{e^{n}-1}{e^{n}}\\to 1$，故\n\n$$\n\\lim_{n\\to\\infty}\\frac{S_n}{e^{n}}=\\frac{\\pi(e+1)}{(1+\\pi^{2})(e-1)} .\n$$\n\n## 易错点\n\n1. **忘记绝对值，直接算 $\\int_{0}^{n}e^{x}\\sin \\pi x\\,\\mathrm{d}x$。** 面积要求被积函数非负，$\\sin \\pi x$ 在 $[0,n]$ 上正负交替，必须按整数点分段并补 $(-1)^{k-1}$，否则相邻区间的正负会互相抵消，得到的是代数积分而不是面积。\n2. **把 $\\int e^{x}\\sin \\pi x\\,\\mathrm{d}x$ 的原函数记错。** 正确结果是 $\\frac{e^{x}(\\sin \\pi x-\\pi \\cos \\pi x)}{1+\\pi^{2}}$，分子里 $\\pi$ 与 $\\sin$、$\\cos$ 的位置不能颠倒；记不住就现场两次分部积分，$e^{x}$ 不动、三角函数求两次导回到自身，就能凑出来。\n3. **求和后忘了 $e^{k-1}$ 的公比是 $e$，首项是 $e^{0}=1$。** 和式为 $\\frac{e^{n}-1}{e-1}$；同时最后极限里 $\\frac{e^{n}-1}{e^{n}}\\to1$，别把 $e^{n}$ 和分母的 $e-1$ 混在一起约成 $\\frac{1}{e}$。\n",
+          "tags": [],
+          "sourcePath": "06-Resources/学习/考研/考研数学/错题本/原档案/高数/高数错题-由微分方程求f再求带绝对值面积和式的极限（分段去绝对值与等比求和）.md",
           "isPastExam": false
         }
       ]
